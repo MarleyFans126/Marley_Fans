@@ -17,7 +17,8 @@
         - Partner-level WhatsApp support
         - Reusable service layer for future automations
     """,
-    'author': 'Your Company',
+    'author': 'Techmatic Systems',
+    'website': 'https://www.techmaticsys.com',
     'category': 'Discuss',
     'depends': ['base', 'mail', 'contacts', 'crm'],
 
@@ -48,5 +49,7 @@
     'application': True,
     'auto_install': False,
     'license': 'LGPL-3',
+    'maintainer': 'Techmatic Odoo Team',
+    'support': 'info@techmaticsys.com',
     # 'images': ['static/description/icon.png'],
 }

@@ -9,7 +9,8 @@
         - Stage Changes: Notifications (New -> Qualify)
         - Won/Lost Logic
     """,
-    'author': 'Your Company',
+    'author': 'Techmatic Systems',
+    'website': 'https://www.techmaticsys.com',
     'depends': ['crm', 'mail', 'sale_management'],
     'data': [
         'security/ir.model.access.csv',
@@ -28,4 +29,6 @@
     'installable': True,
     'application': False,
     'license': 'LGPL-3',
+    'maintainer': 'Techmatic Odoo Team',
+    'support': 'info@techmaticsys.com',
 }

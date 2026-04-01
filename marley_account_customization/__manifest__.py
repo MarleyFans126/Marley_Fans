@@ -4,7 +4,8 @@
     'summary': 'Cash receipt entry, outstanding management, and proforma invoice linking',
     'description': 'Adds Cash Receipt menu, customer outstanding views, and proforma invoice linking for Marley Fans.',
     'category': 'Accounting',
-    'author': 'Marley Fans',
+    'author': 'Techmatic Systems',
+    'website': 'https://www.techmaticsys.com',
     'depends': [
         'account',
     ],
@@ -17,4 +18,6 @@
     'application': False,
     'auto_install': False,
     'license': 'LGPL-3',
+    'maintainer': 'Techmatic Odoo Team',
+    'support': 'info@techmaticsys.com',
 }

@@ -13,7 +13,7 @@
         - City tier master data for geographic scoring
     """,
     'author': 'Techmatic Systems',
-    'website': 'https://www.techmatics.in',
+    'website': 'https://www.techmaticsys.com',
     'category': 'Sales/CRM',
     'depends': ['crm', 'mail'],
     'data': [
@@ -30,4 +30,6 @@
     'installable': True,
     'application': False,
     'license': 'LGPL-3',
+    'maintainer': 'Techmatic Odoo Team',
+    'support': 'info@techmaticsys.com',
 }

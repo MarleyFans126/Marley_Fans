@@ -7,7 +7,8 @@
          Automation handled by crm_lead_automation_engine.
     """,
     'category': 'Sales/CRM',
-    'author': 'Marley Fans',
+    'author': 'Techmatic Systems',
+    'website': 'https://www.techmaticsys.com',
     'depends': ['crm', 'mail', 'crm_lead_automation_engine'],
     'data': [
         'security/ir.model.access.csv',
@@ -20,5 +21,7 @@
     'application': True,
     'auto_install': False,
     'license': 'LGPL-3',
+    'maintainer': 'Techmatic Odoo Team',
+    'support': 'info@techmaticsys.com',
     'images': ['static/description/icon.png'],
 }

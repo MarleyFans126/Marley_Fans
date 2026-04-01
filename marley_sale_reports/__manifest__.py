@@ -4,7 +4,8 @@
     'summary': 'Custom Quotation and Proforma Invoice print layouts for Marley Fans',
     'description': 'QWeb report templates matching Marley Fans branding: Quotation with technical specs and commercial terms, Proforma Invoice. Delivery Note will be added once the stock module is available.',
     'category': 'Sales',
-    'author': 'Marley Fans',
+    'author': 'Techmatic Systems',
+    'website': 'https://www.techmaticsys.com',
     'depends': [
         'sale_management',
         'account',
@@ -28,4 +29,6 @@
     'application': False,
     'auto_install': False,
     'license': 'LGPL-3',
+    'maintainer': 'Techmatic Odoo Team',
+    'support': 'info@techmaticsys.com',
 }

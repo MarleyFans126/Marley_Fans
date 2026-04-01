@@ -6,8 +6,8 @@
         Integrates AAJJO leads into CRM.
         Dependencies: crm_lead_automation_engine handles automation/duplicates.
     """,
-    'author': 'Your Company',
-    'website': 'https://www.yourcompany.com',
+    'author': 'Techmatic Systems',
+    'website': 'https://www.techmaticsys.com',
     'category': 'Sales/CRM',
     'depends': ['base', 'crm', 'sale_management', 'project', 'crm_lead_automation_engine'],
     'data': [
@@ -24,5 +24,7 @@
     'application': True,
     'auto_install': False,
     'license': 'LGPL-3',
+    'maintainer': 'Techmatic Odoo Team',
+    'support': 'info@techmaticsys.com',
     'images': ['static/description/icon.png'],
 }

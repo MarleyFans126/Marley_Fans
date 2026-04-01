@@ -4,7 +4,8 @@
     'summary': 'CRM lifecycle stages, Won/Loss logic, quotation from lead, project creation',
     'description': 'Implements Marley Fans CRM requirements: stage data, Won conversion to Customer + Project, Loss enforcement with mandatory remarks, Won notifications, and quotation creation from leads.',
     'category': 'Sales/CRM',
-    'author': 'Marley Fans',
+    'author': 'Techmatic Systems',
+    'website': 'https://www.techmaticsys.com',
     'depends': [
         'crm',
         'mail',
@@ -35,4 +36,6 @@
     'application': False,
     'auto_install': False,
     'license': 'LGPL-3',
+    'maintainer': 'Techmatic Odoo Team',
+    'support': 'info@techmaticsys.com',
 }

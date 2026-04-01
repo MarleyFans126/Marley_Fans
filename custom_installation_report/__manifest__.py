@@ -14,7 +14,8 @@
         - Site Specifications (rod length, field height, electrical wire, etc.)
         - Footer with company contact info
     """,
-    'author': 'Custom',
+    'author': 'Techmatic Systems',
+    'website': 'https://www.techmaticsys.com',
     'depends': ['sale', 'sale_management'],
     'data': [
         'views/sale_order_views.xml',
@@ -24,4 +25,6 @@
     'installable': True,
     'application': False,
     'license': 'LGPL-3',
+    'maintainer': 'Techmatic Odoo Team',
+    'support': 'info@techmaticsys.com',
 }

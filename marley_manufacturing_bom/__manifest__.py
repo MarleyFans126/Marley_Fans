@@ -4,7 +4,8 @@
     'summary': 'Kit (Phantom) BOM configuration for HVLS Fan assemblies',
     'description': 'Configures Manufacturing BOM with Kit concept. Kit auto-explodes on SO confirmation, deducting component stock without manufacturing orders.',
     'category': 'Manufacturing',
-    'author': 'Marley Fans',
+    'author': 'Techmatic Systems',
+    'website': 'https://www.techmaticsys.com',
     'depends': [
         'mrp',
         'sale_mrp',
@@ -17,4 +18,6 @@
     'application': False,
     'auto_install': False,
     'license': 'LGPL-3',
+    'maintainer': 'Techmatic Odoo Team',
+    'support': 'info@techmaticsys.com',
 }
