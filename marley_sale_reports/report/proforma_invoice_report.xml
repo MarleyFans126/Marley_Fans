@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Marley Fans Proforma Invoice Report Action -->
+    <record id="action_report_marley_proforma" model="ir.actions.report">
+        <field name="name">Marley Proforma Invoice</field>
+        <field name="model">account.move</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">marley_sale_reports.report_marley_proforma_invoice</field>
+        <field name="report_file">marley_sale_reports.report_marley_proforma_invoice</field>
+        <field name="print_report_name">'Proforma Invoice - %s' % object.name</field>
+        <field name="binding_model_id" ref="account.model_account_move"/>
+        <field name="binding_type">report</field>
+        <field name="is_invoice_report">True</field>
+        <field name="domain">[]</field>
+        <field name="paperformat_id" ref="marley_sale_reports.paperformat_marley_quotation"/>
+    </record>
+
+</odoo>

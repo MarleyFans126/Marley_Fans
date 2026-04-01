@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Set default BOM type to Kit (Phantom) and enhance form -->
+    <record id="mrp_bom_form_view_inherit_marley" model="ir.ui.view">
+        <field name="name">mrp.bom.form.inherit.marley</field>
+        <field name="model">mrp.bom</field>
+        <field name="inherit_id" ref="mrp.mrp_bom_form_view"/>
+        <field name="arch" type="xml">
+
+            <!-- Default BOM type to Kit -->
+            <xpath expr="//field[@name='type']" position="attributes">
+                <attribute name="default">phantom</attribute>
+            </xpath>
+
+        </field>
+    </record>
+
+    <!-- Kit BOM list action: filtered to show only Kit BOMs -->
+    <record id="action_mrp_bom_kit" model="ir.actions.act_window">
+        <field name="name">Kit BOMs</field>
+        <field name="res_model">mrp.bom</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('type', '=', 'phantom')]</field>
+        <field name="context">{'default_type': 'phantom'}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a Kit Bill of Materials
+            </p>
+            <p>
+                Kit BOMs auto-explode into components on Sales Order confirmation.
+                Component stock is deducted automatically without creating a Manufacturing Order.
+            </p>
+        </field>
+    </record>
+
+    <!-- Menu: Manufacturing → Kit BOMs -->
+    <menuitem
+        id="menu_mrp_bom_kit"
+        name="Kit BOMs"
+        parent="mrp.menu_mrp_bom"
+        action="action_mrp_bom_kit"
+        sequence="5"/>
+
+</odoo>

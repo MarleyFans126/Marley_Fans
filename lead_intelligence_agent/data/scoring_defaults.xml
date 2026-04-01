@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <!-- Default Scoring Configuration (singleton) -->
+        <record id="lead_intelligence_scoring_config_default" model="x.lead.scoring.config">
+            <field name="weight_source_quality">20</field>
+            <field name="weight_contact_completeness">15</field>
+            <field name="weight_geographic_match">15</field>
+            <field name="weight_deal_size">20</field>
+            <field name="weight_engagement_speed">15</field>
+            <field name="weight_duplicate_flag">15</field>
+        </record>
+
+    </data>
+</odoo>

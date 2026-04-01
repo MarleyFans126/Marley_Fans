@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="whatsapp_core_community_menu_root"
+              name="WhatsApp"
+              web_icon="whatsapp_core_community,static/description/icon.png"
+              sequence="90"/>
+
+    <menuitem id="whatsapp_core_community_menu_message_logs"
+              name="Message Logs"
+              parent="whatsapp_core_community_menu_root"
+              action="action_whatsapp_message_log"
+              sequence="10"/>
+
+    <menuitem id="whatsapp_core_community_menu_configuration"
+              name="Configuration"
+              parent="whatsapp_core_community_menu_root"
+              sequence="90"
+              groups="base.group_system"/>
+
+    <menuitem id="whatsapp_core_community_menu_settings"
+              name="WhatsApp Settings"
+              parent="whatsapp_core_community_menu_configuration"
+              action="action_whatsapp_config_settings"
+              sequence="10"
+              groups="base.group_system"/>
+</odoo>

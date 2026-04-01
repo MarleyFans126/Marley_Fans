@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_aajjo_api_log,aajjo.api.log,model_aajjo_api_log,base.group_user,1,1,1,1
+access_aajjo_api_log_manager,aajjo.api.log manager,model_aajjo_api_log,base.group_system,1,1,1,1

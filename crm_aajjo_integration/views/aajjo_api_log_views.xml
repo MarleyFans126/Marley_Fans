@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_aajjo_api_log_tree" model="ir.ui.view">
+        <field name="name">aajjo.api.log.tree</field>
+        <field name="model">aajjo.api.log</field>
+        <field name="arch" type="xml">
+            <list string="AAJJO API Logs" create="false" edit="false">
+                <field name="create_date"/>
+                <field name="name"/>
+                <field name="request_type"/>
+                <field name="status_code"/>
+                <field name="error_message"/>
+                <field name="log_date"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_aajjo_api_log_form" model="ir.ui.view">
+        <field name="name">aajjo.api.log.form</field>
+        <field name="model">aajjo.api.log</field>
+        <field name="arch" type="xml">
+            <form string="AAJJO API Log" create="false" edit="false">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="request_type"/>
+                            <field name="status_code"/>
+                        </group>
+                        <group>
+                            <field name="create_date"/>
+                            <field name="log_date"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Request Payload">
+                            <field name="request_payload"/>
+                        </page>
+                        <page string="Response Payload">
+                            <field name="response_payload"/>
+                        </page>
+                        <page string="Error Message">
+                            <field name="error_message"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_aajjo_api_log" model="ir.actions.act_window">
+        <field name="name">AAJJO API Logs</field>
+        <field name="res_model">aajjo.api.log</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem id="menu_aajjo_api_log"
+              name="AAJJO API Logs"
+              parent="crm.crm_menu_config"
+              action="action_aajjo_api_log"
+              sequence="50"/>
+</odoo>

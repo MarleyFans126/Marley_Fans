@@ -1,0 +1,180 @@
+import base64
+import logging
+
+from odoo import models, fields, api, _
+
+_logger = logging.getLogger(__name__)
+
+
+class SaleOrder(models.Model):
+    _inherit = 'sale.order'
+
+    # ------------------------------------------------------------------
+    # WhatsApp: Share quotation with client
+    # ------------------------------------------------------------------
+
+    def action_open_whatsapp_send_wizard(self):
+        """Open the WhatsApp Send Wizard with the quotation PDF pre-attached."""
+        self.ensure_one()
+
+        # Guard: whatsapp_core_community must be installed
+        if 'whatsapp.send.wizard' not in self.env:
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'title': _('WhatsApp Not Available'),
+                    'message': _('Please install the WhatsApp Core Community module first.'),
+                    'type': 'warning',
+                    'sticky': False,
+                },
+            }
+
+        partner = self.partner_id
+
+        mobile_number = (
+            getattr(partner, 'whatsapp_number', False)
+            or getattr(partner, 'mobile', False)
+            or partner.phone
+        ) if partner else False
+
+        if not mobile_number:
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'title': _('Number Missing'),
+                    'message': _(
+                        'Please set a mobile/WhatsApp number for customer "%s" before sending.',
+                        partner.name if partner else 'N/A',
+                    ),
+                    'type': 'warning',
+                    'sticky': False,
+                },
+            }
+
+        # ── Generate quotation PDF ──────────────────────────────────────
+        pdf_filename = 'Quotation - %s.pdf' % self.name
+
+        # Try Marley custom report first, then fall back to standard Odoo
+        report = self.env.ref(
+            'marley_sale_reports.action_report_marley_quotation',
+            raise_if_not_found=False,
+        )
+        if not report:
+            report = self.env.ref('sale.action_report_saleorder')
+
+        pdf_content, _content_type = report.sudo()._render_qweb_pdf(
+            report.report_name, self.ids,
+        )
+        pdf_base64 = base64.b64encode(pdf_content).decode('ascii')
+
+        # ── Create wizard record with PDF already written ─────────────
+        wizard = self.env['whatsapp.send.wizard'].create({
+            'mobile_number': mobile_number,
+            'partner_id': partner.id,
+            'message_type': 'media',
+            'media_file': pdf_base64,
+            'media_filename': pdf_filename,
+        })
+
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Send Quotation via WhatsApp'),
+            'res_model': 'whatsapp.send.wizard',
+            'res_id': wizard.id,
+            'view_mode': 'form',
+            'target': 'new',
+        }
+
+    # ------------------------------------------------------------------
+    # Quotation Commercial Terms (as per Marley Fans template)
+    # ------------------------------------------------------------------
+    warranty_terms = fields.Text(
+        string='Warranty Terms',
+        default='5 Years warranty on Mechanical items & 1 year OEM warranty on Motors & VFD Drive',
+    )
+    delivery_terms = fields.Text(
+        string='Delivery Terms',
+        default='1-2 Weeks from the date of receipt of your technically and commercially clear purchase order.',
+    )
+    payment_terms_text = fields.Text(
+        string='Payment Terms (Text)',
+        default='Supply: 100% Advance with Purchase Order\nInstallation: 100% immediately after Installation',
+    )
+    offer_validity_days = fields.Integer(
+        string='Offer Validity (Days)',
+        default=30,
+    )
+    cover_letter = fields.Text(
+        string='Cover Letter',
+        default='We thank you very much for your valuable enquiry for HVLS Fans and are pleased to enclose herewith our offer.\n\nWe hope that you will find the above offer in line with your requirements.\nPlease feel free to contact us for any further clarification.\n\nLooking forward to receiving your valuable order.\nAssuring you of our best services at all times.',
+    )
+    customer_scope = fields.Text(
+        string='Customer Scope',
+        help='Facilities / responsibilities to be provided by the customer',
+    )
+    subject_line = fields.Char(
+        string='Subject',
+        help='Subject line for quotation print (e.g. Supply of Pole mounted HVLS Fan)',
+    )
+    kind_attn = fields.Char(
+        string='Kind Attention',
+        help='Contact person name for quotation print',
+    )
+    bank_name = fields.Char(string='Bank Name', default='HDFC Bank')
+    bank_account_number = fields.Char(string='Bank Account Number', default='50200092737354')
+    bank_account_type = fields.Char(string='Account Type', default='Current Account')
+    bank_ifsc = fields.Char(string='IFSC Code', default='HDFC0000364')
+    bank_branch = fields.Char(string='Bank Branch', default='Kukatpally, Hyderabad')
+
+    # ── Installation Cost Fields ─────────────────────────────────
+    x_installation_cost = fields.Float(string='Installation Cost (per unit)')
+    x_installation_qty = fields.Integer(string='Installation Qty', default=0)
+    x_installation_total = fields.Float(
+        string='Installation Total',
+        compute='_compute_installation_total',
+        store=True,
+    )
+
+    @api.depends('x_installation_cost', 'x_installation_qty')
+    def _compute_installation_total(self):
+        for order in self:
+            order.x_installation_total = order.x_installation_cost * order.x_installation_qty
+
+
+class SaleOrderLine(models.Model):
+    _inherit = 'sale.order.line'
+
+    list_price = fields.Float(
+        string='List Price',
+        help='Original list price before discount',
+    )
+    special_discount_price = fields.Float(
+        string='Special Discount Price',
+        help='Discounted unit price offered to customer',
+    )
+
+    @api.onchange('product_id')
+    def _onchange_product_set_list_price(self):
+        """Auto-fill list_price from product's sales price when product is selected."""
+        for line in self:
+            if line.product_id and line.product_id.list_price:
+                line.list_price = line.product_id.list_price
+                if not line.special_discount_price:
+                    line.special_discount_price = line.product_id.list_price
+
+    @api.onchange('special_discount_price')
+    def _onchange_special_discount_price(self):
+        """When special discount price is set, update unit price accordingly."""
+        for line in self:
+            if line.special_discount_price:
+                line.price_unit = line.special_discount_price
+
+    @api.onchange('list_price')
+    def _onchange_list_price(self):
+        """If special discount price is zero, set it equal to list price."""
+        for line in self:
+            if line.list_price and not line.special_discount_price:
+                line.special_discount_price = line.list_price
+                line.price_unit = line.list_price

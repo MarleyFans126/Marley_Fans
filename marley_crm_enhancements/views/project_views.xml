@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Extend Project Form: Add Installation Tab -->
+    <record id="project_view_form_inherit_installation" model="ir.ui.view">
+        <field name="name">project.project.form.installation</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.edit_project"/>
+        <field name="priority">50</field>
+        <field name="arch" type="xml">
+
+            <!-- Send buttons in the header -->
+            <xpath expr="//header" position="inside">
+                <button name="action_send_installation_report_email"
+                        string="Send by Email"
+                        type="object"
+                        class="btn-secondary"
+                        icon="fa-envelope"
+                        groups="project.group_project_user"/>
+                <button name="action_send_installation_report_whatsapp"
+                        string="Send by WhatsApp"
+                        type="object"
+                        class="btn-secondary text-success"
+                        icon="fa-whatsapp"
+                        groups="project.group_project_user"/>
+            </xpath>
+
+            <xpath expr="//notebook" position="inside">
+                <page string="Installation Details" name="installation_tab">
+
+                    <group string="Installation Info">
+                        <group>
+                            <field name="installation_date"/>
+                            <field name="site_contact_person"/>
+                            <field name="site_contact_number"/>
+                            <field name="lead_id" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="models_to_transport"/>
+                            <field name="transportation_terms"/>
+                            <field name="invoice_value" widget="monetary"/>
+                            <field name="advance_received" widget="monetary"/>
+                            <field name="balance_amount" widget="monetary" readonly="1"/>
+                            <field name="amount_in_words" readonly="1"/>
+                        </group>
+                    </group>
+
+                    <!-- Installation Site Address -->
+                    <group string="Installation Site Address">
+                        <group>
+                            <field name="site_address_street" placeholder="Street address..."/>
+                            <field name="site_address_street2" placeholder="Street address line 2..."/>
+                            <field name="site_address_city" placeholder="City"/>
+                        </group>
+                        <group>
+                            <field name="site_address_state_id" placeholder="Select State..."/>
+                            <field name="site_address_zip" placeholder="Pincode"/>
+                        </group>
+                    </group>
+
+                    <group string="Site Specification">
+                        <group>
+                            <field name="ext_rod_length" placeholder="e.g. 500 mm"/>
+                            <field name="field_height" placeholder="e.g. 6 MTR"/>
+                            <field name="required_electrical_wire" placeholder="e.g. 150 Meter"/>
+                        </group>
+                        <group>
+                            <field name="mounting_structure" placeholder="e.g. PEB, RCC"/>
+                            <field name="crane_rafter_distance" placeholder="e.g. 200 mm"/>
+                        </group>
+                    </group>
+
+                    <group string="Other Information">
+                        <field name="other_important_info" nolabel="1"
+                               placeholder="Any special notes, payment terms, delivery instructions..."
+                               colspan="2"/>
+                    </group>
+
+                </page>
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>

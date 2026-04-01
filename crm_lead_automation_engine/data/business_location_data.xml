@@ -1,0 +1,322 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<data noupdate="1">
+
+    <!-- ============================================================ -->
+    <!-- CITIES — Tier 1 (8 cities) -->
+    <!-- ============================================================ -->
+    <record id="city_mumbai" model="business.city">
+        <field name="name">Mumbai</field>
+        <field name="state_id" ref="base.state_in_mh"/>
+    </record>
+    <record id="city_delhi" model="business.city">
+        <field name="name">Delhi</field>
+        <field name="state_id" ref="base.state_in_dl"/>
+    </record>
+    <record id="city_bangalore" model="business.city">
+        <field name="name">Bangalore</field>
+        <field name="state_id" ref="base.state_in_ka"/>
+    </record>
+    <record id="city_hyderabad" model="business.city">
+        <field name="name">Hyderabad</field>
+        <field name="state_id" ref="base.state_in_ts"/>
+    </record>
+    <record id="city_chennai" model="business.city">
+        <field name="name">Chennai</field>
+        <field name="state_id" ref="base.state_in_tn"/>
+    </record>
+    <record id="city_kolkata" model="business.city">
+        <field name="name">Kolkata</field>
+        <field name="state_id" ref="base.state_in_wb"/>
+    </record>
+    <record id="city_pune" model="business.city">
+        <field name="name">Pune</field>
+        <field name="state_id" ref="base.state_in_mh"/>
+    </record>
+    <record id="city_ahmedabad" model="business.city">
+        <field name="name">Ahmedabad</field>
+        <field name="state_id" ref="base.state_in_gj"/>
+    </record>
+
+    <!-- ============================================================ -->
+    <!-- CITIES — Tier 2 (12 cities) -->
+    <!-- ============================================================ -->
+    <record id="city_jaipur" model="business.city">
+        <field name="name">Jaipur</field>
+        <field name="state_id" ref="base.state_in_rj"/>
+    </record>
+    <record id="city_lucknow" model="business.city">
+        <field name="name">Lucknow</field>
+        <field name="state_id" ref="base.state_in_up"/>
+    </record>
+    <record id="city_kanpur" model="business.city">
+        <field name="name">Kanpur</field>
+        <field name="state_id" ref="base.state_in_up"/>
+    </record>
+    <record id="city_nagpur" model="business.city">
+        <field name="name">Nagpur</field>
+        <field name="state_id" ref="base.state_in_mh"/>
+    </record>
+    <record id="city_indore" model="business.city">
+        <field name="name">Indore</field>
+        <field name="state_id" ref="base.state_in_mp"/>
+    </record>
+    <record id="city_bhopal" model="business.city">
+        <field name="name">Bhopal</field>
+        <field name="state_id" ref="base.state_in_mp"/>
+    </record>
+    <record id="city_visakhapatnam" model="business.city">
+        <field name="name">Visakhapatnam</field>
+        <field name="state_id" ref="base.state_in_ap"/>
+    </record>
+    <record id="city_coimbatore" model="business.city">
+        <field name="name">Coimbatore</field>
+        <field name="state_id" ref="base.state_in_tn"/>
+    </record>
+    <record id="city_kochi" model="business.city">
+        <field name="name">Kochi</field>
+        <field name="state_id" ref="base.state_in_kl"/>
+    </record>
+    <record id="city_chandigarh" model="business.city">
+        <field name="name">Chandigarh</field>
+        <field name="state_id" ref="base.state_in_ch"/>
+    </record>
+    <record id="city_vadodara" model="business.city">
+        <field name="name">Vadodara</field>
+        <field name="state_id" ref="base.state_in_gj"/>
+    </record>
+    <record id="city_surat" model="business.city">
+        <field name="name">Surat</field>
+        <field name="state_id" ref="base.state_in_gj"/>
+    </record>
+
+    <!-- ============================================================ -->
+    <!-- CITIES — Tier 3 (9 cities) -->
+    <!-- ============================================================ -->
+    <record id="city_vijayawada" model="business.city">
+        <field name="name">Vijayawada</field>
+        <field name="state_id" ref="base.state_in_ap"/>
+    </record>
+    <record id="city_rajkot" model="business.city">
+        <field name="name">Rajkot</field>
+        <field name="state_id" ref="base.state_in_gj"/>
+    </record>
+    <record id="city_jodhpur" model="business.city">
+        <field name="name">Jodhpur</field>
+        <field name="state_id" ref="base.state_in_rj"/>
+    </record>
+    <record id="city_raipur" model="business.city">
+        <field name="name">Raipur</field>
+        <field name="state_id" ref="base.state_in_cg"/>
+    </record>
+    <record id="city_guwahati" model="business.city">
+        <field name="name">Guwahati</field>
+        <field name="state_id" ref="base.state_in_as"/>
+    </record>
+    <record id="city_dehradun" model="business.city">
+        <field name="name">Dehradun</field>
+        <field name="state_id" ref="base.state_in_uk"/>
+    </record>
+    <record id="city_ranchi" model="business.city">
+        <field name="name">Ranchi</field>
+        <field name="state_id" ref="base.state_in_jh"/>
+    </record>
+    <record id="city_patna" model="business.city">
+        <field name="name">Patna</field>
+        <field name="state_id" ref="base.state_in_br"/>
+    </record>
+    <record id="city_thiruvananthapuram" model="business.city">
+        <field name="name">Thiruvananthapuram</field>
+        <field name="state_id" ref="base.state_in_kl"/>
+    </record>
+
+    <!-- ============================================================ -->
+    <!-- AREAS — Mumbai -->
+    <!-- ============================================================ -->
+    <record id="area_mumbai_andheri" model="business.area">
+        <field name="name">Andheri</field>
+        <field name="city_id" ref="city_mumbai"/>
+    </record>
+    <record id="area_mumbai_bandra" model="business.area">
+        <field name="name">Bandra</field>
+        <field name="city_id" ref="city_mumbai"/>
+    </record>
+    <record id="area_mumbai_powai" model="business.area">
+        <field name="name">Powai</field>
+        <field name="city_id" ref="city_mumbai"/>
+    </record>
+    <record id="area_mumbai_worli" model="business.area">
+        <field name="name">Worli</field>
+        <field name="city_id" ref="city_mumbai"/>
+    </record>
+    <record id="area_mumbai_lower_parel" model="business.area">
+        <field name="name">Lower Parel</field>
+        <field name="city_id" ref="city_mumbai"/>
+    </record>
+    <record id="area_mumbai_goregaon" model="business.area">
+        <field name="name">Goregaon</field>
+        <field name="city_id" ref="city_mumbai"/>
+    </record>
+    <record id="area_mumbai_malad" model="business.area">
+        <field name="name">Malad</field>
+        <field name="city_id" ref="city_mumbai"/>
+    </record>
+    <record id="area_mumbai_thane" model="business.area">
+        <field name="name">Thane</field>
+        <field name="city_id" ref="city_mumbai"/>
+    </record>
+    <record id="area_mumbai_navi_mumbai" model="business.area">
+        <field name="name">Navi Mumbai</field>
+        <field name="city_id" ref="city_mumbai"/>
+    </record>
+
+    <!-- ============================================================ -->
+    <!-- AREAS — Delhi -->
+    <!-- ============================================================ -->
+    <record id="area_delhi_connaught_place" model="business.area">
+        <field name="name">Connaught Place</field>
+        <field name="city_id" ref="city_delhi"/>
+    </record>
+    <record id="area_delhi_dwarka" model="business.area">
+        <field name="name">Dwarka</field>
+        <field name="city_id" ref="city_delhi"/>
+    </record>
+    <record id="area_delhi_karol_bagh" model="business.area">
+        <field name="name">Karol Bagh</field>
+        <field name="city_id" ref="city_delhi"/>
+    </record>
+    <record id="area_delhi_saket" model="business.area">
+        <field name="name">Saket</field>
+        <field name="city_id" ref="city_delhi"/>
+    </record>
+    <record id="area_delhi_noida" model="business.area">
+        <field name="name">Noida</field>
+        <field name="city_id" ref="city_delhi"/>
+    </record>
+    <record id="area_delhi_gurgaon" model="business.area">
+        <field name="name">Gurgaon</field>
+        <field name="city_id" ref="city_delhi"/>
+    </record>
+    <record id="area_delhi_okhla" model="business.area">
+        <field name="name">Okhla Industrial Area</field>
+        <field name="city_id" ref="city_delhi"/>
+    </record>
+
+    <!-- ============================================================ -->
+    <!-- AREAS — Hyderabad -->
+    <!-- ============================================================ -->
+    <record id="area_hyd_banjara_hills" model="business.area">
+        <field name="name">Banjara Hills</field>
+        <field name="city_id" ref="city_hyderabad"/>
+    </record>
+    <record id="area_hyd_hitec_city" model="business.area">
+        <field name="name">HITEC City</field>
+        <field name="city_id" ref="city_hyderabad"/>
+    </record>
+    <record id="area_hyd_madhapur" model="business.area">
+        <field name="name">Madhapur</field>
+        <field name="city_id" ref="city_hyderabad"/>
+    </record>
+    <record id="area_hyd_secunderabad" model="business.area">
+        <field name="name">Secunderabad</field>
+        <field name="city_id" ref="city_hyderabad"/>
+    </record>
+    <record id="area_hyd_gachibowli" model="business.area">
+        <field name="name">Gachibowli</field>
+        <field name="city_id" ref="city_hyderabad"/>
+    </record>
+    <record id="area_hyd_kukatpally" model="business.area">
+        <field name="name">Kukatpally</field>
+        <field name="city_id" ref="city_hyderabad"/>
+    </record>
+    <record id="area_hyd_lb_nagar" model="business.area">
+        <field name="name">LB Nagar</field>
+        <field name="city_id" ref="city_hyderabad"/>
+    </record>
+
+    <!-- ============================================================ -->
+    <!-- AREAS — Bangalore -->
+    <!-- ============================================================ -->
+    <record id="area_blr_koramangala" model="business.area">
+        <field name="name">Koramangala</field>
+        <field name="city_id" ref="city_bangalore"/>
+    </record>
+    <record id="area_blr_whitefield" model="business.area">
+        <field name="name">Whitefield</field>
+        <field name="city_id" ref="city_bangalore"/>
+    </record>
+    <record id="area_blr_electronic_city" model="business.area">
+        <field name="name">Electronic City</field>
+        <field name="city_id" ref="city_bangalore"/>
+    </record>
+    <record id="area_blr_indiranagar" model="business.area">
+        <field name="name">Indiranagar</field>
+        <field name="city_id" ref="city_bangalore"/>
+    </record>
+    <record id="area_blr_hsr_layout" model="business.area">
+        <field name="name">HSR Layout</field>
+        <field name="city_id" ref="city_bangalore"/>
+    </record>
+    <record id="area_blr_marathahalli" model="business.area">
+        <field name="name">Marathahalli</field>
+        <field name="city_id" ref="city_bangalore"/>
+    </record>
+
+    <!-- ============================================================ -->
+    <!-- AREAS — Chennai -->
+    <!-- ============================================================ -->
+    <record id="area_chn_t_nagar" model="business.area">
+        <field name="name">T. Nagar</field>
+        <field name="city_id" ref="city_chennai"/>
+    </record>
+    <record id="area_chn_anna_nagar" model="business.area">
+        <field name="name">Anna Nagar</field>
+        <field name="city_id" ref="city_chennai"/>
+    </record>
+    <record id="area_chn_adyar" model="business.area">
+        <field name="name">Adyar</field>
+        <field name="city_id" ref="city_chennai"/>
+    </record>
+    <record id="area_chn_velachery" model="business.area">
+        <field name="name">Velachery</field>
+        <field name="city_id" ref="city_chennai"/>
+    </record>
+    <record id="area_chn_omr" model="business.area">
+        <field name="name">OMR (Old Mahabalipuram Road)</field>
+        <field name="city_id" ref="city_chennai"/>
+    </record>
+    <record id="area_chn_ambattur" model="business.area">
+        <field name="name">Ambattur Industrial Estate</field>
+        <field name="city_id" ref="city_chennai"/>
+    </record>
+
+    <!-- ============================================================ -->
+    <!-- AREAS — Pune -->
+    <!-- ============================================================ -->
+    <record id="area_pune_hinjewadi" model="business.area">
+        <field name="name">Hinjewadi</field>
+        <field name="city_id" ref="city_pune"/>
+    </record>
+    <record id="area_pune_kothrud" model="business.area">
+        <field name="name">Kothrud</field>
+        <field name="city_id" ref="city_pune"/>
+    </record>
+    <record id="area_pune_viman_nagar" model="business.area">
+        <field name="name">Viman Nagar</field>
+        <field name="city_id" ref="city_pune"/>
+    </record>
+    <record id="area_pune_hadapsar" model="business.area">
+        <field name="name">Hadapsar</field>
+        <field name="city_id" ref="city_pune"/>
+    </record>
+    <record id="area_pune_wakad" model="business.area">
+        <field name="name">Wakad</field>
+        <field name="city_id" ref="city_pune"/>
+    </record>
+    <record id="area_pune_pimpri_chinchwad" model="business.area">
+        <field name="name">Pimpri-Chinchwad</field>
+        <field name="city_id" ref="city_pune"/>
+    </record>
+
+</data>
+</odoo>

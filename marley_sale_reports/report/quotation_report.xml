@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Marley Quotation Paper Format (running header/footer) -->
+    <record id="paperformat_marley_quotation" model="report.paperformat">
+        <field name="name">Marley Quotation A4</field>
+        <field name="default" eval="False"/>
+        <field name="format">A4</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">40</field>
+        <field name="margin_bottom">30</field>
+        <field name="margin_left">7</field>
+        <field name="margin_right">7</field>
+        <field name="header_line" eval="False"/>
+        <field name="header_spacing">35</field>
+        <field name="dpi">96</field>
+        <field name="disable_shrinking" eval="True"/>
+    </record>
+
+    <!-- Marley Fans Quotation Report Action -->
+    <record id="action_report_marley_quotation" model="ir.actions.report">
+        <field name="name">Marley Quotation</field>
+        <field name="model">sale.order</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">marley_sale_reports.report_marley_quotation</field>
+        <field name="report_file">marley_sale_reports.report_marley_quotation</field>
+        <field name="print_report_name">'Quotation - %s' % object.name</field>
+        <field name="binding_model_id" ref="sale.model_sale_order"/>
+        <field name="binding_type">report</field>
+        <field name="paperformat_id" ref="paperformat_marley_quotation"/>
+    </record>
+
+</odoo>

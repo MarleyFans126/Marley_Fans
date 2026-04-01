@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+
+        <!-- Email template for sending Installation Report PDF -->
+        <record id="email_template_installation_report" model="mail.template">
+            <field name="name">Installation Report (Marley Fans)</field>
+            <field name="model_id" ref="project.model_project_project"/>
+            <field name="subject">Installation Report — {{ object.partner_id.name or object.name }}</field>
+            <field name="email_from">{{ (object.user_id.email_formatted or user.email_formatted) }}</field>
+            <field name="email_to">{{ object.partner_id.email }}</field>
+            <field name="email_cc">{{ ','.join(object.partner_id.child_ids.filtered('email').mapped('email')) if object.partner_id else '' }}</field>
+            <field name="body_html" type="html">
+                <div style="margin: 0px; padding: 0px; font-family: Arial, sans-serif;">
+                    <p style="font-size: 14px;">
+                        Dear <t t-out="object.partner_id.name or 'Customer'"/>,
+                    </p>
+                    <p style="font-size: 13px;">
+                        Please find attached the Installation Report for
+                        <strong><t t-out="object.name"/></strong>.
+                    </p>
+                    <p style="font-size: 13px;">
+                        This document contains the installation details, product information,
+                        and site specifications for your reference.
+                    </p>
+                    <p style="font-size: 13px;">
+                        If you have any questions, please do not hesitate to contact us.
+                    </p>
+                    <br/>
+                    <p style="font-size: 13px;">
+                        Warm regards,<br/>
+                        <strong><t t-out="object.user_id.name or 'Marley Fans Team'"/></strong><br/>
+                        Marley HVLS Fans
+                    </p>
+                </div>
+            </field>
+            <field name="report_template_ids" eval="[(4, ref('marley_crm_enhancements.action_report_installation'))]"/>
+            <field name="auto_delete" eval="True"/>
+        </record>
+
+        <!-- Email template for sending Task Installation Report PDF -->
+        <record id="email_template_task_installation_report" model="mail.template">
+            <field name="name">Task Installation Report (Marley Fans)</field>
+            <field name="model_id" ref="project.model_project_task"/>
+            <field name="subject">Installation Report — {{ object.inst_company_name or object.partner_id.name or object.name }}</field>
+            <field name="email_from">{{ (object.user_ids[:1].email_formatted if object.user_ids else user.email_formatted) }}</field>
+            <field name="email_to">{{ object.partner_id.email }}</field>
+            <field name="email_cc">{{ ','.join(object.partner_id.child_ids.filtered('email').mapped('email')) if object.partner_id else '' }}</field>
+            <field name="body_html" type="html">
+                <div style="margin: 0px; padding: 0px; font-family: Arial, sans-serif;">
+                    <p style="font-size: 14px;">
+                        Dear <t t-out="object.inst_company_name or object.partner_id.name or 'Customer'"/>,
+                    </p>
+                    <p style="font-size: 13px;">
+                        Please find attached the Installation Report for
+                        <strong><t t-out="object.project_id.name or object.name"/></strong>.
+                    </p>
+                    <p style="font-size: 13px;">
+                        This document contains the installation details, product information,
+                        and site specifications for your reference.
+                    </p>
+                    <p style="font-size: 13px;">
+                        If you have any questions, please do not hesitate to contact us.
+                    </p>
+                    <br/>
+                    <p style="font-size: 13px;">
+                        Warm regards,<br/>
+                        <strong><t t-out="object.inst_sales_rep or 'Marley Fans Team'"/></strong><br/>
+                        Marley HVLS Fans
+                    </p>
+                </div>
+            </field>
+            <field name="report_template_ids" eval="[(4, ref('marley_crm_enhancements.action_report_task_installation'))]"/>
+            <field name="auto_delete" eval="True"/>
+        </record>
+
+    </data>
+</odoo>

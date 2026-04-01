@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Extend Task Form: Add Installation Tab -->
+    <record id="project_task_view_form_inherit_installation" model="ir.ui.view">
+        <field name="name">project.task.form.installation</field>
+        <field name="model">project.task</field>
+        <field name="inherit_id" ref="project.view_task_form2"/>
+        <field name="priority">50</field>
+        <field name="arch" type="xml">
+
+            <!-- Send buttons in the header -->
+            <xpath expr="//header" position="inside">
+                <button name="action_send_installation_report_email"
+                        string="Send by Email"
+                        type="object"
+                        class="btn-secondary"
+                        icon="fa-envelope"
+                        groups="project.group_project_user"/>
+                <button name="action_send_installation_report_whatsapp"
+                        string="Send by WhatsApp"
+                        type="object"
+                        class="btn-secondary text-success"
+                        icon="fa-whatsapp"
+                        groups="project.group_project_user"/>
+            </xpath>
+
+            <xpath expr="//notebook" position="inside">
+                <page string="Installation" name="installation_tab">
+
+                    <!-- Toggle + Refresh -->
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <field name="is_installation" widget="boolean_toggle"/>
+                        <label for="is_installation" string="This is an Installation Task"/>
+                        <button name="action_refresh_installation"
+                                string="Refresh from Invoice/SO"
+                                type="object"
+                                class="btn-sm btn-outline-primary ms-auto"
+                                icon="fa-refresh"
+                                invisible="not is_installation"/>
+                    </div>
+
+                    <div invisible="not is_installation">
+
+                        <!-- Row 1: Sales Rep + Installation Date + Company -->
+                        <group string="Installation Details">
+                            <group>
+                                <field name="inst_sales_rep"/>
+                                <field name="inst_installation_date"/>
+                                <field name="inst_site_contact"/>
+                                <field name="inst_site_phone" widget="phone"/>
+                            </group>
+                            <group>
+                                <field name="inst_company_name"/>
+                                <field name="inst_company_address"/>
+                                <field name="inst_gstin"/>
+                            </group>
+                        </group>
+
+                        <!-- Installation Site Address -->
+                        <group string="Installation Site Address">
+                            <group>
+                                <field name="inst_site_address_street" placeholder="Street address..."/>
+                                <field name="inst_site_address_street2" placeholder="Street address line 2..."/>
+                                <field name="inst_site_address_city" placeholder="City"/>
+                            </group>
+                            <group>
+                                <field name="inst_site_address_state_id" placeholder="Select State..."/>
+                                <field name="inst_site_address_zip" placeholder="Pincode"/>
+                            </group>
+                        </group>
+
+                        <!-- Row 2: Transport / Invoice -->
+                        <group string="Product Model / Quantity / Weight / Terms">
+                            <group>
+                                <field name="inst_models_to_transport"/>
+                                <field name="inst_transportation_terms"/>
+                            </group>
+                            <group>
+                                <field name="inst_invoice_value" widget="monetary"/>
+                                <field name="inst_advance_received" readonly="1" widget="monetary"/>
+                                <field name="inst_balance_amount" widget="monetary" readonly="1"/>
+                                <field name="inst_amount_in_words" readonly="1"/>
+                            </group>
+                        </group>
+
+                        <!-- Row 3: Link to Sale Order -->
+                        <group string="Linked Sale Order" invisible="not sale_order_id">
+                            <group>
+                                <field name="sale_order_id" readonly="1"/>
+                            </group>
+                        </group>
+
+                        <!-- Row 4: Site Specification -->
+                        <group string="Site Specification">
+                            <group>
+                                <field name="inst_ext_rod_length" placeholder="e.g. 500 mm"/>
+                                <field name="inst_field_height" placeholder="e.g. 6 MTR Meter"/>
+                                <field name="inst_electrical_wire" placeholder="e.g. 150 Meter"/>
+                            </group>
+                            <group>
+                                <field name="inst_mounting_structure" placeholder="e.g. PEB"/>
+                                <field name="inst_crane_rafter_distance" placeholder="e.g. 200 mm"/>
+                            </group>
+                        </group>
+
+                        <!-- Row 5: Other Info -->
+                        <group string="Other Important Information">
+                            <field name="inst_other_info" nolabel="1" colspan="2"
+                                   placeholder="Payment terms, delivery notes, special instructions..."/>
+                        </group>
+
+                    </div>
+                </page>
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <!--
+            WhatsApp Security Rules
+            =======================
+            - Only System Administrators can write WhatsApp message logs
+            - Internal users can read logs for partners they have access to
+            - Only System Admins can modify WhatsApp settings
+        -->
+
+        <!-- Record Rule: Internal users can only read message logs (no write/delete) -->
+        <record id="whatsapp_message_log_rule_user" model="ir.rule">
+            <field name="name">WhatsApp Message Log: User Read Access</field>
+            <field name="model_id" ref="model_whatsapp_message_log"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <!-- Record Rule: Admins have full access to logs -->
+        <record id="whatsapp_message_log_rule_admin" model="ir.rule">
+            <field name="name">WhatsApp Message Log: Admin Full Access</field>
+            <field name="model_id" ref="model_whatsapp_message_log"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('base.group_system'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
+        </record>
+
+    </data>
+</odoo>

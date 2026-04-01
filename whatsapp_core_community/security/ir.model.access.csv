@@ -1,0 +1,13 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_whatsapp_service_admin,whatsapp.service (System Admin),model_whatsapp_service,base.group_system,1,1,1,1
+access_whatsapp_service_user,whatsapp.service (Internal User),model_whatsapp_service,base.group_user,1,0,0,0
+access_whatsapp_message_log_admin,whatsapp.message.log (System Admin),model_whatsapp_message_log,base.group_system,1,1,1,1
+access_whatsapp_message_log_user,whatsapp.message.log (Internal User),model_whatsapp_message_log,base.group_user,1,0,0,0
+access_whatsapp_send_wizard_user,whatsapp.send.wizard (Internal User),model_whatsapp_send_wizard,base.group_user,1,1,1,1
+access_whatsapp_send_wizard_admin,whatsapp.send.wizard (System Admin),model_whatsapp_send_wizard,base.group_system,1,1,1,1
+access_whatsapp_template_admin,whatsapp.template (System Admin),model_whatsapp_template,base.group_system,1,1,1,1
+access_whatsapp_template_user,whatsapp.template (User Read),model_whatsapp_template,base.group_user,1,0,0,0
+access_whatsapp_template_button_admin,whatsapp.template.button (Admin),model_whatsapp_template_button,base.group_system,1,1,1,1
+access_whatsapp_template_button_user,whatsapp.template.button (User),model_whatsapp_template_button,base.group_user,1,0,0,0
+access_whatsapp_template_variable_admin,whatsapp.template.variable (Admin),model_whatsapp_template_variable,base.group_system,1,1,1,1
+access_whatsapp_template_variable_user,whatsapp.template.variable (User),model_whatsapp_template_variable,base.group_user,1,0,0,0

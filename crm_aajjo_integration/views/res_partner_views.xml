@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_partner_form_inherit_aajjo" model="ir.ui.view">
+        <field name="name">res.partner.form.inherit.aajjo</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='email']" position="replace">
+                <label for="email" class="oe_edit_only"/>
+                <div class="o_row">
+                    <!-- Removing widget='email' to prevent 'mailto:' link -->
+                    <field name="email" widget="char"/>
+                    <button name="action_open_mail_composer" type="object" icon="fa-envelope" class="btn-link" title="Send Email" invisible="not email"/>
+                </div>
+            </xpath>
+        </field>
+    </record>
+</odoo>

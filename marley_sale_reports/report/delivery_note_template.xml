@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<data>
+
+<template id="report_marley_delivery_note">
+    <t t-call="web.html_container">
+        <t t-foreach="docs" t-as="doc">
+            <t t-call="web.external_layout">
+                <div class="page" style="font-family: Arial, sans-serif; font-size: 12px;">
+
+                    <!-- Title -->
+                    <div class="text-center" style="margin-bottom: 20px;">
+                        <h2 style="font-weight: bold;">DELIVERY NOTE</h2>
+                    </div>
+
+                    <!-- Header Info -->
+                    <div class="row" style="margin-bottom: 20px;">
+                        <div class="col-6">
+                            <strong>Delivery No:</strong> <span t-field="doc.name"/><br/>
+                            <strong>Date:</strong> <span t-field="doc.scheduled_date" t-options='{"format": "dd-MM-yyyy"}'/><br/>
+                            <strong>Source:</strong> <span t-field="doc.origin"/>
+                        </div>
+                        <div class="col-6">
+                            <strong>Customer:</strong><br/>
+                            <span t-field="doc.partner_id.name"/><br/>
+                            <t t-if="doc.partner_id.street">
+                                <span t-field="doc.partner_id.street"/><br/>
+                            </t>
+                            <t t-if="doc.partner_id.city">
+                                <span t-field="doc.partner_id.city"/>,
+                            </t>
+                            <t t-if="doc.partner_id.state_id">
+                                <span t-field="doc.partner_id.state_id.name"/>
+                            </t>
+                            <t t-if="doc.partner_id.zip">
+                                - <span t-field="doc.partner_id.zip"/>
+                            </t>
+                        </div>
+                    </div>
+
+                    <!-- Product Lines Table -->
+                    <table class="table table-bordered" style="width: 100%; font-size: 11px;">
+                        <thead>
+                            <tr style="background-color: #f0f0f0;">
+                                <th style="width: 8%; text-align: center;">S.No</th>
+                                <th style="width: 52%;">Description</th>
+                                <th style="width: 20%; text-align: center;">Quantity</th>
+                                <th style="width: 20%; text-align: center;">UoM</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-set="sno" t-value="0"/>
+                            <t t-foreach="doc.move_ids" t-as="move">
+                                <t t-set="sno" t-value="sno + 1"/>
+                                <tr>
+                                    <td style="text-align: center;"><t t-out="sno"/></td>
+                                    <td><span t-field="move.product_id.name"/></td>
+                                    <td style="text-align: center;">
+                                        <span t-out="'{:,.2f}'.format(move.quantity)"/>
+                                    </td>
+                                    <td style="text-align: center;">
+                                        <span t-field="move.product_uom_id.name"/>
+                                    </td>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+
+                    <!-- Signature Block -->
+                    <div class="row" style="margin-top: 60px;">
+                        <div class="col-6">
+                            <strong>Received By:</strong><br/><br/>
+                            <div style="border-top: 1px solid #000; width: 200px; margin-top: 40px;">
+                                Name &amp; Signature
+                            </div>
+                        </div>
+                        <div class="col-6 text-end">
+                            <strong>For <span t-field="doc.company_id.name"/></strong><br/><br/>
+                            <div style="border-top: 1px solid #000; width: 200px; margin-top: 40px; float: right;">
+                                Authorized Signatory
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </t>
+        </t>
+    </t>
+</template>
+
+</data>
+</odoo>

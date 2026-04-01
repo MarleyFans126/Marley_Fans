@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- 
+        Extend CRM Lead form view:
+        - Add WhatsApp icon inline beside Phone field
+    -->
+    <record id="crm_lead_view_form_whatsapp" model="ir.ui.view">
+        <field name="name">crm.lead.form.whatsapp</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_lead_view_form"/>
+        <field name="arch" type="xml">
+            
+            <!-- 
+                Using 'phone' as the anchor since 'mobile' appears to be undefined in this environment.
+            -->
+            <xpath expr="//field[@name='phone']" position="after">
+                <button name="action_open_whatsapp_send_wizard"
+                        type="object"
+                        class="btn btn-link p-0 ms-1"
+                        icon="fa-whatsapp"
+                        title="Send WhatsApp Message"
+                        invisible="not phone"
+                        style="color: #25D366; font-size: 1.2rem; vertical-align: baseline;"
+                        help="Send WhatsApp Message"/>
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>

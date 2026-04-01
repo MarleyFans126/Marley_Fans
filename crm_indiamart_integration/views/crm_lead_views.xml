@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="utm_source_indiamart" model="utm.source">
+            <field name="name">IndiaMART</field>
+        </record>
+    </data>
+
+    <data>
+        <!-- Server Action -->
+        <record id="action_fetch_indiamart_leads_server" model="ir.actions.server">
+            <field name="name">Fetch IndiaMART Leads</field>
+            <field name="model_id" ref="crm.model_crm_lead"/>
+            <field name="binding_model_id" ref="crm.model_crm_lead"/>
+            <field name="binding_view_types">list</field>
+            <field name="state">code</field>
+            <field name="code">
+                action = model.action_manual_fetch()
+            </field>
+        </record>
+        
+        <!-- Add Smart Button to Form View -->
+        <!-- Inherit CRM Lead Form -->
+        <!-- Global Lead Customizations Inherit CRM Lead Form (Clean Structure) -->
+        <record id="crm_lead_view_form_inherit_custom" model="ir.ui.view">
+            <field name="name">crm.lead.form.inherit.custom.clean</field>
+            <field name="model">crm.lead</field>
+            <field name="inherit_id" ref="crm.crm_lead_view_form"/>
+            <field name="arch" type="xml">
+
+                <!-- Rename Phone -->
+                <xpath expr="//field[@name='phone']" position="attributes">
+                    <attribute name="string">Mobile</attribute>
+                    <attribute name="required">1</attribute>
+                </xpath>
+
+                <!-- Make Email Required -->
+                <xpath expr="//field[@name='email_from']" position="attributes">
+                    <attribute name="required">1</attribute>
+                </xpath>
+
+                <!-- Checkboxes under Contact (Before Email) -->
+                <xpath expr="//field[@name='email_from']" position="before">
+                    <field name="is_aajjo" readonly="1" invisible="not is_aajjo"/>
+                    <field name="is_indiamart" readonly="1" invisible="not is_indiamart"/>
+                    <field name="is_manual_lead" readonly="1" invisible="not is_manual_lead"/>
+                    <field name="lead_query_type" readonly="1" invisible="not is_indiamart"/>
+                </xpath>
+
+                <!-- Insert under Salesperson in RIGHT column only -->
+                <xpath expr="//field[@name='user_id']" position="after">
+                    <field name="second_salesperson_id"/>
+                    <field name="business_state_id"
+                           options="{'no_create': False}"/>
+                    <field name="business_city_id"
+                           options="{'no_create': False, 'quick_create': True}"
+                           context="{'default_state_id': business_state_id}"/>
+                    <field name="business_area_id"
+                           options="{'no_create': False, 'quick_create': True}"
+                           context="{'default_city_id': business_city_id}"/>
+                    <field name="business_pincode" placeholder="Pincode"/>
+                </xpath>
+
+            </field>
+        </record>
+        
+        <!-- Search Filter for IndiaMART -->
+        <record id="view_crm_case_leads_filter_indiamart" model="ir.ui.view">
+            <field name="name">crm.lead.search.indiamart</field>
+            <field name="model">crm.lead</field>
+            <field name="inherit_id" ref="crm.view_crm_case_leads_filter"/>
+            <field name="arch" type="xml">
+                <filter name="salesperson" position="after">
+                    <filter string="IndiaMART Leads" name="indiamart" domain="[('is_indiamart', '=', True)]"/>
+                </filter>
+            </field>
+        </record>
+
+        <!-- Fetch IndiaMART Leads (under Configuration) -->
+        <menuitem id="menu_crm_lead_fetch_indiamart"
+                  name="Fetch IndiaMART Leads"
+                  parent="crm.crm_menu_config"
+                  action="action_fetch_indiamart_leads_server"
+                  sequence="99"/>
+
+    </data>
+</odoo>

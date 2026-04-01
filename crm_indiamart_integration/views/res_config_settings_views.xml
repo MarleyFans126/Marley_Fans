@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form_indiamart" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.indiamart</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="crm.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//app[@name='crm']" position="inside">
+                <block title="IndiaMART Integration" name="indiamart_settings">
+                    <setting help="Enable IndiaMART Lead Sync">
+                        <field name="indiamart_active"/>
+                        <div class="content-group" invisible="not indiamart_active">
+                            <div class="row mt16">
+                                <label for="indiamart_api_key" class="col-lg-3 o_light_label"/>
+                                <field name="indiamart_api_key"/>
+                            </div>
+                            <div class="row mt16">
+                                <label for="indiamart_api_base_url" class="col-lg-3 o_light_label"/>
+                                <field name="indiamart_api_base_url"/>
+                            </div>
+                            <div class="row mt16">
+                                <label for="indiamart_key_generated_date" class="col-lg-3 o_light_label"/>
+                                <field name="indiamart_key_generated_date"/>
+                            </div>
+                            <div class="row mt16">
+                                <label for="indiamart_is_mock_server" class="col-lg-3 o_light_label"/>
+                                <field name="indiamart_is_mock_server"/>
+                            </div>
+                            <div class="row mt16 text-muted">
+                                <label for="indiamart_last_sync_datetime" class="col-lg-3 o_light_label"/>
+                                <field name="indiamart_last_sync_datetime" readonly="1"/>
+                            </div>
+                            <div class="row mt16 text-muted">
+                                <label for="indiamart_last_start_time" class="col-lg-3 o_light_label"/>
+                                <field name="indiamart_last_start_time" readonly="1"/>
+                            </div>
+                            <div class="row mt16 text-muted">
+                                <label for="indiamart_last_end_time" class="col-lg-3 o_light_label"/>
+                                <field name="indiamart_last_end_time" readonly="1"/>
+                            </div>
+                            <div class="row mt16 text-muted">
+                                <label for="indiamart_historical_sync_done" class="col-lg-3 o_light_label"/>
+                                <field name="indiamart_historical_sync_done" readonly="1"/>
+                            </div>
+                            <div class="row mt16 text-muted" invisible="indiamart_historical_sync_done">
+                                <label for="indiamart_historical_sync_cursor" class="col-lg-3 o_light_label"/>
+                                <field name="indiamart_historical_sync_cursor" readonly="1"/>
+                            </div>
+                        </div>
+                    </setting>
+                </block>
+            </xpath>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.aajjo</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="crm.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//app[@name='crm']" position="inside">
+                <block title="AAJJO Integration" name="aajjo_setting_container">
+                    <setting string="AAJJO Configuration" help="Connect to AAJJO API for lead synchronization.">
+                        <field name="enable_aajjo_sync"/>
+                        <div class="content-group" invisible="not enable_aajjo_sync">
+                            <div class="row mt16">
+                                <label string="API URL" for="aajjo_api_url" class="col-lg-3 o_light_label"/>
+                                <field name="aajjo_api_url"/>
+                            </div>
+                            <div class="row mt16">
+                                <label string="Username" for="aajjo_username" class="col-lg-3 o_light_label"/>
+                                <field name="aajjo_username"/>
+                            </div>
+                            <div class="row mt16">
+                                <label string="API Key" for="aajjo_api_key" class="col-lg-3 o_light_label"/>
+                                <field name="aajjo_api_key"/>
+                            </div>
+                            <div class="mt16">
+                                <button name="action_verify_connection" type="object" string="Verify Connection" class="btn-primary"/>
+                                <button name="action_sync_now" type="object" string="Sync Now" class="btn-secondary ml-2"/>
+                            </div>
+                            <div class="mt8">
+                                <label string="Last Sync:" for="last_sync_datetime"/>
+                                <field name="last_sync_datetime"/>
+                            </div>
+                        </div>
+                    </setting>
+                </block>
+            </xpath>
+        </field>
+    </record>
+</odoo>

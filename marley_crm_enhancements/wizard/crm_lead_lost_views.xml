@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Inherit the standard Lost wizard to add mandatory Loss Remarks -->
+    <record id="crm_lead_lost_view_form_inherit_marley" model="ir.ui.view">
+        <field name="name">crm.lead.lost.form.inherit.marley</field>
+        <field name="model">crm.lead.lost</field>
+        <field name="inherit_id" ref="crm.crm_lead_lost_view_form"/>
+        <field name="arch" type="xml">
+
+            <!-- Make lost_reason_id required in the view -->
+            <xpath expr="//field[@name='lost_reason_id']" position="attributes">
+                <attribute name="required">1</attribute>
+            </xpath>
+
+            <!-- Add Loss Remarks after the Closing Note -->
+            <xpath expr="//field[@name='lost_feedback']" position="before">
+                <label for="loss_remarks" class="o_form_label"/>
+                <field name="loss_remarks"
+                       placeholder="Please explain in detail why this lead was lost..."
+                       nolabel="1" colspan="2"
+                       required="1"/>
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>

@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <!-- =====================================================================
+         WhatsApp Send Wizard — Form View
+         ===================================================================== -->
+    <record id="view_whatsapp_send_wizard_form" model="ir.ui.view">
+        <field name="name">whatsapp.send.wizard.form</field>
+        <field name="model">whatsapp.send.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Send WhatsApp Message">
+                <sheet>
+                    <field name="whatsapp_enabled" invisible="1"/>
+
+                    <!-- WhatsApp Disabled warning -->
+                    <div class="alert alert-danger d-flex align-items-center mb-3"
+                         role="alert"
+                         invisible="whatsapp_enabled">
+                        <i class="fa fa-exclamation-triangle me-2"/>
+                        <span>WhatsApp integration is completely disabled in Settings. Please enable it first.</span>
+                    </div>
+
+                    <!-- No Approved Templates warning -->
+                    <div class="alert alert-warning d-flex align-items-center mb-3"
+                         role="alert"
+                         invisible="not has_approved_templates or message_type != 'template'">
+                        <i class="fa fa-exclamation-triangle me-2"/>
+                        <span>No approved WhatsApp templates available. Please sync or create some in Meta first.</span>
+                    </div>
+
+                    <!-- Header with contact info -->
+                    <div class="oe_title mb-3">
+                        <div class="d-flex align-items-center gap-3">
+                            <span class="fa fa-whatsapp fa-2x text-success" title="WhatsApp"/>
+                            <div>
+
+                                <h4 class="mb-0">Send WhatsApp Message</h4>
+                                <field name="partner_id" invisible="1"/>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Number missing warning -->
+                    <div class="alert alert-warning d-flex align-items-center mb-3"
+                         role="alert"
+                         invisible="mobile_number != False">
+
+                        <i class="fa fa-exclamation-triangle me-2"/>
+                        <span>This contact has no mobile number. Please add one first.</span>
+                    </div>
+
+                    <!-- Number confirmed banner -->
+                    <div class="alert alert-success d-flex align-items-center mb-3"
+                         role="alert"
+                         invisible="not mobile_number">
+
+                        <i class="fa fa-whatsapp me-2"/>
+                        <span>Sending to:
+                            <strong><field name="mobile_number" readonly="1" class="d-inline"/></strong>
+                        </span>
+                    </div>
+
+                    <!-- Message Type Selector -->
+                    <group invisible="not mobile_number or not whatsapp_enabled">
+                        <field name="message_type" widget="radio"
+                               string="Message Type"
+                               options="{'horizontal': True}"/>
+                    </group>
+
+                    <!-- ─── TEXT MESSAGE ──────────────────────────────── -->
+                    <group invisible="message_type != 'text' or not mobile_number or not whatsapp_enabled">
+                        <group string="Compose Text Message" col="1">
+                            <field name="text_body"
+                                   placeholder="Type your WhatsApp message here (max 4096 characters)..."
+                                   nolabel="1"
+                                   widget="text"/>
+                            <div class="text-muted">
+                                <small><i class="fa fa-info-circle"/> Plain text only. No HTML formatting supported.</small>
+                            </div>
+                        </group>
+                    </group>
+
+                    <!-- ─── TEMPLATE MESSAGE ──────────────────────────── -->
+                    <group invisible="message_type != 'template' or not mobile_number or not whatsapp_enabled" col="1">
+                        <field name="has_approved_templates" invisible="1"/>
+                        
+                        <group string="Template Selection" col="1">
+                            <field name="template_id" options="{'no_create': True}" domain="[('meta_status', '=', 'approved')]"/>
+                            <field name="variable_count" invisible="1"/>
+                        </group>
+
+                        <group string="Template Preview" col="1">
+                            <field name="template_preview" nolabel="1" readonly="1" class="border p-2 bg-light rounded"/>
+                        </group>
+                        
+                        <separator string="Template Variables" invisible="variable_count == 0"/>
+                        <div class="wa_variable_block" invisible="variable_count == 0">
+                            <div class="text-muted mb-2">
+                                <small>
+                                    <i class="fa fa-info-circle"/>
+                                    Fill in the required variables for your approved template.
+                                </small>
+                            </div>
+
+                            <div class="wa_variable_row" invisible="variable_count &lt; 1">
+                                <span class="wa_variable_label">Variable 1</span>
+                                <field name="variable_1" class="wa_variable_input" placeholder="Value for {{1}}" required="variable_count >= 1" nolabel="1"/>
+                            </div>
+                            <div class="wa_variable_row" invisible="variable_count &lt; 2">
+                                <span class="wa_variable_label">Variable 2</span>
+                                <field name="variable_2" class="wa_variable_input" placeholder="Value for {{2}}" required="variable_count >= 2" nolabel="1"/>
+                            </div>
+                            <div class="wa_variable_row" invisible="variable_count &lt; 3">
+                                <span class="wa_variable_label">Variable 3</span>
+                                <field name="variable_3" class="wa_variable_input" placeholder="Value for {{3}}" required="variable_count >= 3" nolabel="1"/>
+                            </div>
+                            <div class="wa_variable_row" invisible="variable_count &lt; 4">
+                                <span class="wa_variable_label">Variable 4</span>
+                                <field name="variable_4" class="wa_variable_input" placeholder="Value for {{4}}" required="variable_count >= 4" nolabel="1"/>
+                            </div>
+                            <div class="wa_variable_row" invisible="variable_count &lt; 5">
+                                <span class="wa_variable_label">Variable 5</span>
+                                <field name="variable_5" class="wa_variable_input" placeholder="Value for {{5}}" required="variable_count >= 5" nolabel="1"/>
+                            </div>
+                            <div class="wa_variable_row" invisible="variable_count &lt; 6">
+                                <span class="wa_variable_label">Variable 6</span>
+                                <field name="variable_6" class="wa_variable_input" placeholder="Value for {{6}}" required="variable_count >= 6" nolabel="1"/>
+                            </div>
+                            <div class="wa_variable_row" invisible="variable_count &lt; 7">
+                                <span class="wa_variable_label">Variable 7</span>
+                                <field name="variable_7" class="wa_variable_input" placeholder="Value for {{7}}" required="variable_count >= 7" nolabel="1"/>
+                            </div>
+                            <div class="wa_variable_row" invisible="variable_count &lt; 8">
+                                <span class="wa_variable_label">Variable 8</span>
+                                <field name="variable_8" class="wa_variable_input" placeholder="Value for {{8}}" required="variable_count >= 8" nolabel="1"/>
+                            </div>
+                            <div class="wa_variable_row" invisible="variable_count &lt; 9">
+                                <span class="wa_variable_label">Variable 9</span>
+                                <field name="variable_9" class="wa_variable_input" placeholder="Value for {{9}}" required="variable_count >= 9" nolabel="1"/>
+                            </div>
+                            <div class="wa_variable_row" invisible="variable_count &lt; 10">
+                                <span class="wa_variable_label">Variable 10</span>
+                                <field name="variable_10" class="wa_variable_input" placeholder="Value for {{10}}" required="variable_count >= 10" nolabel="1"/>
+                            </div>
+                        </div>
+                    </group>
+
+                    <!-- ─── MEDIA MESSAGE ─────────────────────────────── -->
+                    <group invisible="message_type != 'media' or not mobile_number or not whatsapp_enabled">
+                        <group string="Media / Document">
+                            <field name="media_file" filename="media_filename" widget="binary" string="Upload File"/>
+                            <field name="media_filename" invisible="1"/>
+                            <field name="media_caption" placeholder="Optional caption for image, video, or document"/>
+                            <div class="text-muted">
+                                <small>
+                                    <i class="fa fa-info-circle"/>
+                                    Supported: Images (JPEG/PNG), Documents (PDF), Audio, Video.
+                                    Max file size 15MB.
+                                </small>
+                            </div>
+                        </group>
+                    </group>
+
+                </sheet>
+
+                <!-- Footer: Send + Cancel -->
+                <footer>
+                    <button type="object"
+                            name="action_send_whatsapp"
+                            string="Send Message"
+                            class="btn btn-success"
+                            data-hotkey="s"
+                            invisible="not mobile_number or not whatsapp_enabled or (message_type == 'template' and not has_approved_templates)"/>
+                    <button type="cancel"
+                            string="Cancel"
+                            class="btn btn-secondary"/>
+                </footer>
+
+            </form>
+        </field>
+    </record>
+
+    <!-- =====================================================================
+         WhatsApp Send Wizard — Action (for standalone open)
+         ===================================================================== -->
+    <record id="action_whatsapp_send_wizard" model="ir.actions.act_window">
+        <field name="name">Send WhatsApp Message</field>
+        <field name="res_model">whatsapp.send.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="view_id" ref="view_whatsapp_send_wizard_form"/>
+    </record>
+
+</odoo>

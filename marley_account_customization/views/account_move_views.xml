@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Customer Outstanding: filtered list of unpaid invoices -->
+    <record id="action_customer_outstanding" model="ir.actions.act_window">
+        <field name="name">Customer Outstanding</field>
+        <field name="res_model">account.move</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[
+            ('move_type', '=', 'out_invoice'),
+            ('payment_state', 'in', ('not_paid', 'partial')),
+            ('state', '=', 'posted')
+        ]</field>
+        <field name="context">{'search_default_partner': 1}</field>
+    </record>
+
+    <!-- Search view: add Outstanding Only filter next to the existing partner filter -->
+    <record id="view_account_move_search_outstanding" model="ir.ui.view">
+        <field name="name">account.move.search.outstanding</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_account_move_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//filter[@name='partner']" position="after">
+                <filter string="Outstanding Only" name="outstanding_only"
+                        domain="[('payment_state', 'in', ('not_paid', 'partial')), ('state', '=', 'posted'), ('move_type', '=', 'out_invoice')]"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Menu Item: Accounting → Customers → Outstanding -->
+    <menuitem
+        id="menu_customer_outstanding"
+        name="Customer Outstanding"
+        parent="account.menu_finance_receivables"
+        action="action_customer_outstanding"
+        sequence="35"/>
+
+</odoo>

@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <!-- WhatsApp Message Log - List View -->
+    <record id="view_whatsapp_message_log_list" model="ir.ui.view">
+        <field name="name">whatsapp.message.log.list</field>
+        <field name="model">whatsapp.message.log</field>
+        <field name="arch" type="xml">
+            <list string="WhatsApp Message Logs"
+                  default_order="timestamp desc"
+                  decoration-success="status == 'sent' or status == 'received'"
+                  decoration-danger="status == 'failed'"
+                  decoration-warning="status == 'pending'">
+                <field name="timestamp" string="Date &amp; Time"/>
+                <field name="partner_id" string="Contact"/>
+                <field name="direction" string="Direction"
+                       decoration-primary="direction == 'outbound'"
+                       decoration-info="direction == 'inbound'"/>
+                <field name="message_type" string="Type"/>
+                <field name="template_name" string="Template" optional="show"/>
+                <field name="body_preview" string="Message Preview"/>
+                <field name="status" string="Status"
+                       widget="badge"
+                       decoration-success="status in ('sent', 'received')"
+                       decoration-danger="status == 'failed'"
+                       decoration-warning="status == 'pending'"/>
+                <field name="wa_message_id" string="Message ID" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- WhatsApp Message Log - Form View -->
+    <record id="view_whatsapp_message_log_form" model="ir.ui.view">
+        <field name="name">whatsapp.message.log.form</field>
+        <field name="model">whatsapp.message.log</field>
+        <field name="arch" type="xml">
+            <form string="WhatsApp Message Log">
+                <sheet>
+                    <widget name="web_ribbon" title="Sent" bg_color="bg-success" invisible="status != 'sent'"/>
+                    <widget name="web_ribbon" title="Failed" bg_color="bg-danger" invisible="status != 'failed'"/>
+                    <widget name="web_ribbon" title="Received" bg_color="bg-info" invisible="status != 'received'"/>
+
+                    <div class="oe_title">
+                        <h1>
+                            <field name="direction" readonly="1"/>
+                            -
+                            <field name="message_type" readonly="1"/>
+                        </h1>
+                    </div>
+
+                    <group>
+                        <group string="Message Details">
+                            <field name="partner_id" readonly="1"/>
+                            <field name="direction" readonly="1"/>
+                            <field name="message_type" readonly="1"/>
+                            <field name="template_name" readonly="1" invisible="message_type != 'template'"/>
+                            <field name="from_number" readonly="1" invisible="direction != 'inbound'"/>
+                            <field name="wa_message_id" readonly="1"/>
+                            <field name="timestamp" readonly="1"/>
+                        </group>
+                        <group string="Status">
+                            <field name="status" readonly="1" widget="badge"
+                                   decoration-success="status in ('sent', 'received')"
+                                   decoration-danger="status == 'failed'"
+                                   decoration-warning="status == 'pending'"/>
+                            <field name="error_message" readonly="1" invisible="status != 'failed'"/>
+                        </group>
+                    </group>
+
+                    <group string="Message Preview">
+                        <field name="body_preview" nolabel="1" readonly="1" widget="text" class="o_field_text"/>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- WhatsApp Message Log - Search View -->
+    <record id="view_whatsapp_message_log_search" model="ir.ui.view">
+        <field name="name">whatsapp.message.log.search</field>
+        <field name="model">whatsapp.message.log</field>
+        <field name="arch" type="xml">
+            <search string="Search WhatsApp Logs">
+                <field name="partner_id" string="Contact"/>
+                <field name="body_preview" string="Message"/>
+                <field name="template_name" string="Template"/>
+                <field name="wa_message_id" string="Message ID"/>
+                <field name="from_number" string="From Number"/>
+                <filter string="Outbound" name="filter_outbound" domain="[('direction', '=', 'outbound')]"/>
+                <filter string="Inbound" name="filter_inbound" domain="[('direction', '=', 'inbound')]"/>
+                <separator/>
+                <filter string="Sent" name="filter_sent" domain="[('status', '=', 'sent')]"/>
+                <filter string="Received" name="filter_received" domain="[('status', '=', 'received')]"/>
+                <filter string="Failed" name="filter_failed" domain="[('status', '=', 'failed')]"/>
+                <separator/>
+                <filter string="Text Messages" name="filter_text" domain="[('message_type', '=', 'text')]"/>
+                <filter string="Templates" name="filter_template" domain="[('message_type', '=', 'template')]"/>
+                <filter string="Media" name="filter_media" domain="[('message_type', '=', 'media')]"/>
+                <separator/>
+                <filter string="Group by Contact" name="group_partner" context="{'group_by': 'partner_id'}"/>
+                <filter string="Group by Direction" name="group_direction" context="{'group_by': 'direction'}"/>
+                <filter string="Group by Status" name="group_status" context="{'group_by': 'status'}"/>
+                <filter string="Group by Type" name="group_type" context="{'group_by': 'message_type'}"/>
+                <filter string="Group by Date" name="group_date" context="{'group_by': 'timestamp:day'}"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- WhatsApp Message Log - Action -->
+    <record id="action_whatsapp_message_log" model="ir.actions.act_window">
+        <field name="name">WhatsApp Message Logs</field>
+        <field name="res_model">whatsapp.message.log</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_whatsapp_message_log_search"/>
+        <field name="context">{}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No WhatsApp messages yet!</p>
+            <p>Send your first WhatsApp message from a contact's page using the 📱 button.</p>
+        </field>
+    </record>
+
+</odoo>

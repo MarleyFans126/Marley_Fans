@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_lead_whatsapp_bulk_approve_wizard_form" model="ir.ui.view">
+        <field name="name">lead.whatsapp.bulk.approve.wizard.form</field>
+        <field name="model">lead.whatsapp.bulk.approve.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Pending WhatsApp Approvals">
+                <p class="text-muted">
+                    The following leads have been created via API and need a WhatsApp acknowledgment.
+                </p>
+                <group>
+                    <field name="preview_text" readonly="1" options="{'no_open': True}"/>
+                    <field name="count" invisible="1"/>
+                </group>
+                <field name="lead_ids" readonly="1">
+                    <list>
+                        <field name="name" string="Lead Reference"/>
+                        <field name="contact_name"/>
+                        <field name="phone" optional="show"/>
+                        <field name="is_indiamart" optional="show"/>
+                        <field name="is_aajjo" optional="show"/>
+                        <field name="stage_id"/>
+                    </list>
+                </field>
+                <footer>
+                    <button string="Approve &amp; Send WhatsApp" name="action_approve_and_send" type="object" class="btn-primary" data-hotkey="q"/>
+                    <button string="Cancel" name="action_cancel" type="object" class="btn-secondary" data-hotkey="z"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Server Action replacing standard CRM Leads action -->
+    <record id="action_check_whatsapp_leads" model="ir.actions.server">
+        <field name="name">Leads</field>
+        <field name="model_id" ref="crm.model_crm_lead"/>
+        <field name="state">code</field>
+        <field name="code">
+            action = model.action_open_leads_with_whatsapp_check()
+        </field>
+    </record>
+
+    <!-- Override Default CRM menu to use Server Action -->
+    <menuitem
+        id="crm.crm_menu_leads"
+        action="action_check_whatsapp_leads"
+    />
+</odoo>

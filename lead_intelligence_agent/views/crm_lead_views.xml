@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ════════════════════════════════════════════════════════ -->
+    <!-- EXTEND CRM LEAD FORM VIEW (via xpath inheritance)       -->
+    <!-- ════════════════════════════════════════════════════════ -->
+    <record id="lead_intelligence_crm_lead_form_inherit" model="ir.ui.view">
+        <field name="name">crm.lead.form.inherit.intelligence</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_lead_view_form"/>
+        <field name="arch" type="xml">
+
+            <!-- Buttons in header: Re-Enrich + Recompute Score + Merge -->
+            <xpath expr="//form//header" position="inside">
+                <button name="action_enrich_lead"
+                        string="🔄 Re-Enrich"
+                        type="object"
+                        class="btn-secondary"
+                        invisible="not x_gstin"/>
+                <button name="action_recompute_score"
+                        string="📊 Recompute Score"
+                        type="object"
+                        class="btn-secondary"/>
+                <button name="action_open_merge_wizard"
+                        string="🔀 Merge Leads"
+                        type="object"
+                        class="btn-warning"
+                        invisible="not x_duplicate_of"/>
+            </xpath>
+
+            <!-- Duplicate Alert Banner (shown when x_duplicate_of is set) -->
+            <xpath expr="//form//sheet" position="before">
+                <div class="alert alert-danger mb-0" role="alert"
+                     invisible="not x_duplicate_of">
+                    <strong>⚠️ Possible duplicate of:</strong>
+                    <field name="x_duplicate_of" readonly="1" class="d-inline"/>
+                </div>
+            </xpath>
+
+            <!-- Lead Score Badge (top of sheet, after title) -->
+            <xpath expr="//div[hasclass('oe_title')]" position="after">
+                <group>
+                    <group>
+                        <field name="x_lead_score" widget="progressbar"
+                               options="{'max_value': 100}"/>
+                        <field name="x_lead_grade" widget="badge"
+                               decoration-success="x_lead_grade == 'a'"
+                               decoration-info="x_lead_grade == 'b'"
+                               decoration-warning="x_lead_grade == 'c'"
+                               decoration-danger="x_lead_grade == 'd'"/>
+                    </group>
+                </group>
+            </xpath>
+
+            <!-- New Notebook Tab: Lead Intelligence -->
+            <xpath expr="//notebook" position="inside">
+                <page string="Lead Intelligence" name="lead_intelligence_tab">
+                    <group>
+                        <group string="GST Enrichment">
+                            <field name="x_gstin"/>
+                            <field name="x_company_legal_name"/>
+                            <field name="x_gst_status" widget="badge"
+                                   decoration-success="x_gst_status == 'active'"
+                                   decoration-danger="x_gst_status == 'cancelled'"
+                                   decoration-warning="x_gst_status == 'suspended'"/>
+                            <field name="x_business_type"/>
+                            <field name="x_enriched"/>
+                            <field name="x_enrichment_date"/>
+                        </group>
+                        <group string="GST Registered Address">
+                            <field name="x_gst_address" nolabel="1" colspan="2"/>
+                        </group>
+                    </group>
+                    <group string="Score Breakdown">
+                        <field name="x_score_breakdown" nolabel="1" colspan="2"
+                               widget="text" readonly="1"/>
+                    </group>
+                    <group string="Duplicate Intelligence">
+                        <group>
+                            <field name="x_duplicate_of"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>

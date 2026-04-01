@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Form View Inheritance -->
+    <record id="crm_lead_view_form_inherit_aajjo" model="ir.ui.view">
+        <field name="name">crm.lead.view.form.inherit.aajjo</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_lead_view_form"/>
+        <field name="arch" type="xml">
+            <!-- Rename Phone to Mobile (Label change via attributes) -->
+            <!-- Rename Phone to Mobile and Make Mandatory -->
+            <xpath expr="//field[@name='phone']" position="attributes">
+                <attribute name="string">Mobile</attribute>
+                <attribute name="required">1</attribute>
+            </xpath>
+            <!-- Make Email Mandatory -->
+            <xpath expr="//field[@name='email_from']" position="attributes">
+                <attribute name="required">1</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='user_id']" position="after">
+                <!-- handled globally by crm_indiamart_integration -->
+            </xpath>
+
+            <!-- Loss Reason and Remarks (Visible only in Lost stage logic implicitly, or add invisible logic) -->
+            <xpath expr="//field[@name='description']" position="before">
+                <group invisible="not active"> 
+                     <field name="loss_reason_id" invisible="active"/>
+                     <field name="loss_remarks" invisible="active"/>
+                </group>
+            </xpath>
+
+            <!-- Add Button for Quotation Creation if not present -->
+<!-- Quotation button removed as logic is unimplemented -->
+        </field>
+    </record>
+
+    <!-- Tree View Inheritance -->
+    <record id="crm_lead_view_tree_inherit_aajjo" model="ir.ui.view">
+        <field name="name">crm.lead.view.tree.inherit.aajjo</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_case_tree_view_oppor"/>
+        <field name="arch" type="xml">
+
+            <field name="user_id" position="after">
+                <field name="second_salesperson_id" optional="hide"/>
+                <field name="business_city_id" optional="show"/>
+                <field name="business_area_id" optional="hide"/>
+                <field name="business_pincode" optional="hide"/>
+            </field>
+        </field>
+    </record>
+
+    <!-- Search View Inheritance -->
+    <record id="crm_lead_view_search_inherit_aajjo" model="ir.ui.view">
+        <field name="name">crm.lead.view.search.inherit.aajjo</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.view_crm_case_leads_filter"/>
+        <field name="arch" type="xml">
+            <filter name="salesperson" position="after">
+                <filter string="Is AAJJO Lead" name="aajjo_lead" domain="[('is_aajjo', '=', True)]"/>
+            </filter>
+        </field>
+    </record>
+
+
+    <record id="action_crm_lead_fetch_aajjo" model="ir.actions.server">
+        <field name="name">Fetch AAJJO Leads</field>
+        <field name="model_id" ref="crm.model_crm_lead"/>
+        <field name="binding_model_id" ref="crm.model_crm_lead"/>
+        <field name="binding_view_types">list,form</field>
+        <field name="state">code</field>
+        <field name="code">action = model.action_fetch_aajjo_leads()</field>
+    </record>
+
+    <menuitem id="menu_crm_lead_fetch_aajjo"
+              name="Fetch AAJJO Leads"
+              parent="crm.crm_menu_root"
+              action="action_crm_lead_fetch_aajjo"
+              sequence="20"/>
+</odoo>

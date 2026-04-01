@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ========== Sale Order Form: Add Installation Fields ========== -->
+    <record id="view_sale_order_form_inherit_installation" model="ir.ui.view">
+        <field name="name">sale.order.form.inherit.installation</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+
+            <!-- Add Installation Details tab -->
+            <xpath expr="//page[@name='other_information']" position="after">
+                <page string="Installation Details" name="installation_details">
+                    <group>
+                        <group string="Installation Info">
+                            <field name="x_scheduled_installation_date"/>
+                            <field name="x_site_contact_person"/>
+                            <field name="x_site_contact_number"/>
+                        </group>
+                        <group string="Transport Details">
+                            <field name="x_models_to_transport"/>
+                            <field name="x_transportation_terms"/>
+                            <field name="x_amount_in_words"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Site Specifications">
+                            <field name="x_ext_rod_length"/>
+                            <field name="x_field_height"/>
+                            <field name="x_required_electrical_wire"/>
+                            <field name="x_mounting_structure"/>
+                            <field name="x_crane_rafter_distance"/>
+                        </group>
+                        <group string="Box Totals">
+                            <field name="x_total_box_qty"/>
+                            <field name="x_total_weight"/>
+                            <field name="x_product_total_qty"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="x_other_important_info" nolabel="1"
+                               placeholder="Other important information..."/>
+                    </group>
+                </page>
+            </xpath>
+
+            <!-- Add Box Dimension, Box Qty, Weight/Unit columns to order lines -->
+            <xpath expr="//field[@name='order_line']/list//field[@name='product_uom_qty']" position="after">
+                <field name="x_box_dimension" string="Box Dimension" optional="show"/>
+                <field name="x_box_qty" string="Box Qty" optional="show"/>
+                <field name="x_weight_per_unit" string="Weight/Unit (kg)" optional="show"/>
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>

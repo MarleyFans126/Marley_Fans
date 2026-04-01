@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- City Tier: Tree View -->
+    <record id="lead_intelligence_city_tier_tree" model="ir.ui.view">
+        <field name="name">x.city.tier.list</field>
+        <field name="model">x.city.tier</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="name"/>
+                <field name="state"/>
+                <field name="tier"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- City Tier: Form View -->
+    <record id="lead_intelligence_city_tier_form" model="ir.ui.view">
+        <field name="name">x.city.tier.form</field>
+        <field name="model">x.city.tier</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="state"/>
+                        </group>
+                        <group>
+                            <field name="tier"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- City Tier: Action -->
+    <record id="lead_intelligence_action_city_tier" model="ir.actions.act_window">
+        <field name="name">City Tiers</field>
+        <field name="res_model">x.city.tier</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Define city tiers for geographic lead scoring.
+            </p>
+        </field>
+    </record>
+
+    <!-- Menu: CRM > Configuration > City Tiers -->
+    <menuitem id="lead_intelligence_menu_city_tier"
+              name="City Tiers"
+              parent="crm.crm_menu_config"
+              action="lead_intelligence_action_city_tier"
+              sequence="90"/>
+
+</odoo>

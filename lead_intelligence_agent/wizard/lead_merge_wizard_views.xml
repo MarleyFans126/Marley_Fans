@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Lead Merge Wizard: Form View -->
+    <record id="lead_intelligence_merge_wizard_form" model="ir.ui.view">
+        <field name="name">x.lead.merge.wizard.form</field>
+        <field name="model">x.lead.merge.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Merge Leads">
+                <group>
+                    <group string="Original Lead">
+                        <field name="x_lead_original_id"/>
+                        <field name="x_orig_contact"/>
+                        <field name="x_orig_email"/>
+                        <field name="x_orig_mobile"/>
+                        <field name="x_orig_revenue"/>
+                        <field name="x_orig_source"/>
+                        <field name="x_orig_description"/>
+                    </group>
+                    <group string="Duplicate Lead">
+                        <field name="x_lead_duplicate_id"/>
+                        <field name="x_dup_contact"/>
+                        <field name="x_dup_email"/>
+                        <field name="x_dup_mobile"/>
+                        <field name="x_dup_revenue"/>
+                        <field name="x_dup_source"/>
+                        <field name="x_dup_description"/>
+                    </group>
+                </group>
+                <separator string="Choose which lead to keep"/>
+                <group>
+                    <field name="x_keep_lead" widget="radio"/>
+                </group>
+                <div class="alert alert-warning" role="alert">
+                    <strong>⚠️ What happens on merge:</strong><br/>
+                    • All messages and activities are moved to the kept lead<br/>
+                    • Missing data on kept lead is filled from the other lead<br/>
+                    • The other lead is <b>archived</b> (never deleted)<br/>
+                    • Higher expected revenue is preserved
+                </div>
+                <footer>
+                    <button name="action_merge_leads" string="Merge Leads"
+                            type="object" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+</odoo>

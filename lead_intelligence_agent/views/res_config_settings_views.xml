@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Extend Settings: Add Lead Intelligence section -->
+    <record id="lead_intelligence_res_config_settings_form" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.lead.intelligence</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+
+                <app data-string="Lead Intelligence" string="Lead Intelligence"
+                     name="lead_intelligence_agent"
+                     groups="base.group_system">
+
+                    <block title="GST Enrichment API"
+                           name="lead_intelligence_enrichment_block">
+
+                        <setting id="lead_intelligence_auto_enrichment"
+                                 string="Auto-Enrich Leads from GSTIN"
+                                 help="Automatically look up company details from GSTIN when a lead is created with a GSTIN number.">
+                            <field name="x_enable_auto_enrichment" widget="boolean_toggle"/>
+                        </setting>
+
+                        <setting id="lead_intelligence_gst_api_url"
+                                 string="GST API URL"
+                                 help="Base URL for the GST lookup API endpoint.">
+                            <field name="x_gst_api_url" placeholder="https://sheet.gstzen.in/api/v1/gstin"/>
+                        </setting>
+
+                        <setting id="lead_intelligence_gst_api_key"
+                                 string="GST API Key"
+                                 help="API key for GST lookup (leave blank if not required).">
+                            <field name="x_gst_api_key" password="True"/>
+                        </setting>
+
+                    </block>
+                </app>
+
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

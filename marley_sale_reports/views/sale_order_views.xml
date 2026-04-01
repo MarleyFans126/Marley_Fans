@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Add Marley custom fields to Sale Order form -->
+    <record id="sale_order_view_form_inherit_marley" model="ir.ui.view">
+        <field name="name">sale.order.view.form.inherit.marley</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+
+            <!-- WhatsApp button in header -->
+            <xpath expr="//form//header" position="inside">
+                <button name="action_open_whatsapp_send_wizard"
+                        string="WhatsApp"
+                        type="object"
+                        class="btn-success"
+                        icon="fa-whatsapp"
+                        invisible="not partner_id"/>
+            </xpath>
+
+            <!-- Add commercial terms tab -->
+            <xpath expr="//notebook" position="inside">
+                <page string="Quotation Print" name="marley_quotation_details">
+                    <group>
+                        <group string="Cover Letter Details">
+                            <field name="kind_attn" placeholder="e.g. Mr. Jacob"/>
+                            <field name="subject_line" placeholder="e.g. Supply of Pole mounted – 24FT Geared HVLS FAN"/>
+                        </group>
+                        <group string="Installation Charges">
+                            <field name="x_installation_cost"/>
+                            <field name="x_installation_qty"/>
+                            <field name="x_installation_total"/>
+                        </group>
+                    </group>
+                    <group string="Cover Letter Body">
+                        <field name="cover_letter" nolabel="1" colspan="2" placeholder="Custom cover letter text (leave blank for default)"/>
+                    </group>
+                </page>
+                <page string="Commercial Terms" name="marley_commercial_terms">
+                    <group>
+                        <group string="Terms &amp; Conditions">
+                            <field name="warranty_terms"/>
+                            <field name="delivery_terms"/>
+                            <field name="offer_validity_days"/>
+                        </group>
+                        <group string="Bank Details">
+                            <field name="bank_name"/>
+                            <field name="bank_account_number"/>
+                            <field name="bank_account_type"/>
+                            <field name="bank_ifsc"/>
+                            <field name="bank_branch"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Payment Terms">
+                            <field name="payment_terms_text" nolabel="1" colspan="2"/>
+                        </group>
+                        <group string="Customer Scope">
+                            <field name="customer_scope" nolabel="1" colspan="2" placeholder="Facilities/responsibilities to be provided by the customer"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+
+        </field>
+    </record>
+
+    <!-- Add list_price and special_discount_price to SO line standalone list -->
+    <record id="sale_order_line_tree_inherit_marley" model="ir.ui.view">
+        <field name="name">sale.order.line.tree.inherit.marley</field>
+        <field name="model">sale.order.line</field>
+        <field name="inherit_id" ref="sale.view_order_line_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='price_subtotal']" position="before">
+                <field name="list_price" optional="show"/>
+                <field name="special_discount_price" optional="show"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Add list_price and special_discount_price inside SO form's order line list -->
+    <record id="sale_order_form_inline_line_inherit_marley" model="ir.ui.view">
+        <field name="name">sale.order.form.inline.line.inherit.marley</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='order_line']//list//field[@name='price_unit']" position="before">
+                <field name="list_price" string="List Price" optional="show"/>
+                <field name="special_discount_price" string="Special Discount Price" optional="show"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

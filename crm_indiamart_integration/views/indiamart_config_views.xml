@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_indiamart_log_tree" model="ir.ui.view">
+        <field name="name">indiamart.log.tree</field>
+        <field name="model">indiamart.log</field>
+        <field name="arch" type="xml">
+            <list string="IndiaMART Logs" decoration-danger="status_code!=200" decoration-success="status_code==200">
+                <field name="create_date"/>
+                <field name="sync_mode" optional="show"/>
+                <field name="name" string="Endpoint"/>
+                <field name="status_code"/>
+                <field name="api_start_time" optional="show"/>
+                <field name="api_end_time" optional="show"/>
+                <field name="leads_fetched"/>
+                <field name="leads_created"/>
+                <field name="leads_skipped_dup" optional="hide"/>
+                <field name="leads_skipped_invalid" optional="hide"/>
+                <field name="error_message" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_indiamart_log_form" model="ir.ui.view">
+        <field name="name">indiamart.log.form</field>
+        <field name="model">indiamart.log</field>
+        <field name="arch" type="xml">
+            <form string="IndiaMART Log">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name" string="Endpoint"/>
+                            <field name="sync_mode"/>
+                            <field name="request_type"/>
+                            <field name="status_code"/>
+                            <field name="create_date" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="leads_fetched"/>
+                            <field name="leads_created"/>
+                            <field name="leads_skipped_dup"/>
+                            <field name="leads_skipped_invalid"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Time Window">
+                            <group>
+                                <field name="api_start_time"/>
+                                <field name="api_end_time"/>
+                            </group>
+                        </page>
+                        <page string="Response Payload">
+                            <field name="response_payload"/>
+                        </page>
+                        <page string="Request Payload">
+                             <field name="request_payload"/>
+                        </page>
+                        <page string="Error Message" invisible="not error_message">
+                            <field name="error_message"/>
+                        </page>
+                        <page string="Technicals">
+                            <group>
+                                <field name="request_url"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_indiamart_log" model="ir.actions.act_window">
+        <field name="name">IndiaMART Logs</field>
+        <field name="res_model">indiamart.log</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem id="menu_indiamart_logs"
+              name="IndiaMART Logs"
+              parent="crm.crm_menu_config"
+              action="action_indiamart_log"
+              sequence="100"/>
+</odoo>

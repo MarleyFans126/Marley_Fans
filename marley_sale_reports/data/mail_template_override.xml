@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+
+        <!--
+            Override the default Sale Quotation email template to attach
+            Marley's custom quotation PDF instead of Odoo's default report.
+        -->
+        <record id="sale.email_template_edi_sale" model="mail.template">
+            <field name="name">Sales: Send Quotation</field>
+            <field name="model_id" ref="sale.model_sale_order"/>
+            <field name="subject">Marley Fans - Quotation {{ object.name or 'n/a' }}</field>
+            <field name="email_from">{{ (object.user_id.email_formatted or object.company_id.email_formatted or user.email_formatted) }}</field>
+            <field name="partner_to" eval="False"/>
+            <field name="use_default_to" eval="True"/>
+            <field name="description">Sends Marley Fans quotation PDF to customer</field>
+            <field name="body_html" type="html">
+<div style="margin: 0px; padding: 0px; font-family: 'Poppins', Arial, sans-serif;">
+    <p style="margin: 0px; padding: 0px; font-size: 14px; color: #333;">
+        Dear
+        <t t-if="object.partner_id.name">
+            <span t-out="object.partner_id.name or ''">Customer</span>,
+        </t>
+        <t t-else="">Customer,</t>
+        <br/><br/>
+        Thank you for your interest in <strong>Marley HVLS Fans</strong>.
+        <br/><br/>
+        Please find attached the quotation
+        <strong><span t-out="object.name or ''">S00001</span></strong>
+        <t t-if="object.origin">
+            (Ref: <t t-out="object.origin or ''"/>)
+        </t>
+        amounting to
+        <strong><span t-out="format_amount(object.amount_total, object.currency_id) or ''">₹ 0.00</span></strong>.
+        <br/><br/>
+        The quotation includes:
+    </p>
+    <ul style="font-size: 13px; color: #555; margin: 8px 0;">
+        <t t-foreach="object.order_line.filtered(lambda l: not l.display_type)" t-as="line">
+            <li>
+                <span t-out="line.product_id.name or ''">Product</span>
+                — Qty: <span t-out="line.product_uom_qty or ''">1</span>
+            </li>
+        </t>
+    </ul>
+    <p style="font-size: 14px; color: #333;">
+        Please review the attached quotation document for complete details including
+        technical specifications, pricing, and terms.
+        <br/><br/>
+        Should you have any questions or require modifications, please do not hesitate
+        to reach out to us.
+        <br/><br/>
+        <strong>Best Regards,</strong>
+        <br/>
+        <t t-if="object.user_id.name">
+            <span t-out="object.user_id.name or ''">Sales Team</span><br/>
+        </t>
+        <t t-if="object.user_id.phone">
+            Phone: <span t-out="object.user_id.phone or ''"/><br/>
+        </t>
+        <t t-if="object.user_id.email">
+            Email: <span t-out="object.user_id.email or ''"/><br/>
+        </t>
+        <br/>
+        <strong>Marley Enterprises Private Limited</strong><br/>
+        <span style="color: #888; font-size: 12px;">Manufacturers of HVLS Fans</span>
+    </p>
+    <t t-if="not is_html_empty(object.user_id.signature)">
+        <div style="margin-top: 10px;">--<br/><t t-out="object.user_id.signature or ''"/></div>
+    </t>
+</div>
+            </field>
+            <!-- Attach Marley Quotation PDF instead of default -->
+            <field name="report_template_ids" eval="[(6, 0, [ref('marley_sale_reports.action_report_marley_quotation')])]"/>
+            <field name="auto_delete" eval="True"/>
+        </record>
+
+    </data>
+</odoo>

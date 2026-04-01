@@ -1,0 +1,292 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ==================== MAIN TEMPLATE ==================== -->
+    <template id="report_installation_document">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="custom_installation_report.report_installation_content"/>
+            </t>
+        </t>
+    </template>
+
+    <!-- ==================== REPORT CONTENT ==================== -->
+    <template id="report_installation_content">
+        <div class="page" style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1a1a2e; font-size: 12px;">
+
+            <!-- ============ DOT PATTERN HEADER ============ -->
+            <div style="position: relative; padding-bottom: 15px; margin-bottom: 10px;">
+                <!-- Dot pattern rows -->
+                <div style="text-align: center; color: #1b2a4a; font-size: 18px; letter-spacing: 28px; line-height: 1.8;">
+                    <div>&#8226; &#8226; &#8226; &#8226; &#8226; &#8226; &#8226; &#8226; &#8226; &#8226; &#8226; &#8226;</div>
+                    <div>&#8226; &#8226; &#8226; &#8226; &#8226; &#8226; &#8226; &#8226; &#8226; &#8226; &#8226; &#8226;</div>
+                    <div>&#8226; &#8226; &#8226; &#8226; &#8226; &#8226; &#8226; &#8226; &#8226; &#8226; &#8226; &#8226;</div>
+                </div>
+                <!-- Company Name overlay -->
+                <div style="position: absolute; top: 8px; left: 20px;">
+                    <div style="display: flex; align-items: center;">
+                        <t t-if="o.company_id.logo">
+                            <img t-att-src="image_data_uri(o.company_id.logo)"
+                                 style="max-height: 60px; margin-right: 10px;" alt="Logo"/>
+                        </t>
+                        <div>
+                            <span style="font-size: 26px; font-weight: bold; color: #1b2a4a;">
+                                <t t-esc="o.company_id.name"/>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ============ TITLE ============ -->
+            <h2 style="text-align: center; color: #1b2a4a; font-size: 20px; font-weight: bold; margin: 25px 0 20px 0;">
+                Installation for: <t t-esc="o.partner_id.name"/>
+            </h2>
+
+            <!-- ============ DETAILS TABLE ============ -->
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+                <tr>
+                    <td style="border: 1px solid #ccc; padding: 10px 15px; width: 35%; font-weight: bold; vertical-align: top;">
+                        Sales Representative
+                    </td>
+                    <td style="border: 1px solid #ccc; padding: 10px 15px; vertical-align: top;">
+                        <t t-esc="o.user_id.name or ''"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="border: 1px solid #ccc; padding: 10px 15px; font-weight: bold; vertical-align: top;">
+                        Scheduled Installation Date
+                    </td>
+                    <td style="border: 1px solid #ccc; padding: 10px 15px; vertical-align: top;">
+                        <t t-if="o.x_scheduled_installation_date">
+                            <t t-esc="o.x_scheduled_installation_date" t-options='{"widget": "date", "format": "MMM dd, yyyy"}'/>
+                        </t>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="border: 1px solid #ccc; padding: 10px 15px; font-weight: bold; vertical-align: top;">
+                        Company Details
+                    </td>
+                    <td style="border: 1px solid #ccc; padding: 10px 15px; vertical-align: top;">
+                        <t t-esc="o.partner_id.name"/><br/>
+                        <t t-if="o.partner_id.street"><t t-esc="o.partner_id.street"/>,<br/></t>
+                        <t t-if="o.partner_id.street2"><t t-esc="o.partner_id.street2"/>,<br/></t>
+                        <t t-if="o.partner_id.city"><t t-esc="o.partner_id.city"/></t>
+                        <t t-if="o.partner_id.state_id"> <t t-esc="o.partner_id.state_id.name"/></t>
+                        <t t-if="o.partner_id.country_id"> (<t t-esc="o.partner_id.country_id.code"/>)</t>
+                        <t t-if="o.partner_id.zip"> <t t-esc="o.partner_id.zip"/>.</t>
+                        <br/>
+                        <t t-if="o.partner_id.vat">
+                            GSTIN <t t-esc="o.partner_id.vat"/>
+                        </t>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="border: 1px solid #ccc; padding: 10px 15px; font-weight: bold; vertical-align: top;">
+                        Site Contact Person<br/>
+                        Contact number
+                    </td>
+                    <td style="border: 1px solid #ccc; padding: 10px 15px; vertical-align: top;">
+                        <t t-esc="o.x_site_contact_person or ''"/><br/>
+                        <t t-esc="o.x_site_contact_number or ''"/>
+                    </td>
+                </tr>
+            </table>
+
+            <!-- ============ PRODUCT MODEL / BOX &amp; QUANTITY / WEIGHT / TERMS ============ -->
+            <h4 style="text-align: center; color: #1b2a4a; font-weight: bold; margin: 20px 0 10px 0;">
+                Product Model/ Box &amp; quantity | weight | Terms
+            </h4>
+
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+                <tr>
+                    <td style="border: 1px solid #ccc; padding: 10px 15px; width: 35%; font-weight: bold;">
+                        Models to transport
+                    </td>
+                    <td style="border: 1px solid #ccc; padding: 10px 15px;">
+                        | <t t-esc="o.x_models_to_transport or ''"/> |
+                    </td>
+                </tr>
+                <tr>
+                    <td style="border: 1px solid #ccc; padding: 10px 15px; font-weight: bold;">
+                        Transportation terms:
+                    </td>
+                    <td style="border: 1px solid #ccc; padding: 10px 15px;">
+                        <t t-if="o.x_transportation_terms == 'paid'">Paid</t>
+                        <t t-if="o.x_transportation_terms == 'to_pay'">To Pay</t>
+                        <t t-if="o.x_transportation_terms == 'foc'">FOC</t>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="border: 1px solid #ccc; padding: 10px 15px; font-weight: bold;">
+                        Invoice Value:
+                    </td>
+                    <td style="border: 1px solid #ccc; padding: 10px 15px;">
+                        <t t-esc="'{:,.1f}'.format(o.amount_untaxed)"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="border: 1px solid #ccc; padding: 10px 15px; font-weight: bold;">
+                        Amount In Words:
+                    </td>
+                    <td style="border: 1px solid #ccc; padding: 10px 15px;">
+                        <t t-esc="o.x_amount_in_words or ''"/>
+                    </td>
+                </tr>
+            </table>
+
+            <!-- ============ PRODUCT LINES TABLE ============ -->
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 5px;">
+                <thead>
+                    <tr style="background-color: #f0f0f5;">
+                        <th style="border: 1px solid #ccc; padding: 8px 10px; text-align: center; font-weight: bold; width: 6%;">
+                            Sr. No.
+                        </th>
+                        <th style="border: 1px solid #ccc; padding: 8px 10px; text-align: left; font-weight: bold; width: 25%;">
+                            Product
+                        </th>
+                        <th style="border: 1px solid #ccc; padding: 8px 10px; text-align: left; font-weight: bold; width: 39%;">
+                            Box Dimension
+                        </th>
+                        <th style="border: 1px solid #ccc; padding: 8px 10px; text-align: center; font-weight: bold; width: 12%;">
+                            Box Qty
+                        </th>
+                        <th style="border: 1px solid #ccc; padding: 8px 10px; text-align: right; font-weight: bold; width: 18%;">
+                            Weight/unit
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <t t-set="line_index" t-value="0"/>
+                    <t t-foreach="o.order_line.filtered(lambda l: not l.display_type)" t-as="line">
+                        <t t-set="line_index" t-value="line_index + 1"/>
+                        <tr>
+                            <td style="border: 1px solid #ccc; padding: 8px 10px; text-align: center; vertical-align: top;">
+                                <t t-esc="line_index"/>
+                            </td>
+                            <td style="border: 1px solid #ccc; padding: 8px 10px; vertical-align: top;">
+                                <t t-esc="line.product_id.name or line.name"/>
+                            </td>
+                            <td style="border: 1px solid #ccc; padding: 8px 10px; vertical-align: top;">
+                                <t t-esc="line.x_box_dimension or ''"/>
+                            </td>
+                            <td style="border: 1px solid #ccc; padding: 8px 10px; text-align: center; vertical-align: top;">
+                                <t t-esc="'%.1f' % line.x_box_qty"/>
+                            </td>
+                            <td style="border: 1px solid #ccc; padding: 8px 10px; text-align: right; vertical-align: top;">
+                                <t t-esc="'%.1f' % line.x_weight_per_unit"/> kg.
+                            </td>
+                        </tr>
+                    </t>
+                </tbody>
+            </table>
+
+            <!-- ============ TOTALS ROW ============ -->
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 25px;">
+                <tr style="background-color: #f0f0f5; font-weight: bold;">
+                    <td style="border: 1px solid #ccc; padding: 8px 12px; width: 33%;">
+                        <strong>Total Box Qty:</strong>&#160;&#160;
+                        <t t-esc="'%.1f' % o.x_total_box_qty"/>
+                    </td>
+                    <td style="border: 1px solid #ccc; padding: 8px 12px; width: 34%; text-align: center;">
+                        <strong>Total Weight:</strong>&#160;&#160;
+                        <t t-esc="'%.1f' % o.x_total_weight"/> kg
+                    </td>
+                    <td style="border: 1px solid #ccc; padding: 8px 12px; width: 33%; text-align: right;">
+                        <strong>Product total Qty:</strong>&#160;&#160;
+                        <t t-esc="int(o.x_product_total_qty)"/>
+                    </td>
+                </tr>
+            </table>
+
+            <!-- ============ SITE SPECIFICATION ============ -->
+            <h4 style="text-align: center; color: #1b2a4a; font-weight: bold; margin: 20px 0 10px 0;">
+                Site Specification
+            </h4>
+
+            <table style="width: 70%; margin: 0 auto; border-collapse: collapse; margin-bottom: 20px;">
+                <tr>
+                    <td style="border: 1px solid #ccc; padding: 10px 15px; width: 50%; font-weight: bold;">
+                        Ext rod length
+                    </td>
+                    <td style="border: 1px solid #ccc; padding: 10px 15px;">
+                        <t t-esc="o.x_ext_rod_length or ''"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="border: 1px solid #ccc; padding: 10px 15px; font-weight: bold;">
+                        Field height
+                    </td>
+                    <td style="border: 1px solid #ccc; padding: 10px 15px;">
+                        <t t-esc="o.x_field_height or ''"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="border: 1px solid #ccc; padding: 10px 15px; font-weight: bold;">
+                        Required Electrical wire
+                    </td>
+                    <td style="border: 1px solid #ccc; padding: 10px 15px;">
+                        <t t-esc="o.x_required_electrical_wire or ''"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="border: 1px solid #ccc; padding: 10px 15px; font-weight: bold;">
+                        Mounting structure
+                    </td>
+                    <td style="border: 1px solid #ccc; padding: 10px 15px;">
+                        <t t-esc="o.x_mounting_structure or ''"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="border: 1px solid #ccc; padding: 10px 15px; font-weight: bold;">
+                        Distance between crane top and Rafter bottom
+                    </td>
+                    <td style="border: 1px solid #ccc; padding: 10px 15px;">
+                        <t t-esc="o.x_crane_rafter_distance or ''"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="border: 1px solid #ccc; padding: 10px 15px; font-weight: bold; vertical-align: top;">
+                        Other important Information
+                    </td>
+                    <td style="border: 1px solid #ccc; padding: 10px 15px; white-space: pre-wrap;">
+                        <t t-esc="o.x_other_important_info or ''"/>
+                    </td>
+                </tr>
+            </table>
+
+            <!-- ============ FOOTER ============ -->
+            <div style="border-top: 3px solid #1b2a4a; margin-top: 30px; padding-top: 10px;">
+                <table style="width: 100%; font-size: 10px;">
+                    <tr>
+                        <td style="width: 25%; vertical-align: top;">
+                            <strong style="color: #1b2a4a;">Analogue:</strong><br/>
+                            <t t-esc="o.company_id.phone or ''"/>
+                        </td>
+                        <td style="width: 25%; vertical-align: top;">
+                            <strong style="color: #1b2a4a;">Web:</strong><br/>
+                            <t t-esc="o.company_id.email or ''"/><br/>
+                            <t t-esc="o.company_id.website or ''"/>
+                        </td>
+                        <td style="width: 25%; vertical-align: top;">
+                            <strong style="color: #1b2a4a;">Address:</strong><br/>
+                            <t t-if="o.company_id.street"><t t-esc="o.company_id.street"/><br/></t>
+                            <t t-if="o.company_id.street2"><t t-esc="o.company_id.street2"/><br/></t>
+                            <t t-if="o.company_id.city"><t t-esc="o.company_id.city"/></t>
+                            <t t-if="o.company_id.state_id"><t t-esc="o.company_id.state_id.name"/></t>
+                            <t t-if="o.company_id.country_id"> (<t t-esc="o.company_id.country_id.code"/>)</t>
+                            <br/>
+                            <t t-esc="o.company_id.zip or ''"/>
+                        </td>
+                        <td style="width: 25%; vertical-align: top;">
+                            <strong style="color: #1b2a4a;">Business:</strong><br/>
+                            <t t-esc="o.company_id.vat or ''"/>&#160;&#160;GSTIN
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+        </div>
+    </template>
+
+</odoo>

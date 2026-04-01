@@ -1,0 +1,5 @@
+"id","name","model_id:id","group_id:id","perm_read","perm_write","perm_create","perm_unlink"
+"access_indiamart_config_user","indiamart.config user","model_indiamart_config","base.group_user",1,0,0,0
+"access_indiamart_config_manager","indiamart.config manager","model_indiamart_config","base.group_system",1,1,1,1
+"access_indiamart_log_user","indiamart.log user","model_indiamart_log","base.group_user",1,0,0,0
+"access_indiamart_log_manager","indiamart.log manager","model_indiamart_log","base.group_system",1,1,1,1

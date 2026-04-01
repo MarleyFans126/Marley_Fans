@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ============================================================ -->
+    <!-- BUSINESS CITY — Views -->
+    <!-- ============================================================ -->
+    <record id="business_city_view_list" model="ir.ui.view">
+        <field name="name">business.city.list</field>
+        <field name="model">business.city</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="name"/>
+                <field name="state_id"/>
+                <field name="active" column_invisible="True"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="business_city_view_form" model="ir.ui.view">
+        <field name="name">business.city.form</field>
+        <field name="model">business.city</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="state_id"/>
+                        </group>
+                        <group>
+                            <field name="active"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="business_city_view_search" model="ir.ui.view">
+        <field name="name">business.city.search</field>
+        <field name="model">business.city</field>
+        <field name="arch" type="xml">
+            <search string="Search Cities">
+                <filter name="group_state" string="State" context="{'group_by': 'state_id'}"/>
+                <separator/>
+                <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_business_city" model="ir.actions.act_window">
+        <field name="name">Cities</field>
+        <field name="res_model">business.city</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Add a new city
+            </p>
+            <p>Manage Indian cities used for CRM lead locations.</p>
+        </field>
+    </record>
+
+    <!-- ============================================================ -->
+    <!-- BUSINESS AREA — Views -->
+    <!-- ============================================================ -->
+    <record id="business_area_view_list" model="ir.ui.view">
+        <field name="name">business.area.list</field>
+        <field name="model">business.area</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="name"/>
+                <field name="city_id"/>
+                <field name="state_id"/>
+                <field name="active" column_invisible="True"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="business_area_view_form" model="ir.ui.view">
+        <field name="name">business.area.form</field>
+        <field name="model">business.area</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="city_id"/>
+                        </group>
+                        <group>
+                            <field name="state_id"/>
+                            <field name="active"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="business_area_view_search" model="ir.ui.view">
+        <field name="name">business.area.search</field>
+        <field name="model">business.area</field>
+        <field name="arch" type="xml">
+            <search string="Search Areas">
+                <filter name="group_city" string="City" context="{'group_by': 'city_id'}"/>
+                <filter name="group_state" string="State" context="{'group_by': 'state_id'}"/>
+                <separator/>
+                <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_business_area" model="ir.actions.act_window">
+        <field name="name">Areas / Localities</field>
+        <field name="res_model">business.area</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Add a new area / locality
+            </p>
+            <p>Manage areas within cities for CRM lead locations.</p>
+        </field>
+    </record>
+
+    <!-- ============================================================ -->
+    <!-- MENUS — CRM > Configuration > Business Locations -->
+    <!-- ============================================================ -->
+    <menuitem id="menu_business_location_parent"
+              name="Business Locations"
+              parent="crm.crm_menu_config"
+              sequence="85"/>
+
+    <menuitem id="menu_business_city"
+              name="Cities"
+              parent="menu_business_location_parent"
+              action="action_business_city"
+              sequence="10"/>
+
+    <menuitem id="menu_business_area"
+              name="Areas / Localities"
+              parent="menu_business_location_parent"
+              action="action_business_area"
+              sequence="20"/>
+
+</odoo>

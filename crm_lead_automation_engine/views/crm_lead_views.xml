@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- 
+      1. TREE VIEW for OPPORTUNITIES (default Pipeline view)
+    -->
+    <record id="crm_case_tree_view_oppor_inherit_automation" model="ir.ui.view">
+        <field name="name">crm.lead.tree.opportunity.inherit.automation</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_case_tree_view_oppor"/>
+        <field name="arch" type="xml">
+            <!-- Make duplicate rows stand out in red (Odoo 19 uses <list> not <tree>) -->
+            <xpath expr="//list" position="attributes">
+                <attribute name="decoration-danger">duplicate_flag</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='name']" position="before">
+                <!-- Hidden flags used for row decoration -->
+                <field name="duplicate_flag" column_invisible="1"/>
+                <!-- Star indicator: Always visible -->
+                <field name="duplicate_star" string=" " readonly="1"/>
+            </xpath>
+
+            <!-- Source column after Team -->
+            <xpath expr="//field[@name='team_id']" position="after">
+                <field name="lead_source_type" string="Source" readonly="1" optional="show"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!--
+      2. TREE VIEW for LEADS (standard "Leads" menu - separate from Opportunities)
+    -->
+    <record id="crm_case_tree_view_leads_inherit_automation" model="ir.ui.view">
+        <field name="name">crm.lead.tree.leads.inherit.automation</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_case_tree_view_leads"/>
+        <field name="arch" type="xml">
+            <!-- Odoo 19: list view root element is <list>, not <tree> -->
+            <xpath expr="//list" position="attributes">
+                <attribute name="decoration-danger">duplicate_flag</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='name']" position="before">
+                <field name="duplicate_flag" column_invisible="1"/>
+                <field name="duplicate_star" string=" " readonly="1"/>
+            </xpath>
+
+            <!-- Source column after Team -->
+            <xpath expr="//field[@name='team_id']" position="after">
+                <field name="lead_source_type" string="Source" readonly="1" optional="show"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!--
+      3. FORM VIEW Inheritance (Duplicate Warning Banner)
+    -->
+    <record id="crm_lead_view_form_inherit_automation" model="ir.ui.view">
+        <field name="name">crm.lead.form.inherit.automation</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_lead_view_form"/>
+        <field name="arch" type="xml">
+            <!-- Red warning banner above the sheet, visible only when flagged -->
+            <xpath expr="//sheet" position="before">
+                <div class="alert alert-danger mb-0 d-flex align-items-center gap-2"
+                     role="alert" invisible="not duplicate_flag">
+                    <strong style="font-size: 18px;">★ Duplicate Lead Detected</strong>
+                    <span>— This lead shares a mobile number or email with
+                        <field name="duplicate_count" readonly="1" class="oe_inline" nolabel="1"/>
+                        other lead(s)
+                    </span>
+                    <button name="action_manual_duplicate_check" type="object"
+                            string="Re-check" class="btn btn-sm btn-warning ms-auto"
+                            help="Re-run duplicate detection for this lead"/>
+                </div>
+            </xpath>
+            <!-- Keep duplicate_flag accessible in form context (for invisible attrs) -->
+            <xpath expr="//field[@name='user_id']" position="after">
+                <field name="duplicate_flag" invisible="1"/>
+            </xpath>
+
+            <!-- Business Location fields are added by crm_indiamart_integration in the right column -->
+        </field>
+    </record>
+    
+    <!-- 
+      4. SEARCH VIEW Filter 
+    -->
+    <record id="view_crm_case_leads_filter_inherit_automation" model="ir.ui.view">
+        <field name="name">crm.lead.search.inherit.automation</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.view_crm_case_leads_filter"/>
+        <field name="arch" type="xml">
+            <filter name="salesperson" position="after">
+                <separator/>
+                <filter string="Is Duplicate" name="duplicate" domain="[('duplicate_flag', '=', True)]"/>
+                <separator/>
+                <filter string="IndiaMART" name="source_indiamart" domain="[('lead_source_type', '=', 'indiamart')]"/>
+                <filter string="AAJJO" name="source_aajjo" domain="[('lead_source_type', '=', 'aajjo')]"/>
+                <filter string="Manual" name="source_manual" domain="[('lead_source_type', '=', 'manual')]"/>
+            </filter>
+        </field>
+    </record>
+</odoo>

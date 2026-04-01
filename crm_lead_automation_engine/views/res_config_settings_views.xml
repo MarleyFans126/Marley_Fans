@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record id="res_config_settings_view_form_crm_automation" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.crm.automation</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+
+                <app data-string="CRM Automation" string="CRM Automation"
+                     name="crm_lead_automation_engine"
+                     groups="base.group_system">
+
+                    <block title="Auto-Send Settings"
+                           name="crm_automation_auto_send_block">
+
+                        <setting id="crm_auto_email_setting"
+                                 string="Auto Email on Opportunity"
+                                 help="When enabled, an acknowledgment email is automatically sent to the customer when a lead is converted to an opportunity.">
+                            <field name="crm_auto_email_enabled" widget="boolean_toggle"/>
+                        </setting>
+
+                        <setting id="crm_auto_whatsapp_setting"
+                                 string="Auto WhatsApp on Opportunity"
+                                 help="When enabled, a WhatsApp template message (lead_auto_thankyou) is automatically sent to the customer when a lead is converted to an opportunity.">
+                            <field name="crm_auto_whatsapp_enabled" widget="boolean_toggle"/>
+                        </setting>
+
+                    </block>
+
+                    <block title="Qualify Stage Notifications (New → Qualify)"
+                           name="crm_automation_qualify_block">
+
+                        <setting id="crm_qualify_email_setting"
+                                 string="Auto Email on Qualify"
+                                 help="When a lead moves from New to Qualify stage, automatically send an email to the client with the assigned salesperson name, phone number, and email.">
+                            <field name="crm_qualify_email_enabled" widget="boolean_toggle"/>
+                        </setting>
+
+                        <setting id="crm_qualify_whatsapp_setting"
+                                 string="Auto WhatsApp on Qualify"
+                                 help="When a lead moves from New to Qualify stage, automatically send a WhatsApp message (lead_qualified_notification) to the client with salesperson details. Variables: Client Name, Salesperson Name, Phone, Email.">
+                            <field name="crm_qualify_whatsapp_enabled" widget="boolean_toggle"/>
+                        </setting>
+
+                    </block>
+                </app>
+
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

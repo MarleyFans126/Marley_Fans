@@ -1,0 +1,322 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<data>
+
+    <!--
+        Deactivate the old broken inherited view so it stops interfering.
+        This overwrites the DB-cached record that had inherit_id on report_invoice_document.
+    -->
+    <record id="report_invoice_document_marley" model="ir.ui.view">
+        <field name="name">marley.report_invoice_document_marley.deactivated</field>
+        <field name="model"/>
+        <field name="inherit_id" eval="False"/>
+        <field name="active" eval="False"/>
+        <field name="arch" type="xml"><div/></field>
+    </record>
+
+    <!--
+        Standalone Marley invoice document template.
+        Called from the report_invoice wrapper via _get_name_invoice_report().
+        Does NOT inherit account.report_invoice_document — avoids breaking child views.
+    -->
+    <template id="report_marley_invoice_document">
+        <t t-call="web.basic_layout">
+            <t t-set="o" t-value="o.with_context(lang=o.partner_id.lang)"/>
+
+            <!-- Resolve linked Sale Order for custom fields -->
+            <t t-set="linked_so" t-value="o.invoice_line_ids.sale_line_ids.order_id[:1]"/>
+
+            <style>
+                @page { margin-top: 0mm !important; }
+                .article { margin-top: 0 !important; padding-top: 0 !important; }
+                table td, table th { -webkit-print-color-adjust: exact; }
+                .marley-q-body { font-family: Arial, Helvetica, sans-serif; font-size: 14px; color: #000; line-height: 1.7; }
+                .marley-q-body table { page-break-inside: auto; }
+                .marley-q-body tr { page-break-inside: avoid; }
+                .marley-q-body .section-heading { font-size: 15px; font-weight: bold; text-decoration: underline; margin: 18px 0 8px 0; }
+                .marley-q-body .section-text { font-size: 13px; margin: 6px 0; line-height: 1.7; }
+            </style>
+
+            <!-- ============ RUNNING HEADER ============ -->
+            <div class="header" style="margin: 0; padding: 0;">
+                <div style="position: relative; height: 110px;">
+                    <div style="position: absolute; top: 6px; left: 0; width: 100%;">
+                        <table style="width: 100%; border-collapse: collapse;"><tr>
+                            <td style="width:8.33%; text-align:center; color:#1b2a4a; font-size:5px;">&#9679;</td>
+                            <td style="width:8.33%; text-align:center; color:#1b2a4a; font-size:5px;">&#9679;</td>
+                            <td style="width:8.33%;"></td>
+                            <td style="width:8.33%;"></td>
+                            <td style="width:8.33%; text-align:center; color:#1b2a4a; font-size:5px;">&#9679;</td>
+                            <td style="width:8.33%; text-align:center; color:#1b2a4a; font-size:5px;">&#9679;</td>
+                            <td style="width:8.33%; text-align:center; color:#1b2a4a; font-size:5px;">&#9679;</td>
+                            <td style="width:8.33%; text-align:center; color:#1b2a4a; font-size:5px;">&#9679;</td>
+                            <td style="width:8.33%; text-align:center; color:#1b2a4a; font-size:5px;">&#9679;</td>
+                            <td style="width:8.33%; text-align:center; color:#1b2a4a; font-size:5px;">&#9679;</td>
+                            <td style="width:8.33%; text-align:center; color:#1b2a4a; font-size:5px;">&#9679;</td>
+                            <td style="width:8.33%; text-align:center; color:#1b2a4a; font-size:5px;">&#9679;</td>
+                        </tr></table>
+                    </div>
+                    <div style="position: absolute; top: 40px; left: 0; width: 100%;">
+                        <table style="width: 100%; border-collapse: collapse;"><tr>
+                            <td style="width:8.33%; text-align:center; color:#1b2a4a; font-size:5px;">&#9679;</td>
+                            <td style="width:8.33%;"></td>
+                            <td style="width:8.33%;"></td>
+                            <td style="width:8.33%; text-align:center; color:#1b2a4a; font-size:5px;">&#9679;</td>
+                            <td style="width:8.33%;"></td>
+                            <td style="width:8.33%; text-align:center; color:#1b2a4a; font-size:5px;">&#9679;</td>
+                            <td style="width:8.33%;"></td>
+                            <td style="width:8.33%; text-align:center; color:#1b2a4a; font-size:5px;">&#9679;</td>
+                            <td style="width:8.33%;"></td>
+                            <td style="width:8.33%; text-align:center; color:#1b2a4a; font-size:5px;">&#9679;</td>
+                            <td style="width:8.33%;"></td>
+                            <td style="width:8.33%; text-align:center; color:#1b2a4a; font-size:5px;">&#9679;</td>
+                        </tr></table>
+                    </div>
+                    <div style="position: absolute; top: 74px; left: 0; width: 100%;">
+                        <table style="width: 100%; border-collapse: collapse;"><tr>
+                            <td style="width:8.33%; text-align:center; color:#1b2a4a; font-size:5px;">&#9679;</td>
+                            <td style="width:8.33%; text-align:center; color:#1b2a4a; font-size:5px;">&#9679;</td>
+                            <td style="width:8.33%;"></td>
+                            <td style="width:8.33%;"></td>
+                            <td style="width:8.33%; text-align:center; color:#1b2a4a; font-size:5px;">&#9679;</td>
+                            <td style="width:8.33%;"></td>
+                            <td style="width:8.33%; text-align:center; color:#1b2a4a; font-size:5px;">&#9679;</td>
+                            <td style="width:8.33%;"></td>
+                            <td style="width:8.33%; text-align:center; color:#1b2a4a; font-size:5px;">&#9679;</td>
+                            <td style="width:8.33%; text-align:center; color:#1b2a4a; font-size:5px;">&#9679;</td>
+                            <td style="width:8.33%; text-align:center; color:#1b2a4a; font-size:5px;">&#9679;</td>
+                            <td style="width:8.33%; text-align:center; color:#1b2a4a; font-size:5px;">&#9679;</td>
+                        </tr></table>
+                    </div>
+                    <div style="position: absolute; top: 18px; left: 30px; z-index: 10;">
+                        <img src="/marley_sale_reports/static/src/img/marley_logo.png" alt="Marley" style="height: 70px; width: auto;"/>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ============ RUNNING FOOTER ============ -->
+            <div class="footer" style="margin: 0; padding: 0; font-family: Arial, sans-serif;">
+                <div style="border-top: 3px solid #1b2a4a; padding-top: 8px;">
+                    <table style="width: 100%; border-collapse: collapse; font-size: 9px; color: #333;">
+                        <tr>
+                            <td style="width: 20%; vertical-align: top; padding-right: 10px;">
+                                <strong style="color: #1a3c7a;">Analogue:</strong><br/>
+                                92814 44711
+                            </td>
+                            <td style="width: 25%; vertical-align: top; padding-right: 10px;">
+                                <strong style="color: #1a3c7a;">Web:</strong><br/>
+                                marleyhvlsfans@gmail.com<br/>
+                                www.marleyfans.in
+                            </td>
+                            <td style="width: 35%; vertical-align: top; padding-right: 10px;">
+                                <strong style="color: #1a3c7a;">Address:</strong><br/>
+                                GROUND FLOOR, PLOT NO.7/PART,<br/>
+                                SHED NO.4, PHASE &#8211; IV,<br/>
+                                IDA Jeedimetla, QUTHBULLAPUR,<br/>
+                                Hyderabad, Medchal Malkajgiri,<br/>
+                                Telangana-500055
+                            </td>
+                            <td style="width: 20%; vertical-align: top;">
+                                <strong style="color: #1a3c7a;">Business:</strong><br/>
+                                U29308TG2021PTC156778<br/>
+                                GSTIN
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ============ BODY ============ -->
+            <div class="marley-q-body">
+
+                <div style="margin-bottom: 8px; font-size: 15px;">
+                    <strong>Kind Attention:</strong>
+                    <span style="float: right; font-weight: bold;">
+                        Invoice # <t t-esc="o.name"/>
+                    </span>
+                </div>
+                <div style="margin-bottom: 6px; font-size: 14px;">
+                    <t t-if="linked_so and linked_so.kind_attn"><t t-esc="linked_so.kind_attn"/></t>
+                    <t t-elif="o.partner_id.child_ids"><t t-esc="o.partner_id.child_ids[0].name"/></t>
+                    <t t-else=""><t t-esc="o.partner_id.name"/></t>
+                </div>
+
+                <div style="margin-bottom: 14px; line-height: 1.7; font-size: 14px;">
+                    <strong>To,</strong><br/>
+                    <strong><t t-esc="o.partner_id.name"/></strong>
+                    <t t-if="o.partner_id.street"><br/><t t-esc="o.partner_id.street"/></t>
+                    <t t-if="o.partner_id.street2"><br/><t t-esc="o.partner_id.street2"/></t>
+                    <br/>
+                    <t t-if="o.partner_id.city"><t t-esc="o.partner_id.city"/>, </t>
+                    <t t-if="o.partner_id.state_id"><t t-esc="o.partner_id.state_id.name"/> </t>
+                    <t t-if="o.partner_id.zip"><t t-esc="o.partner_id.zip"/></t>
+                    <t t-if="o.partner_id.vat"><br/><strong>GST: </strong><t t-esc="o.partner_id.vat"/></t>
+                    <t t-if="o.partner_id.phone"><br/><strong>Phone: </strong><t t-esc="o.partner_id.phone"/></t>
+                    <t t-if="o.partner_id.email"><br/><strong>Email: </strong><t t-esc="o.partner_id.email"/></t>
+                </div>
+
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 16px; border: 1px solid #ccc;">
+                    <tr style="background-color: #f5f5f5;">
+                        <td style="border: 1px solid #ccc; padding: 8px 10px; font-weight: bold; font-size: 13px; width: 20%;">Invoice Date</td>
+                        <td style="border: 1px solid #ccc; padding: 8px 10px; font-weight: bold; font-size: 13px; width: 20%;">Due Date</td>
+                        <td style="border: 1px solid #ccc; padding: 8px 10px; font-weight: bold; font-size: 13px; width: 30%;">Sales Representative</td>
+                        <td style="border: 1px solid #ccc; padding: 8px 10px; font-weight: bold; font-size: 13px; width: 30%;">Connect</td>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid #ccc; padding: 8px 10px; font-size: 13px;">
+                            <t t-if="o.invoice_date"><t t-esc="o.invoice_date" t-options='{"widget": "date", "format": "dd-MMM-yyyy"}'/></t>
+                        </td>
+                        <td style="border: 1px solid #ccc; padding: 8px 10px; font-size: 13px;">
+                            <t t-if="o.invoice_date_due"><t t-esc="o.invoice_date_due" t-options='{"widget": "date", "format": "dd-MMM-yyyy"}'/></t>
+                        </td>
+                        <td style="border: 1px solid #ccc; padding: 8px 10px; font-size: 13px;">
+                            <t t-esc="o.invoice_user_id.name or ''"/>
+                        </td>
+                        <td style="border: 1px solid #ccc; padding: 8px 10px; font-size: 13px;">
+                            <t t-if="o.invoice_user_id.phone"><t t-esc="o.invoice_user_id.phone"/> </t>
+                            <t t-if="o.invoice_user_id.email"><t t-esc="o.invoice_user_id.email"/></t>
+                        </td>
+                    </tr>
+                </table>
+
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 0; border: 1px solid #ccc;">
+                    <thead>
+                        <tr style="background-color: #f0f0f0; font-weight: bold;">
+                            <th style="border: 1px solid #ccc; padding: 10px 8px; text-align: left; font-size: 13px; width: 42%;">DESCRIPTION</th>
+                            <th style="border: 1px solid #ccc; padding: 10px 8px; text-align: center; font-size: 13px; width: 13%;">QUANTITY</th>
+                            <th style="border: 1px solid #ccc; padding: 10px 8px; text-align: right; font-size: 13px; width: 15%;">UNIT PRICE</th>
+                            <th style="border: 1px solid #ccc; padding: 10px 8px; text-align: center; font-size: 13px; width: 14%;">TAXES</th>
+                            <th style="border: 1px solid #ccc; padding: 10px 8px; text-align: right; font-size: 13px; width: 16%;">AMOUNT</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <t t-foreach="o.invoice_line_ids.filtered(lambda l: l.display_type == 'product')" t-as="line">
+                            <tr style="page-break-inside: avoid;">
+                                <td style="border: 1px solid #ccc; padding: 10px 8px; font-size: 13px; vertical-align: top; line-height: 1.7;">
+                                    <strong><t t-esc="line.product_id.name or line.name"/></strong>
+                                    <t t-if="line.name and line.name != (line.product_id.name or '')">
+                                        <br/><span style="font-size: 12px; color: #333; white-space: pre-line;"><t t-esc="line.name"/></span>
+                                    </t>
+                                </td>
+                                <td style="border: 1px solid #ccc; padding: 10px 8px; text-align: center; font-size: 13px; vertical-align: top;">
+                                    <t t-esc="'%.2f' % line.quantity"/> <t t-esc="line.product_uom_id.name or 'Units'"/>
+                                </td>
+                                <td style="border: 1px solid #ccc; padding: 10px 8px; text-align: right; font-size: 13px; vertical-align: top;">
+                                    <t t-esc="'{:,.2f}'.format(line.price_unit)"/>
+                                </td>
+                                <td style="border: 1px solid #ccc; padding: 10px 8px; text-align: center; font-size: 12px; vertical-align: top;">
+                                    <t t-foreach="line.tax_ids" t-as="tax">
+                                        <t t-esc="tax.name"/><br/>
+                                    </t>
+                                </td>
+                                <td style="border: 1px solid #ccc; padding: 10px 8px; text-align: right; font-size: 13px; vertical-align: top; font-weight: bold;">
+                                    &#8377; <t t-esc="'{:,.2f}'.format(line.price_subtotal)"/>
+                                </td>
+                            </tr>
+                        </t>
+                    </tbody>
+                </table>
+
+                <t t-set="tax_totals" t-value="o.tax_totals"/>
+                <table style="width: 50%; margin-left: auto; border-collapse: collapse; margin-bottom: 20px;">
+                    <t t-foreach="tax_totals.get('subtotals', [])" t-as="subtotal">
+                        <tr>
+                            <td style="padding: 8px 12px; text-align: right; font-size: 13px; border: 1px solid #ccc;">
+                                <t t-esc="subtotal.get('name', 'Untaxed Amount')"/>
+                            </td>
+                            <td style="padding: 8px 12px; text-align: right; font-size: 13px; font-weight: bold; border: 1px solid #ccc; width: 35%;">
+                                &#8377; <t t-esc="'{:,.2f}'.format(subtotal.get('base_amount_currency', 0))"/>
+                            </td>
+                        </tr>
+                        <t t-foreach="subtotal.get('tax_groups', [])" t-as="tax_group">
+                            <tr>
+                                <td style="padding: 8px 12px; text-align: right; font-size: 13px; border: 1px solid #ccc;">
+                                    <t t-esc="tax_group.get('group_name', 'Tax')"/>
+                                </td>
+                                <td style="padding: 8px 12px; text-align: right; font-size: 13px; font-weight: bold; border: 1px solid #ccc;">
+                                    &#8377; <t t-esc="'{:,.2f}'.format(tax_group.get('tax_amount_currency', 0))"/>
+                                </td>
+                            </tr>
+                        </t>
+                    </t>
+                    <tr style="background-color: #f0f0f0;">
+                        <td style="padding: 10px 12px; text-align: right; font-size: 14px; font-weight: bold; border: 2px solid #999;">Total</td>
+                        <td style="padding: 10px 12px; text-align: right; font-size: 14px; font-weight: bold; border: 2px solid #999;">
+                            &#8377; <t t-esc="'{:,.2f}'.format(tax_totals.get('total_amount_currency', o.amount_total))"/>
+                        </td>
+                    </tr>
+                </table>
+
+                <div style="margin-bottom: 14px;">
+                    <div class="section-heading">TAXES &amp; DUTIES:</div>
+                    <p class="section-text">
+                        GST at the rate of 18% shall be applicable on above quoted price.
+                        If there is any change in Tax structure or any statutory levies are introduced by the appropriate Government at the
+                        time of shipment additional charges will have to be borne by the BUYER as per actual.
+                    </p>
+                </div>
+
+                <t t-if="linked_so and linked_so.customer_scope">
+                    <div style="margin-bottom: 14px;">
+                        <div class="section-heading">EXCLUSION:</div>
+                        <p class="section-text" style="white-space: pre-line;"><t t-esc="linked_so.customer_scope"/></p>
+                    </div>
+                </t>
+
+                <div style="margin-bottom: 14px;">
+                    <div class="section-heading">TERMS &amp; CONDITIONS:</div>
+                    <p class="section-text">
+                        <strong>Quality assurance &amp; Warranty:</strong> -
+                        <t t-if="linked_so and linked_so.warranty_terms"><t t-esc="linked_so.warranty_terms"/></t>
+                        <t t-else="">Marley fan warranty will be 5 Years on Mechanical items &amp; 1 year OEM warranty on Motors &amp; VFD Drive.</t>
+                    </p>
+                </div>
+
+                <div style="margin-bottom: 14px;">
+                    <div class="section-heading">PAYMENT SCHEDULE:</div>
+                    <div class="section-text" style="white-space: pre-line;"><t t-if="linked_so and linked_so.payment_terms_text"><t t-esc="linked_so.payment_terms_text"/></t><t t-else="">100% advance along with your confirmed order.
+Purchase Order should be on the name of Marley Enterprises Private Limited.
+Payments to be issued to us by way of Pay-order/DD/at par Cheque. All payments received by us will be forfeited in case of cancellation of order.</t></div>
+                </div>
+
+                <div style="margin-bottom: 14px;">
+                    <strong style="font-size: 15px;">Bank Details :</strong>
+                    <table style="margin-top: 6px; font-size: 13px; line-height: 1.7;">
+                        <tr><td style="padding: 3px 10px 3px 0;">Account Name</td><td>: Marley Enterprises Private Limited</td></tr>
+                        <tr><td style="padding: 3px 10px 3px 0;">Account No.</td><td>: <t t-esc="(linked_so and linked_so.bank_account_number) or '50200092737354'"/></td></tr>
+                        <tr><td style="padding: 3px 10px 3px 0;">Bank Name</td><td>: <t t-esc="(linked_so and linked_so.bank_name) or 'HDFC Bank'"/></td></tr>
+                        <tr><td style="padding: 3px 10px 3px 0;">Bank Branch</td><td>: <t t-esc="(linked_so and linked_so.bank_branch) or 'Kukatpally, Hyderabad'"/></td></tr>
+                        <tr><td style="padding: 3px 10px 3px 0;">IFSC Code</td><td>: <t t-esc="(linked_so and linked_so.bank_ifsc) or 'HDFC0000364'"/></td></tr>
+                    </table>
+                </div>
+
+                <div style="margin-bottom: 14px;">
+                    <div class="section-heading">DELIVERY SCHEDULE:</div>
+                    <p class="section-text">
+                        <t t-if="linked_so and linked_so.delivery_terms"><t t-esc="linked_so.delivery_terms"/></t>
+                        <t t-else="">Marley FAN will be delivered to your site within 15 to 20 Days from date we receive your techno-commercially clear
+                        purchase-order, subject to your adherence to the agreed payment schedule and availability of material.</t>
+                    </p>
+                </div>
+
+                <div style="margin-top: 24px; font-size: 14px;">
+                    <p>Best Regards,</p>
+                    <p style="font-weight: bold;">Marley Enterprises Pvt. Ltd</p>
+                </div>
+
+            </div>
+        </t>
+    </template>
+
+    <!-- Hook into the report_invoice wrapper so our template gets called -->
+    <template id="report_invoice_marley_hook"
+              inherit_id="account.report_invoice">
+        <xpath expr="//t[@t-foreach='docs']" position="inside">
+            <t t-if="o._get_name_invoice_report() == 'marley_sale_reports.report_marley_invoice_document'"
+               t-call="marley_sale_reports.report_marley_invoice_document"
+               t-lang="lang"/>
+        </xpath>
+    </template>
+
+</data>
+</odoo>

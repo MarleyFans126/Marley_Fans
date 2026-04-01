@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_whatsapp_template_tree" model="ir.ui.view">
+        <field name="name">whatsapp.template.tree</field>
+        <field name="model">whatsapp.template</field>
+        <field name="arch" type="xml">
+            <list string="WhatsApp Templates">
+                <header>
+                    <button name="action_sync_all_templates_from_meta" type="object" string="Sync Templates" class="btn-primary" display="always"/>
+                </header>
+                <field name="name"/>
+                <field name="template_name"/>
+                <field name="meta_status" widget="badge" 
+                       decoration-success="meta_status == 'approved'" 
+                       decoration-warning="meta_status in ('pending', 'draft')" 
+                       decoration-danger="meta_status == 'rejected'"/>
+                <field name="language_code"/>
+                <field name="category"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_whatsapp_template_form" model="ir.ui.view">
+        <field name="name">whatsapp.template.form</field>
+        <field name="model">whatsapp.template</field>
+        <field name="arch" type="xml">
+            <form string="WhatsApp Template">
+                <header>
+                    <button name="action_submit_to_meta" type="object" string="Submit For Approval" class="btn-primary" invisible="meta_status not in ('draft', 'rejected')"/>
+                    <button name="action_sync_template_status" type="object" string="Sync Template" class="btn-secondary" invisible="meta_status == 'draft'"/>
+                    <field name="meta_status" widget="statusbar" statusbar_visible="draft,pending,approved"/>
+                </header>
+                <sheet>
+                    <div class="alert alert-warning" role="alert" invisible="meta_status != 'rejected'">
+                        <i class="fa fa-exclamation-triangle me-2"/> Rejection Reason: <field name="rejection_reason" readonly="1"/>
+                    </div>
+                    
+                    <!-- Exact Layout mimicking Screenshot -->
+                    <div class="oe_title mb-4">
+                        <label for="name" string="Name"/>
+                        <h1>
+                            <field name="name" placeholder="Internal Name" class="w-100"/>
+                        </h1>
+                    </div>
+                    
+                    <group>
+                        <group>
+                            <!-- Simulating left column of screenshot -->
+                            <field name="category"/>
+                            <field name="last_synced_on" string="Last Synced" readonly="1"/>
+                            <field name="meta_template_id" invisible="1"/>
+                            <field name="active" invisible="1"/>
+                        </group>
+                        <group>
+                            <!-- Simulating right column of screenshot -->
+                            <field name="template_name"/>
+                            <field name="language_code" string="Language"/>
+                            <field name="header_type"/>
+                            <field name="header_text" invisible="header_type != 'text'" required="header_type == 'text'"/>
+                            <field name="footer_text" string="Footer Message"/>
+                        </group>
+                    </group>
+                    
+                    <notebook>
+                        <page string="Body">
+                            <field name="body_text" nolabel="1" widget="text"/>
+                        </page>
+                        <page string="Buttons">
+                            <field name="button_ids">
+                                <list editable="bottom">
+                                    <field name="button_type"/>
+                                    <field name="button_text"/>
+                                    <field name="phone_number"/>
+                                    <field name="website_url"/>
+                                    <field name="url_type"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Variables">
+                            <group>
+                                <field name="variable_count" readonly="1"/>
+                            </group>
+                            <field name="variable_ids">
+                                <list editable="bottom" create="false" delete="false">
+                                    <field name="variable_key" readonly="1" force_save="1"/>
+                                    <field name="sample_value"/>
+                                    <field name="variable_type"/>
+                                    <field name="field_name"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_whatsapp_template_search" model="ir.ui.view">
+        <field name="name">whatsapp.template.search</field>
+        <field name="model">whatsapp.template</field>
+        <field name="arch" type="xml">
+            <search string="Search Templates">
+                <field name="name"/>
+                <field name="template_name"/>
+                <filter string="Active" name="active" domain="[('active','=',True)]"/>
+                <filter string="Archived" name="archived" domain="[('active','=',False)]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_whatsapp_template" model="ir.actions.act_window">
+        <field name="name">WhatsApp Templates</field>
+        <field name="res_model">whatsapp.template</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem id="whatsapp_core_community_menu_templates"
+              name="Templates"
+              parent="whatsapp_core_community_menu_root"
+              action="action_whatsapp_template"
+              sequence="20"
+              groups="base.group_system"/>
+
+</odoo>

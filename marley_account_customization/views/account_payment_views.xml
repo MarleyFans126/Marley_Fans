@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Cash Receipt form: add proforma link and receipt reference -->
+    <record id="account_payment_view_form_inherit_marley" model="ir.ui.view">
+        <field name="name">account.payment.form.inherit.marley</field>
+        <field name="model">account.payment</field>
+        <field name="inherit_id" ref="account.view_account_payment_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='memo']" position="after">
+                <field name="receipt_reference"/>
+                <field name="proforma_invoice_id"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Cash Receipts list view (inbound payments only) -->
+    <record id="view_cash_receipt_tree" model="ir.ui.view">
+        <field name="name">account.payment.tree.cash.receipts</field>
+        <field name="model">account.payment</field>
+        <field name="arch" type="xml">
+            <list string="Cash Receipts" decoration-info="state == 'draft'" decoration-muted="state == 'cancelled'">
+                <field name="date"/>
+                <field name="name"/>
+                <field name="receipt_reference"/>
+                <field name="partner_id" string="Customer"/>
+                <field name="journal_id"/>
+                <field name="amount" sum="Total"/>
+                <field name="currency_id" column_invisible="True"/>
+                <field name="state"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Cash Receipts Action -->
+    <record id="action_cash_receipts" model="ir.actions.act_window">
+        <field name="name">Cash Receipts</field>
+        <field name="res_model">account.payment</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('payment_type', '=', 'inbound'), ('partner_type', '=', 'customer')]</field>
+        <field name="context">{'default_payment_type': 'inbound', 'default_partner_type': 'customer'}</field>
+        <field name="view_ids" eval="[(5, 0, 0), (0, 0, {'view_mode': 'list', 'view_id': ref('view_cash_receipt_tree')})]"/>
+    </record>
+
+    <!-- Menu Item: Accounting → Customers → Cash Receipts -->
+    <menuitem
+        id="menu_cash_receipts"
+        name="Cash Receipts"
+        parent="account.menu_finance_receivables"
+        action="action_cash_receipts"
+        sequence="30"/>
+
+</odoo>

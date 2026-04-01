@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Scoring Config: Form View -->
+    <record id="lead_intelligence_scoring_config_form" model="ir.ui.view">
+        <field name="name">x.lead.scoring.config.form</field>
+        <field name="model">x.lead.scoring.config</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>Lead Scoring Weights</h1>
+                        <p class="text-muted">All weights must sum to exactly 100.</p>
+                    </div>
+                    <group>
+                        <group string="Scoring Criteria Weights">
+                            <field name="weight_source_quality"/>
+                            <field name="weight_contact_completeness"/>
+                            <field name="weight_geographic_match"/>
+                        </group>
+                        <group string=" ">
+                            <field name="weight_deal_size"/>
+                            <field name="weight_engagement_speed"/>
+                            <field name="weight_duplicate_flag"/>
+                        </group>
+                    </group>
+                    <div class="alert alert-info" role="alert">
+                        <strong>Scoring Logic:</strong><br/>
+                        • <b>Source Quality</b>: IndiaMart=15/20, Aajjo=12/20, Website=10/20, Other=5/20<br/>
+                        • <b>Contact Completeness</b>: Email(+5), Mobile(+5), GSTIN(+5) out of 15<br/>
+                        • <b>Geographic Match</b>: Tier-1=15, Tier-2=10, Tier-3=5, Unknown=3 out of 15<br/>
+                        • <b>Deal Size</b>: &gt;5L=20, 1-5L=15, 50K-1L=10, &lt;50K=5 out of 20<br/>
+                        • <b>Engagement Speed</b>: ≤1hr=15, ≤4hr=10, ≤24hr=5, &gt;24hr=0 out of 15<br/>
+                        • <b>Duplicate Flag</b>: Not duplicate=full weight, Duplicate=0
+                    </div>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Scoring Config: Action (open singleton) -->
+    <record id="lead_intelligence_action_scoring_config" model="ir.actions.act_window">
+        <field name="name">Lead Scoring Weights</field>
+        <field name="res_model">x.lead.scoring.config</field>
+        <field name="view_mode">form</field>
+        <field name="res_id" ref="lead_intelligence_scoring_config_default"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Configure lead scoring weights.
+            </p>
+        </field>
+    </record>
+
+    <!-- Menu: CRM > Configuration > Lead Scoring Weights -->
+    <menuitem id="lead_intelligence_menu_scoring_config"
+              name="Lead Scoring Weights"
+              parent="crm.crm_menu_config"
+              action="lead_intelligence_action_scoring_config"
+              sequence="91"/>
+
+</odoo>

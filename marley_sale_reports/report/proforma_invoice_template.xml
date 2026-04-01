@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<data>
+
+<template id="report_marley_proforma_invoice">
+    <t t-call="web.html_container">
+        <t t-foreach="docs" t-as="doc">
+            <t t-call="web.basic_layout">
+                <t t-set="doc" t-value="doc"/>
+
+                <style>
+                    @page { margin-top: 0mm !important; }
+                    .article { margin-top: 0 !important; padding-top: 0 !important; }
+                    table td, table th { -webkit-print-color-adjust: exact; }
+                    .marley-inv-body { font-family: Arial, Helvetica, sans-serif; font-size: 14px; color: #000; line-height: 1.7; }
+                    .marley-inv-body table { page-break-inside: auto; }
+                    .marley-inv-body tr { page-break-inside: avoid; }
+                    .marley-inv-body .section-heading { font-size: 15px; font-weight: bold; text-decoration: underline; margin: 18px 0 8px 0; }
+                    .marley-inv-body .section-text { font-size: 13px; margin: 6px 0; line-height: 1.7; }
+                </style>
+
+                <!-- ============ RUNNING HEADER (repeats on every page) ============ -->
+                <div class="header" style="margin: 0; padding: 0;">
+                    <div style="position: relative; height: 110px;">
+                        <!-- Dot Row 1 (top) -->
+                        <div style="position: absolute; top: 6px; left: 0; width: 100%;">
+                            <table style="width: 100%; border-collapse: collapse;"><tr>
+                                <td style="width:8.33%; text-align:center; color:#1b2a4a; font-size:5px;">&#9679;</td>
+                                <td style="width:8.33%; text-align:center; color:#1b2a4a; font-size:5px;">&#9679;</td>
+                                <td style="width:8.33%;"></td>
+                                <td style="width:8.33%;"></td>
+                                <td style="width:8.33%; text-align:center; color:#1b2a4a; font-size:5px;">&#9679;</td>
+                                <td style="width:8.33%; text-align:center; color:#1b2a4a; font-size:5px;">&#9679;</td>
+                                <td style="width:8.33%; text-align:center; color:#1b2a4a; font-size:5px;">&#9679;</td>
+                                <td style="width:8.33%; text-align:center; color:#1b2a4a; font-size:5px;">&#9679;</td>
+                                <td style="width:8.33%; text-align:center; color:#1b2a4a; font-size:5px;">&#9679;</td>
+                                <td style="width:8.33%; text-align:center; color:#1b2a4a; font-size:5px;">&#9679;</td>
+                                <td style="width:8.33%; text-align:center; color:#1b2a4a; font-size:5px;">&#9679;</td>
+                                <td style="width:8.33%; text-align:center; color:#1b2a4a; font-size:5px;">&#9679;</td>
+                            </tr></table>
+                        </div>
+                        <!-- Dot Row 2 (middle — logo row) -->
+                        <div style="position: absolute; top: 40px; left: 0; width: 100%;">
+                            <table style="width: 100%; border-collapse: collapse;"><tr>
+                                <td style="width:8.33%; text-align:center; color:#1b2a4a; font-size:5px;">&#9679;</td>
+                                <td style="width:8.33%;"></td>
+                                <td style="width:8.33%;"></td>
+                                <td style="width:8.33%; text-align:center; color:#1b2a4a; font-size:5px;">&#9679;</td>
+                                <td style="width:8.33%;"></td>
+                                <td style="width:8.33%; text-align:center; color:#1b2a4a; font-size:5px;">&#9679;</td>
+                                <td style="width:8.33%;"></td>
+                                <td style="width:8.33%; text-align:center; color:#1b2a4a; font-size:5px;">&#9679;</td>
+                                <td style="width:8.33%;"></td>
+                                <td style="width:8.33%; text-align:center; color:#1b2a4a; font-size:5px;">&#9679;</td>
+                                <td style="width:8.33%;"></td>
+                                <td style="width:8.33%; text-align:center; color:#1b2a4a; font-size:5px;">&#9679;</td>
+                            </tr></table>
+                        </div>
+                        <!-- Dot Row 3 (bottom) -->
+                        <div style="position: absolute; top: 74px; left: 0; width: 100%;">
+                            <table style="width: 100%; border-collapse: collapse;"><tr>
+                                <td style="width:8.33%; text-align:center; color:#1b2a4a; font-size:5px;">&#9679;</td>
+                                <td style="width:8.33%; text-align:center; color:#1b2a4a; font-size:5px;">&#9679;</td>
+                                <td style="width:8.33%;"></td>
+                                <td style="width:8.33%;"></td>
+                                <td style="width:8.33%; text-align:center; color:#1b2a4a; font-size:5px;">&#9679;</td>
+                                <td style="width:8.33%;"></td>
+                                <td style="width:8.33%; text-align:center; color:#1b2a4a; font-size:5px;">&#9679;</td>
+                                <td style="width:8.33%;"></td>
+                                <td style="width:8.33%; text-align:center; color:#1b2a4a; font-size:5px;">&#9679;</td>
+                                <td style="width:8.33%; text-align:center; color:#1b2a4a; font-size:5px;">&#9679;</td>
+                                <td style="width:8.33%; text-align:center; color:#1b2a4a; font-size:5px;">&#9679;</td>
+                                <td style="width:8.33%; text-align:center; color:#1b2a4a; font-size:5px;">&#9679;</td>
+                            </tr></table>
+                        </div>
+                        <!-- Logo overlay -->
+                        <div style="position: absolute; top: 18px; left: 30px; z-index: 10;">
+                            <img src="/marley_sale_reports/static/src/img/marley_logo.png" alt="Marley" style="height: 70px; width: auto;"/>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ============ RUNNING FOOTER (repeats on every page) ============ -->
+                <div class="footer" style="margin: 0; padding: 0; font-family: Arial, sans-serif;">
+                    <div style="border-top: 3px solid #1b2a4a; padding-top: 8px;">
+                        <table style="width: 100%; border-collapse: collapse; font-size: 9px; color: #333;">
+                            <tr>
+                                <td style="width: 20%; vertical-align: top; padding-right: 10px;">
+                                    <strong style="color: #1a3c7a;">Analogue:</strong><br/>
+                                    92814 44711
+                                </td>
+                                <td style="width: 25%; vertical-align: top; padding-right: 10px;">
+                                    <strong style="color: #1a3c7a;">Web:</strong><br/>
+                                    marleyhvlsfans@gmail.com<br/>
+                                    www.marleyfans.in
+                                </td>
+                                <td style="width: 35%; vertical-align: top; padding-right: 10px;">
+                                    <strong style="color: #1a3c7a;">Address:</strong><br/>
+                                    GROUND FLOOR, PLOT NO.7/PART,<br/>
+                                    SHED NO.4, PHASE &#8211; IV,<br/>
+                                    IDA Jeedimetla, QUTHBULLAPUR,<br/>
+                                    Hyderabad, Medchal Malkajgiri,<br/>
+                                    Telangana-500055
+                                </td>
+                                <td style="width: 20%; vertical-align: top;">
+                                    <strong style="color: #1a3c7a;">Business:</strong><br/>
+                                    U29308TG2021PTC156778<br/>
+                                    GSTIN
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- ============ BODY CONTENT ============ -->
+                <div class="marley-inv-body">
+
+                    <!-- ===== TITLE + INVOICE # ===== -->
+                    <div style="margin-bottom: 8px; font-size: 15px;">
+                        <strong>PROFORMA INVOICE</strong>
+                        <span style="float: right; font-weight: bold;">
+                            Invoice # <t t-esc="doc.name"/>
+                        </span>
+                    </div>
+
+                    <!-- ===== TO ADDRESS ===== -->
+                    <div style="margin-bottom: 14px; line-height: 1.7; font-size: 14px;">
+                        <strong>To,</strong><br/>
+                        <strong><t t-esc="doc.partner_id.name"/></strong>
+                        <t t-if="doc.partner_id.street"><br/><t t-esc="doc.partner_id.street"/></t>
+                        <t t-if="doc.partner_id.street2"><br/><t t-esc="doc.partner_id.street2"/></t>
+                        <br/>
+                        <t t-if="doc.partner_id.city"><t t-esc="doc.partner_id.city"/>, </t>
+                        <t t-if="doc.partner_id.state_id"><t t-esc="doc.partner_id.state_id.name"/> </t>
+                        <t t-if="doc.partner_id.zip"><t t-esc="doc.partner_id.zip"/></t>
+                        <t t-if="doc.partner_id.vat"><br/><strong>GST: </strong><t t-esc="doc.partner_id.vat"/></t>
+                        <t t-if="doc.partner_id.phone"><br/><strong>Phone: </strong><t t-esc="doc.partner_id.phone"/></t>
+                        <t t-if="doc.partner_id.email"><br/><strong>Email: </strong><t t-esc="doc.partner_id.email"/></t>
+                    </div>
+
+                    <!-- ===== INFO ROW ===== -->
+                    <table style="width: 100%; border-collapse: collapse; margin-bottom: 12px; border: 1px solid #ccc;">
+                        <tr style="background-color: #f5f5f5;">
+                            <td style="border: 1px solid #ccc; padding: 8px 10px; font-weight: bold; font-size: 13px; width: 25%;">Invoice Date</td>
+                            <td style="border: 1px solid #ccc; padding: 8px 10px; font-weight: bold; font-size: 13px; width: 25%;">Source Order</td>
+                            <td style="border: 1px solid #ccc; padding: 8px 10px; font-weight: bold; font-size: 13px; width: 25%;">Sales Representative</td>
+                            <td style="border: 1px solid #ccc; padding: 8px 10px; font-weight: bold; font-size: 13px; width: 25%;">Connect</td>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid #ccc; padding: 8px 10px; font-size: 13px;">
+                                <t t-if="doc.invoice_date">
+                                    <t t-esc="doc.invoice_date" t-options='{"widget": "date", "format": "dd-MMM-yyyy"}'/>
+                                </t>
+                            </td>
+                            <td style="border: 1px solid #ccc; padding: 8px 10px; font-size: 13px;">
+                                <t t-esc="doc.invoice_origin or ''"/>
+                            </td>
+                            <td style="border: 1px solid #ccc; padding: 8px 10px; font-size: 13px;">
+                                <t t-esc="doc.invoice_user_id.name or ''"/>
+                            </td>
+                            <td style="border: 1px solid #ccc; padding: 8px 10px; font-size: 13px;">
+                                <t t-if="doc.invoice_user_id.phone"><t t-esc="doc.invoice_user_id.phone"/> </t>
+                                <t t-if="doc.invoice_user_id.email"><t t-esc="doc.invoice_user_id.email"/></t>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <!-- ===== LINE ITEMS TABLE ===== -->
+                    <table style="width: 100%; border-collapse: collapse; margin-bottom: 0; border: 1px solid #ccc;">
+                        <thead>
+                            <tr style="background-color: #f0f0f0; font-weight: bold;">
+                                <th style="border: 1px solid #ccc; padding: 10px 8px; text-align: left; font-size: 13px; width: 45%;">DESCRIPTION</th>
+                                <th style="border: 1px solid #ccc; padding: 10px 8px; text-align: center; font-size: 13px; width: 12%;">QUANTITY</th>
+                                <th style="border: 1px solid #ccc; padding: 10px 8px; text-align: right; font-size: 13px; width: 15%;">UNIT PRICE</th>
+                                <th style="border: 1px solid #ccc; padding: 10px 8px; text-align: center; font-size: 13px; width: 13%;">TAXES</th>
+                                <th style="border: 1px solid #ccc; padding: 10px 8px; text-align: right; font-size: 13px; width: 15%;">AMOUNT</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="doc.invoice_line_ids.filtered(lambda l: l.display_type == 'product')" t-as="line">
+                                <tr style="page-break-inside: avoid;">
+                                    <td style="border: 1px solid #ccc; padding: 10px 8px; font-size: 13px; vertical-align: top; line-height: 1.7;">
+                                        <strong><t t-esc="line.product_id.name or line.name"/></strong>
+                                        <t t-if="line.name and line.name != (line.product_id.name or '')">
+                                            <br/><span style="font-size: 12px; color: #333; white-space: pre-line;"><t t-esc="line.name"/></span>
+                                        </t>
+                                    </td>
+                                    <td style="border: 1px solid #ccc; padding: 10px 8px; text-align: center; font-size: 13px; vertical-align: top;">
+                                        <t t-esc="'%.2f' % line.quantity"/>
+                                        <t t-if="line.product_uom_id"> <t t-esc="line.product_uom_id.name"/></t>
+                                    </td>
+                                    <td style="border: 1px solid #ccc; padding: 10px 8px; text-align: right; font-size: 13px; vertical-align: top;">
+                                        <t t-esc="'{:,.2f}'.format(line.price_unit)"/>
+                                    </td>
+                                    <td style="border: 1px solid #ccc; padding: 10px 8px; text-align: center; font-size: 12px; vertical-align: top;">
+                                        <t t-foreach="line.tax_ids" t-as="tax">
+                                            <t t-esc="tax.name"/><br/>
+                                        </t>
+                                    </td>
+                                    <td style="border: 1px solid #ccc; padding: 10px 8px; text-align: right; font-size: 13px; vertical-align: top; font-weight: bold;">
+                                        &#8377; <t t-esc="'{:,.2f}'.format(line.price_subtotal)"/>
+                                    </td>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+
+                    <!-- ===== TOTALS ===== -->
+                    <table style="width: 50%; margin-left: auto; border-collapse: collapse; margin-bottom: 20px;">
+                        <tr>
+                            <td style="padding: 8px 12px; text-align: right; font-size: 13px; border: 1px solid #ccc;">Untaxed Amount</td>
+                            <td style="padding: 8px 12px; text-align: right; font-size: 13px; font-weight: bold; border: 1px solid #ccc; width: 35%;">
+                                &#8377; <t t-esc="'{:,.2f}'.format(doc.amount_untaxed)"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px 12px; text-align: right; font-size: 13px; border: 1px solid #ccc;">GST / Tax</td>
+                            <td style="padding: 8px 12px; text-align: right; font-size: 13px; font-weight: bold; border: 1px solid #ccc;">
+                                &#8377; <t t-esc="'{:,.2f}'.format(doc.amount_tax)"/>
+                            </td>
+                        </tr>
+                        <tr style="background-color: #f0f0f0;">
+                            <td style="padding: 10px 12px; text-align: right; font-size: 14px; font-weight: bold; border: 2px solid #999;">Total</td>
+                            <td style="padding: 10px 12px; text-align: right; font-size: 14px; font-weight: bold; border: 2px solid #999;">
+                                &#8377; <t t-esc="'{:,.2f}'.format(doc.amount_total)"/>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <!-- ===== TAXES &amp; DUTIES ===== -->
+                    <div style="margin-bottom: 14px;">
+                        <div class="section-heading">TAXES &amp; DUTIES:</div>
+                        <p class="section-text">
+                            <t t-if="doc.proforma_gst_note"><t t-esc="doc.proforma_gst_note"/></t>
+                            <t t-else="">GST at the rate of 18% shall be applicable on above quoted price.</t>
+                        </p>
+                    </div>
+
+                    <!-- ===== TERMS &amp; CONDITIONS ===== -->
+                    <t t-if="doc.proforma_warranty">
+                        <div style="margin-bottom: 14px;">
+                            <div class="section-heading">TERMS &amp; CONDITIONS:</div>
+                            <p class="section-text">
+                                <strong>Quality assurance &amp; Warranty:</strong> - <t t-esc="doc.proforma_warranty"/>
+                            </p>
+                        </div>
+                    </t>
+
+                    <!-- ===== PAYMENT SCHEDULE ===== -->
+                    <t t-if="doc.proforma_payment_terms_text">
+                        <div style="margin-bottom: 14px;">
+                            <div class="section-heading">PAYMENT SCHEDULE:</div>
+                            <div class="section-text" style="white-space: pre-line;"><t t-esc="doc.proforma_payment_terms_text"/></div>
+                        </div>
+                    </t>
+
+                    <!-- ===== BANK DETAILS ===== -->
+                    <div style="margin-bottom: 14px;">
+                        <strong style="font-size: 15px;">Bank Details :</strong>
+                        <table style="margin-top: 6px; font-size: 13px; line-height: 1.7;">
+                            <tr><td style="padding: 3px 10px 3px 0;">Account Name</td><td>: Marley Enterprises Private Limited</td></tr>
+                            <tr><td style="padding: 3px 10px 3px 0;">Account No.</td><td>: <t t-esc="doc.proforma_bank_account_number or '50200092737354'"/></td></tr>
+                            <tr><td style="padding: 3px 10px 3px 0;">Bank Name</td><td>: <t t-esc="doc.proforma_bank_name or 'HDFC Bank'"/></td></tr>
+                            <tr><td style="padding: 3px 10px 3px 0;">Bank Branch</td><td>: <t t-esc="doc.proforma_bank_branch or 'Kukatpally, Hyderabad'"/></td></tr>
+                            <tr><td style="padding: 3px 10px 3px 0;">IFSC Code</td><td>: <t t-esc="doc.proforma_bank_ifsc or 'HDFC0000364'"/></td></tr>
+                        </table>
+                    </div>
+
+                    <!-- ===== DELIVERY ===== -->
+                    <t t-if="doc.proforma_delivery">
+                        <div style="margin-bottom: 14px;">
+                            <div class="section-heading">DELIVERY SCHEDULE:</div>
+                            <p class="section-text"><t t-esc="doc.proforma_delivery"/></p>
+                        </div>
+                    </t>
+
+                    <!-- ===== AUTHORIZED SIGNATORY ===== -->
+                    <div style="margin-top: 30px; font-size: 14px;">
+                        <table style="width: 100%;"><tr>
+                            <td style="width: 50%;"></td>
+                            <td style="width: 50%; text-align: right;">
+                                <strong>Marley Enterprises Pvt. Ltd</strong>
+                                <br/><br/><br/><br/>
+                                <div style="border-top: 1px solid #000; width: 200px; margin-left: auto; padding-top: 5px;">
+                                    <strong>Authorized Signatory</strong>
+                                </div>
+                            </td>
+                        </tr></table>
+                    </div>
+
+                </div>
+            </t>
+        </t>
+    </t>
+</template>
+
+</data>
+</odoo>
