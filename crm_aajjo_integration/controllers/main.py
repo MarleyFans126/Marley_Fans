@@ -7,7 +7,7 @@ _logger = logging.getLogger(__name__)
 
 class AajjoWebhookController(http.Controller):
     
-    @http.route('/api/v1/marley/webhook', type='json', auth='public', methods=['POST'], csrf=False)
+    @http.route('/api/v1/marley/webhook', type='jsonrpc', auth='public', methods=['POST'], csrf=False)
     def handle_webhook(self, **post):
         try:
             data = request.jsonrequest

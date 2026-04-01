@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<odoo noupdate="0">
+<odoo>
 
     <!--
         Update the EXISTING default CRM stages to match FRD naming/sequencing.

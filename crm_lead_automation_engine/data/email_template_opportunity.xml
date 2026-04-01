@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <data noupdate="1">
 
         <!-- Email sent to contact when lead is converted to opportunity -->
         <record id="email_template_opportunity_acknowledgment" model="mail.template">
@@ -43,5 +42,4 @@
             <field name="auto_delete" eval="True"/>
         </record>
 
-    </data>
 </odoo>

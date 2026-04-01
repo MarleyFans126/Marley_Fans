@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-<data noupdate="1">
 
     <!-- Installation stage for project tasks -->
     <record id="project_stage_installation" model="project.task.type">
@@ -28,5 +27,4 @@
         <field name="fold">True</field>
     </record>
 
-</data>
 </odoo>

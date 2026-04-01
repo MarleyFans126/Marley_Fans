@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <data noupdate="0">
         <!-- Override Sales Quotation Template to automatically CC child contacts -->
         <record id="sale.email_template_edi_sale" model="mail.template">
             <field name="email_cc">{{ ','.join(object.partner_id.child_ids.filtered('email').mapped('email')) if object.partner_id else '' }}</field>
@@ -13,5 +12,4 @@
         <record id="sale.mail_template_sale_confirmation" model="mail.template">
             <field name="email_cc">{{ ','.join(object.partner_id.child_ids.filtered('email').mapped('email')) if object.partner_id else '' }}</field>
         </record>
-    </data>
 </odoo>

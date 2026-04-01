@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <data noupdate="1">
 
         <!-- Email sent to client when Lead is marked as Won -->
         <record id="email_template_won_client_confirmation" model="mail.template">
@@ -45,5 +44,4 @@
             <field name="auto_delete" eval="True"/>
         </record>
 
-    </data>
 </odoo>

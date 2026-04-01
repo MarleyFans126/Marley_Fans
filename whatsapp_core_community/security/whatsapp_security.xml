@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-    <data noupdate="1">
 
         <!--
             WhatsApp Security Rules
@@ -34,5 +33,4 @@
             <field name="perm_unlink" eval="True"/>
         </record>
 
-    </data>
 </odoo>

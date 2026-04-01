@@ -64,13 +64,18 @@ def _post_init_swap_quotation_report(env):
 
             # Also clear any cached PDF on draft/unposted invoices so they regenerate
             # with the new template on next send
-            env.cr.execute("""
-                UPDATE account_move
-                SET invoice_pdf_report_file = NULL
-                WHERE invoice_pdf_report_file IS NOT NULL
-                  AND state = 'posted'
-                  AND is_move_sent = FALSE
-            """)
+            try:
+                env.cr.execute("SAVEPOINT clear_pdf_cache")
+                env.cr.execute("""
+                    UPDATE account_move
+                    SET invoice_pdf_report_file = NULL
+                    WHERE invoice_pdf_report_file IS NOT NULL
+                      AND state = 'posted'
+                      AND is_move_sent = FALSE
+                """)
+                env.cr.execute("RELEASE SAVEPOINT clear_pdf_cache")
+            except Exception:
+                env.cr.execute("ROLLBACK TO SAVEPOINT clear_pdf_cache")
 
         # ── Set company name and logo to Marley HVLS Fans ────────────
         import base64, os

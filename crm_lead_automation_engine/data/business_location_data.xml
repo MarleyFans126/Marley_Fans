@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-<data noupdate="1">
 
     <!-- ============================================================ -->
     <!-- CITIES — Tier 1 (8 cities) -->
@@ -318,5 +317,4 @@
         <field name="city_id" ref="city_pune"/>
     </record>
 
-</data>
 </odoo>
