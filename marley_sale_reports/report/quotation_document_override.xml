@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-<data>
 
     <!--
         Override the default Odoo sale order document template with Marley Quotation design.
@@ -317,5 +316,4 @@ Payments to be issued to us by way of Pay-order/DD/at par Cheque. All payments r
         </xpath>
     </template>
 
-</data>
 </odoo>

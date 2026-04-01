@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-    <data>
 
         <!-- Main Report -->
         <template id="report_marley_quotation">
@@ -313,5 +312,4 @@ Payments to be issued to us by way of Pay-order/DD/at par Cheque. All payments r
             </t>
         </template>
 
-    </data>
 </odoo>
