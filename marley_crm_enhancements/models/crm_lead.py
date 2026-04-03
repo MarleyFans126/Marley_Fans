@@ -90,13 +90,26 @@ class CrmLead(models.Model):
     def action_view_project(self):
         """Open the project linked to this lead."""
         self.ensure_one()
-        if not self.project_id:
+        project_id = self.linked_project_id or (self.project_id.id if self.project_id else False)
+        if not project_id:
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'title': 'No Project',
+                    'message': 'No project linked to this lead yet.',
+                    'type': 'warning',
+                    'sticky': False,
+                },
+            }
+        project = self.env['project.project'].sudo().browse(project_id)
+        if not project.exists():
             return False
         return {
             'type': 'ir.actions.act_window',
-            'name': self.project_id.name,
+            'name': project.name,
             'res_model': 'project.project',
-            'res_id': self.project_id.id,
+            'res_id': project.id,
             'view_mode': 'form',
             'target': 'current',
         }
@@ -136,19 +149,21 @@ class CrmLead(models.Model):
 
         # Step 6: Log in chatter
         so_names = ', '.join(sale_orders.mapped('name')) if sale_orders else 'None'
-        body = Markup("<b>Lead Won — Conversion Summary</b><br/>")
+        is_manual = self._context.get('skip_won_status')
+        title = "Lead Project Created" if is_manual else "Lead Won — Conversion Summary"
+        
+        body = Markup("<b>%s</b><br/>") % title
         if partner:
             body += Markup("Customer: %s<br/>") % partner.name
         if project:
             body += Markup("Project: %s<br/>") % project.name
-        body += Markup("Sales Orders: %s<br/>") % so_names
+        if sale_orders:
+            body += Markup("Sales Orders: %s<br/>") % so_names
         self.message_post(body=body)
 
-        # Step 7: Notify sales team + management
-        self._notify_won_internal(partner, project, sale_orders)
-
-        # Step 8: Send optional email to client
-        self._send_won_client_email(partner)
+        # Step 7: Internal notification only (no client email — handled by Automated Action)
+        if not is_manual:
+            self._notify_won_internal(partner, project, sale_orders)
 
         _logger.info(
             "Won conversion done for Lead %s | partner=%s | project=%s | SOs=%s",
@@ -336,29 +351,8 @@ class CrmLead(models.Model):
                 _logger.warning("Failed to send Won notification for Lead %s: %s", self.id, e)
 
     # ------------------------------------------------------------------
-    # Won: Optional email confirmation to client
+    # Won: Client email is now handled by Automated Action ('won stage' template)
     # ------------------------------------------------------------------
-
-    def _send_won_client_email(self, partner):
-        """Send email confirmation to the client when lead is Won."""
-        self.ensure_one()
-        if not partner or not self.email_from:
-            _logger.info("Won client email skipped — no partner email for Lead %s", self.id)
-            return
-
-        template = self.env.ref(
-            'marley_crm_enhancements.email_template_won_client_confirmation',
-            raise_if_not_found=False,
-        )
-        if not template:
-            _logger.info("Won client email skipped — template not found for Lead %s", self.id)
-            return
-
-        try:
-            template.send_mail(self.id, force_send=False)
-            _logger.info("Won client email queued for Lead %s to %s", self.id, self.email_from)
-        except Exception as e:
-            _logger.warning("Failed to send Won client email for Lead %s: %s", self.id, e)
 
     # ------------------------------------------------------------------
     # Override Won action to trigger conversion

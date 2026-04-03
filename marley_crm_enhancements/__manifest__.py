@@ -20,7 +20,6 @@
         'data/crm_stages.xml',
         'data/crm_lost_reasons.xml',
         'data/project_stages.xml',
-        'data/email_template_won.xml',
         'report/installation_report.xml',
         'report/installation_template.xml',
         'report/installation_task_report.xml',
