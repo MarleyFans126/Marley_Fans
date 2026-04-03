@@ -22,6 +22,17 @@
             <xpath expr="//notebook" position="inside">
                 <page string="Proforma Invoice Details" name="marley_proforma_details">
 
+                    <group string="Proforma Print Options">
+                        <group>
+                            <field name="proforma_with_taxes"/>
+                            <field name="proforma_print_terms"/>
+                            <field name="advance_payment_percentage"/>
+                        </group>
+                        <group>
+                            <field name="advance_amount_due" readonly="1"/>
+                        </group>
+                    </group>
+
                     <group string="Bank Details (for Proforma Invoice PDF)">
                         <group>
                             <field name="proforma_bank_name"/>

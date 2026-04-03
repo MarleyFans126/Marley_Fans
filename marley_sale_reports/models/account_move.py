@@ -52,6 +52,38 @@ class AccountMove(models.Model):
     )
 
     # ------------------------------------------------------------------
+    # Proforma print options
+    # ------------------------------------------------------------------
+    proforma_with_taxes = fields.Boolean(
+        string='Print With Taxes',
+        default=False,
+        help='If checked, taxes will be shown in the Proforma Invoice PDF.',
+    )
+    proforma_print_terms = fields.Boolean(
+        string='Print Terms & Conditions',
+        default=True,
+        help='If checked, terms, payment schedule, bank details and delivery sections will be printed in the Proforma Invoice PDF.',
+    )
+    advance_payment_percentage = fields.Float(
+        string='Advance Payment %',
+        default=0.0,
+        help='Enter percentage value (e.g. 70 for 70%).',
+    )
+    advance_amount_due = fields.Monetary(
+        string='Advance To Be Paid',
+        compute='_compute_advance_amount_due',
+        store=True,
+        currency_field='currency_id',
+    )
+
+    @api.depends('advance_payment_percentage', 'amount_total', 'amount_untaxed', 'proforma_with_taxes')
+    def _compute_advance_amount_due(self):
+        for move in self:
+            pct = move.advance_payment_percentage or 0.0
+            base = move.amount_total if move.proforma_with_taxes else move.amount_untaxed
+            move.advance_amount_due = round(base * pct / 100.0, 2)
+
+    # ------------------------------------------------------------------
     # Commercial terms (shown on Proforma Invoice PDF)
     # ------------------------------------------------------------------
     proforma_warranty = fields.Text(
