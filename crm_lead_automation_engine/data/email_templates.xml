@@ -1,58 +1,164 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-        <!-- Common Lead Acknowledgment Email Template -->
-        <record id="email_template_lead_acknowledgment" model="mail.template">
-            <field name="name">Lead Acknowledgment Email (Common)</field>
-            <field name="model_id" ref="crm.model_crm_lead"/>
-            <field name="subject">Thank you for your interest!</field>
-            <field name="email_from">{{ (object.user_id.email_formatted or user.email_formatted) }}</field>
-            <field name="email_to">{{ object.email_from }}</field>
-            <field name="body_html" type="html">
-                <div style="margin: 0px; padding: 0px;">
-                    <p style="margin: 0px; padding: 0px; font-size: 13px;">
-                        Hello <t t-out="object.contact_name or 'Customer'"/>,
-                        <br/><br/>
-                        Thank you for contacting us. We have received your inquiry regarding 
-                        <strong t-out="object.name"/> and our team will get back to you shortly.
-                        <br/><br/>
-                        Best regards,
-                        <br/>
-                        Sales Team
-                    </p>
-                </div>
-            </field>
-            <field name="auto_delete" eval="True"/>
-        </record>
+    <!--
+        Stage-based email templates used by the automated action
+        (stage_email_automation.xml). Template names MUST match exactly.
+    -->
 
-        <!-- Salesperson Assigned Email Template -->
-        <record id="email_template_salesperson_assigned" model="mail.template">
-            <field name="name">Salesperson Assigned Email (Common)</field>
-            <field name="model_id" ref="crm.model_crm_lead"/>
-            <field name="subject">Salesperson Assigned: {{ object.name }}</field>
-            <field name="email_from">{{ (user.email_formatted) }}</field>
-            <field name="email_to">{{ object.email_from }}</field>
-            <field name="body_html" type="html">
-                <div style="margin: 0px; padding: 0px;">
-                    <p style="margin: 0px; padding: 0px; font-size: 13px;">
-                        Dear <t t-out="object.contact_name or 'Customer'"/>,
-                        <br/><br/>
-                        Your inquiry regarding <strong t-out="object.name"/> has been moved to the <strong>Qualify</strong> stage.
-                        <br/><br/>
-                        A dedicated salesperson has been assigned to assist you:
-                        <ul>
-                            <li><strong>Name:</strong> <t t-out="object.user_id.name or 'N/A'"/></li>
-                            <li><strong>Mobile:</strong> <t t-out="object.user_id.partner_id.phone or 'N/A'"/></li>
-                            <li><strong>Email:</strong> <t t-out="object.user_id.email or 'N/A'"/></li>
-                        </ul>
-                        <br/>
-                        They will be contacting you shortly.
-                        <br/><br/>
-                        Best regards,
-                        <br/>
-                        Sales Team
-                    </p>
-                </div>
-            </field>
-            <field name="auto_delete" eval="True"/>
-        </record>
+    <!-- NEW stage -->
+    <record id="email_template_new_stage" model="mail.template">
+        <field name="name">New stage mail</field>
+        <field name="model_id" ref="crm.model_crm_lead"/>
+        <field name="subject">Introduction – Marley Enterprises | One of India's Leading HVLS Fan Manufacturers</field>
+        <field name="email_from">info@marleyfans.in</field>
+        <field name="reply_to">info@marleyfans.in</field>
+        <field name="email_to">{{ object.email_from }}</field>
+        <field name="body_html" type="html">
+<div style="margin:0; padding:0; font-family:Arial,sans-serif; font-size:14px; color:#333;">
+<p>Dear Valued Customer,</p>
+
+<p>Greetings from <b>Marley Enterprises!</b></p>
+
+<p>Thank you for your inquiry. We are pleased to introduce our company and share details of our product range.</p>
+
+<p><b>Marley Enterprises</b> is one of India's leading and largest manufacturers of <b>HVLS (High Volume Low Speed) Fans</b>, delivering high-performance air movement solutions across Pan India. Our systems are engineered to provide superior airflow, enhanced comfort, and long-term energy efficiency for large commercial and industrial spaces.</p>
+
+<p>You may explore our products and recent installations on our website:<br/>
+<a href="https://www.marleyfans.in/" target="_blank">https://www.marleyfans.in/</a></p>
+
+<p><b>Our Unique Selling Propositions (USPs):</b></p>
+<ul>
+<li>Proudly Made in India</li>
+<li>Widest and densest blades in the market for superior air delivery</li>
+<li>Cost-effective and energy-efficient performance</li>
+<li>Ultra-quiet operation for maximum comfort</li>
+<li>Forward &amp; reverse functionality for year-round usability</li>
+<li>Maintenance-free design for hassle-free ownership</li>
+<li>High-torque motor for powerful and consistent performance</li>
+</ul>
+
+<p>We are proud to have collaborated with reputed organizations across multiple sectors. Kindly find attached our client list showcasing some of our esteemed customers.</p>
+
+<p>We would be glad to understand your requirements and propose the most suitable solution for your space.</p>
+
+<p>Looking forward to your response.</p>
+
+<p>Best Regards,<br/>
+<b>Team Marley Enterprises</b><br/>
+Marley Enterprises Private Limited<br/>
++91 93916 27905<br/>
+sales@marleyfans.in</p>
+</div>
+        </field>
+        <field name="auto_delete" eval="False"/>
+    </record>
+
+    <!-- QUALIFIED stage -->
+    <record id="email_template_qualify_stage" model="mail.template">
+        <field name="name">Qualify stage</field>
+        <field name="model_id" ref="crm.model_crm_lead"/>
+        <field name="subject">Requirement Discussion – Marley Enterprises</field>
+        <field name="email_from">info@marleyfans.in</field>
+        <field name="reply_to">info@marleyfans.in</field>
+        <field name="email_to">{{ object.email_from }}</field>
+        <field name="body_html" type="html">
+<div style="margin:0; padding:0; font-family:Arial,sans-serif; font-size:14px; color:#333;">
+<p>Dear Valued Customer,</p>
+
+<p>Greetings from <b>Marley Enterprises!</b></p>
+
+<p>Thank you for your interest in our fans. Your inquiry has now been moved to the next stage, and our concerned team member will assist you further with detailed discussions, technical support, and the best suitable solution for your requirement.</p>
+
+<p><b>Contact Details:</b><br/>
+<t t-if="object.user_id.phone"><t t-out="object.user_id.phone">+91 93916 27905</t></t>
+<t t-if="not object.user_id.phone">+91 93916 27905</t>
+<br/>
+<t t-if="object.user_id.email"><t t-out="object.user_id.email">sales@marleyfans.in</t></t>
+<t t-if="not object.user_id.email">sales@marleyfans.in</t>
+</p>
+
+<p>Kindly feel free to connect directly for faster assistance.</p>
+
+<p>Looking forward to working with you.</p>
+
+<p>Regards,<br/>
+<b>Team Marley Enterprises</b></p>
+</div>
+        </field>
+        <field name="auto_delete" eval="False"/>
+    </record>
+
+    <!-- PROPOSITION stage -->
+    <record id="email_template_proposition_stage" model="mail.template">
+        <field name="name">Proposition stage</field>
+        <field name="model_id" ref="crm.model_crm_lead"/>
+        <field name="subject">Proposal &amp; Quotation – Marley Enterprises</field>
+        <field name="email_from">info@marleyfans.in</field>
+        <field name="reply_to">info@marleyfans.in</field>
+        <field name="email_to">{{ object.email_from }}</field>
+        <field name="body_html" type="html">
+<div style="margin:0; padding:0; font-family:Arial,sans-serif; font-size:14px; color:#333;">
+<p>Dear Valued Customer,</p>
+
+<p>Greetings from <b>Marley Enterprises!</b></p>
+
+<p>As discussed, please find attached our proposal, including the recommended solution and commercial details for your requirement.</p>
+
+<p>Our products are designed to deliver efficient air movement, energy savings, and reliable long-term performance for your space.</p>
+
+<p>Kindly review the proposal and feel free to reach out for any clarification or further discussion.</p>
+
+<p>Looking forward to your feedback.</p>
+
+<p>Best Regards,<br/>
+<b><t t-out="object.user_id.name or 'Sales Team'">Sales Team</t></b><br/>
+Sales Coordinator<br/>
+Marley Enterprises Private Limited<br/>
+<t t-if="object.user_id.phone"><t t-out="object.user_id.phone">+91 93916 27905</t></t>
+<t t-if="not object.user_id.phone">+91 93916 27905</t>
+<br/>
+<t t-if="object.user_id.email"><t t-out="object.user_id.email">sales@marleyfans.in</t></t>
+<t t-if="not object.user_id.email">sales@marleyfans.in</t>
+</p>
+</div>
+        </field>
+        <field name="auto_delete" eval="False"/>
+    </record>
+
+    <!-- WON stage -->
+    <record id="email_template_won_stage" model="mail.template">
+        <field name="name">won stage</field>
+        <field name="model_id" ref="crm.model_crm_lead"/>
+        <field name="subject">Order Confirmation – Marley Enterprises</field>
+        <field name="email_from">info@marleyfans.in</field>
+        <field name="reply_to">info@marleyfans.in</field>
+        <field name="email_to">{{ object.email_from }}</field>
+        <field name="body_html" type="html">
+<div style="margin:0; padding:0; font-family:Arial,sans-serif; font-size:14px; color:#333;">
+<p>Dear Valued Customer,</p>
+
+<p>Greetings from <b>Marley Enterprises!</b></p>
+
+<p>As discussed, please find attached our proposal, including the recommended solution and commercial details for your requirement.</p>
+
+<p>Our products are designed to deliver efficient air movement, energy savings, and reliable long-term performance for your space.</p>
+
+<p>Kindly review the proposal and feel free to reach out for any clarification or further discussion.</p>
+
+<p>Looking forward to your feedback.</p>
+
+<p>Best Regards,<br/>
+<b><t t-out="object.user_id.name or 'Sales Team'">Sales Team</t></b><br/>
+Sales Coordinator<br/>
+Marley Enterprises Private Limited<br/>
+<t t-if="object.user_id.phone"><t t-out="object.user_id.phone">+91 93916 27905</t></t>
+<t t-if="not object.user_id.phone">+91 93916 27905</t>
+<br/>
+<t t-if="object.user_id.email"><t t-out="object.user_id.email">sales@marleyfans.in</t></t>
+<t t-if="not object.user_id.email">sales@marleyfans.in</t>
+</p>
+</div>
+        </field>
+        <field name="auto_delete" eval="False"/>
+    </record>
 </odoo>

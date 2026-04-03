@@ -11,13 +11,12 @@
     """,
     'author': 'Techmatic Systems',
     'website': 'https://www.techmaticsys.com',
-    'depends': ['crm', 'mail', 'sale_management'],
+    'depends': ['crm', 'mail', 'sale_management', 'base_automation'],
     'data': [
         'security/ir.model.access.csv',
         'data/business_location_data.xml',
         'data/email_templates.xml',
-        'data/email_template_opportunity.xml',
-        'data/email_template_qualified.xml',
+        'data/stage_email_automation.xml',
         'data/debug_actions.xml',
         'views/business_location_views.xml',
         'views/crm_lead_views.xml',
@@ -32,3 +31,5 @@
     'maintainer': 'Techmatic Odoo Team',
     'support': 'info@techmaticsys.com',
 }
+
+

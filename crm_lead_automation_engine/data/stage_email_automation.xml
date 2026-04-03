@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <!-- Server Action: Execute Python code for stage-based emails -->
+    <record id="crm_stage_email_server_action" model="ir.actions.server">
+        <field name="name">CRM: Send Stage-Based Email (Action)</field>
+        <field name="model_id" ref="crm.model_crm_lead"/>
+        <field name="state">code</field>
+        <field name="code">
+for record in records:
+    record._send_stage_email()
+        </field>
+    </record>
+
+    <!-- Automated Action: trigger on stage_id change -->
+    <record id="crm_stage_email_automated_action" model="base.automation">
+        <field name="name">CRM: Send Stage-Based Email on Stage Change</field>
+        <field name="model_id" ref="crm.model_crm_lead"/>
+        <field name="trigger">on_create_or_write</field>
+        <field name="trigger_field_ids" eval="[(4, ref('crm.field_crm_lead__stage_id'))]"/>
+        <field name="active" eval="True"/>
+        <field name="action_server_ids" eval="[(4, ref('crm_stage_email_server_action'))]"/>
+    </record>
+
+</odoo>

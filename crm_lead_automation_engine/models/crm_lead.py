@@ -7,66 +7,6 @@ import re
 
 _logger = logging.getLogger(__name__)
 
-# ── Marley introduction email content ──
-_MARLEY_EMAIL_SUBJECT = (
-    "Introduction \u2013 Marley Enterprises | One of India\u2019s Leading "
-    "HVLS Fan Manufacturers"
-)
-
-_MARLEY_EMAIL_BODY = """\
-<div style="margin:0; padding:0; font-family:Arial, sans-serif; font-size:13px; color:#333;">
-<p>Dear Sir/Ma'am,</p>
-
-<p>
-Greetings from <strong>Marley Enterprises!</strong>
-</p>
-
-<p>
-We are pleased to introduce ourselves as <strong>one of India's leading manufacturers
-of HVLS (High Volume Low Speed) fans</strong>, proudly serving a wide range of industries
-across the country.
-</p>
-
-<p>At Marley, we are committed to delivering <strong>innovative air circulation solutions</strong> that combine:</p>
-<ul>
-    <li>Superior engineering and build quality</li>
-    <li>Energy-efficient performance</li>
-    <li>Customizable designs to suit diverse industrial and commercial needs</li>
-</ul>
-
-<p>Our product range is designed to offer <strong>maximum airflow with minimum energy consumption</strong>, making us the preferred choice for:</p>
-<ul>
-    <li>Warehouses &amp; Logistics Hubs</li>
-    <li>Manufacturing &amp; Assembly Plants</li>
-    <li>Commercial Spaces &amp; Showrooms</li>
-    <li>Dairy Farms &amp; Agricultural Facilities</li>
-    <li>Airports, Railway Stations &amp; Public Infrastructure</li>
-</ul>
-
-<p><strong>Why Marley HVLS Fans?</strong></p>
-<ul>
-    <li>Made in India with globally benchmarked standards</li>
-    <li>Pan-India installation and after-sales support</li>
-    <li>Trusted by 500+ clients across 20+ industries</li>
-    <li>5-year warranty on mechanical parts</li>
-</ul>
-
-<p>
-We would love the opportunity to discuss how our HVLS fans can add value to your facility.
-Please find attached our <strong>Latest Brochure</strong> and <strong>Client List</strong>
-for your reference.
-</p>
-
-<p>
-Looking forward to connecting with you.
-</p>
-
-<p>
-Warm regards,<br/>
-<strong>Team Marley Enterprises</strong><br/>
-<a href="https://www.marleyfan.com">www.marleyfan.com</a>
-</p>
-</div>"""
 
 class CrmLead(models.Model):
     _inherit = 'crm.lead'
@@ -74,12 +14,14 @@ class CrmLead(models.Model):
     # -------------------------------------------------------------------------
     # NEW AUTOMATION FIELDS
     # -------------------------------------------------------------------------
-    acknowledgment_sent = fields.Boolean(default=False, string="Acknowledgment Sent")
+    acknowledgment_sent = fields.Boolean(default=False, string="Acknowledgment Sent (New Stage)")
+    qualify_email_sent = fields.Boolean(default=False, string="Qualify Email Sent")
+    proposition_email_sent = fields.Boolean(default=False, string="Proposition Email Sent")
+    won_email_sent = fields.Boolean(default=False, string="Won Email Sent")
     salesperson_notified = fields.Boolean(default=False, string="Salesperson Notified")
     whatsapp_ack_sent = fields.Boolean(default=False, string="WhatsApp Ack Sent")
-    qualify_email_sent = fields.Boolean(default=False, string="Qualify Email Sent")
     qualify_whatsapp_sent = fields.Boolean(default=False, string="Qualify WhatsApp Sent")
-    
+
     # Duplicate Logic Fields
     duplicate_flag = fields.Boolean(string='Duplicate Lead', default=False, index=True)
     is_duplicate = fields.Boolean(string='Is Duplicate (Legacy)', related='duplicate_flag', readonly=True, store=True)
@@ -89,15 +31,19 @@ class CrmLead(models.Model):
     # Loss Logic Fields
     loss_reason_id = fields.Many2one('crm.lost.reason', string='Loss Reason')
     loss_remarks = fields.Text(string='Loss Remarks')
-    
+
     # Fields moved from crm_aajjo_integration that are needed for general automation display
     second_salesperson_id = fields.Many2one('res.users', string='Second SalesPerson', domain=[('share', '=', False)])
-    
+
     # Unified Source Flags (Shared across modules)
     is_indiamart = fields.Boolean(string='Is IndiaMART Lead', default=False, readonly=True)
     is_aajjo = fields.Boolean(string='Is AAJJO Lead', default=False, readonly=True)
+    is_manual_lead = fields.Boolean(string='Is Manual Lead', default=True)
     aajjo_lead_id = fields.Char(string='AAJJO Lead ID', readonly=True, copy=False)
     external_lead_id = fields.Char(string="External Lead ID", index=True, copy=False)
+
+    # Project link (stored as Integer to avoid hard dependency on project module)
+    linked_project_id = fields.Integer(string='Project ID', readonly=True, copy=False)
 
     # Lead Source Type (computed from flags)
     lead_source_type = fields.Selection([
@@ -106,7 +52,7 @@ class CrmLead(models.Model):
         ('manual', 'Manual'),
     ], string='Source', compute='_compute_lead_source_type', store=True)
 
-    @api.depends('is_indiamart', 'is_aajjo')
+    @api.depends('is_indiamart', 'is_aajjo', 'is_manual_lead')
     def _compute_lead_source_type(self):
         for lead in self:
             if lead.is_indiamart:
@@ -151,79 +97,29 @@ class CrmLead(models.Model):
             self.business_state_id = self.business_city_id.state_id
 
     # -------------------------------------------------------------------------
-    # INIT: Update acknowledgment email template on module upgrade
+    # INIT: Cleanup stale views on module upgrade
     # -------------------------------------------------------------------------
     def init(self):
-        """Replace the default acknowledgment email with Marley intro + PDF attachments."""
-        template = self.env.ref(
-            'crm_lead_automation_engine.email_template_lead_acknowledgment',
-            raise_if_not_found=False,
-        )
-        if not template:
-            return
-
-        # Skip if already updated
-        if 'Marley Enterprises' in (template.subject or ''):
-            return
-
-        # ── Create / find PDF attachments ──
-        attachment_dir = os.path.join(
-            os.path.dirname(os.path.dirname(__file__)),
-            'static', 'attachments',
-        )
-        pdf_files = [
-            ('Latest Brochure - 2026.pdf', 'Latest_Brochure_2026.pdf'),
-            ('Marley Client List.pdf', 'Marley_Client_List.pdf'),
-        ]
-        attachment_ids = []
-        for display_name, filename in pdf_files:
-            filepath = os.path.join(attachment_dir, filename)
-            if not os.path.isfile(filepath):
-                _logger.warning("PDF not found: %s", filepath)
-                continue
-
-            existing = self.env['ir.attachment'].search([
-                ('name', '=', display_name),
-                ('res_model', '=', 'mail.template'),
-                ('res_id', '=', template.id),
-            ], limit=1)
-            if existing:
-                attachment_ids.append(existing.id)
-            else:
-                with open(filepath, 'rb') as f:
-                    data = base64.b64encode(f.read())
-                att = self.env['ir.attachment'].create({
-                    'name': display_name,
-                    'type': 'binary',
-                    'datas': data,
-                    'res_model': 'mail.template',
-                    'res_id': template.id,
-                    'mimetype': 'application/pdf',
-                })
-                attachment_ids.append(att.id)
-
-        vals = {
-            'name': 'Marley Introduction Email (New Stage)',
-            'subject': _MARLEY_EMAIL_SUBJECT,
-            'body_html': _MARLEY_EMAIL_BODY,
-        }
-        if attachment_ids:
-            vals['attachment_ids'] = [(6, 0, attachment_ids)]
-
-        template.write(vals)
-        _logger.info(
-            "Updated acknowledgment template → Marley introduction email "
-            "with %d attachments.", len(attachment_ids),
-        )
+        """Cleanup stale views referencing fields from uninstalled modules."""
+        stale_fields = ['l10n_in_gsp', 'enable_aajjo_sync']
+        for field_name in stale_fields:
+            try:
+                if field_name in self.env['res.config.settings']._fields:
+                    continue
+                stale_views = self.env['ir.ui.view'].sudo().search([
+                    ('model', '=', 'res.config.settings'),
+                    ('arch_db', 'like', field_name),
+                ])
+                if stale_views:
+                    _logger.info("[INIT] Deactivating %d stale view(s) referencing %s", len(stale_views), field_name)
+                    stale_views.write({'active': False})
+            except Exception as e:
+                _logger.warning("[INIT] Could not clean stale views for %s: %s", field_name, e)
 
     # -------------------------------------------------------------------------
     # HELPER: Phone Normalization
     # -------------------------------------------------------------------------
     def _normalize_phone_for_search(self, number):
-        """ 
-        Strip non-numeric characters to improve matching. 
-        Only keep digits.
-        """
         if not number:
             return False
         sanitized = re.sub(r'\D', '', str(number))
@@ -236,9 +132,6 @@ class CrmLead(models.Model):
     # -------------------------------------------------------------------------
     @api.depends('duplicate_flag')
     def _compute_duplicate_info(self):
-        """
-        Compute the visual star indicator and duplicate count.
-        """
         for lead in self:
             lead.duplicate_star = '★' if lead.duplicate_flag else ''
             if lead.duplicate_flag and lead.id:
@@ -255,278 +148,66 @@ class CrmLead(models.Model):
                 lead.duplicate_count = 0
 
     def _get_duplicate_domain(self, phone, email):
-        """ Return domain for finding duplicates based on phone OR email """
         domain = []
-        
         if phone:
             sanitized = re.sub(r'\D', '', str(phone))
             if len(sanitized) >= 10:
-                search_term = sanitized[-10:] 
+                search_term = sanitized[-10:]
                 domain.append(('phone', 'ilike', search_term))
             else:
                 domain.append(('phone', '=ilike', phone.strip()))
-
         if email:
             domain.append(('email_from', '=ilike', email.strip()))
-        
         if not domain:
             return []
-        
         if len(domain) > 1:
             return ['|'] + domain
         return domain
 
     def _check_and_mark_duplicates(self):
-        """ 
-        Check if current lead is a duplicate. 
-        If yes, mark it AND the existing matches as duplicate.
-        """
         for lead in self:
             if not lead.phone and not lead.email_from:
                 continue
-
             domain = self._get_duplicate_domain(lead.phone, lead.email_from)
             if not domain:
                 continue
-
             search_domain = domain + [('id', '!=', lead.id)]
             duplicates = self.search(search_domain)
-            
             if duplicates:
                 _logger.info(f"Duplicate found for Lead {lead.id}: {len(duplicates)} matches.")
-                
                 if not lead.duplicate_flag:
                     lead.duplicate_flag = True
-                
                 leads_to_flag = duplicates.filtered(lambda l: not l.duplicate_flag)
                 if leads_to_flag:
                     leads_to_flag.write({'duplicate_flag': True})
-                    _logger.info(f"Marked {len(leads_to_flag)} existing leads as duplicates of {lead.id}")
-            
             else:
                 if lead.duplicate_flag:
                     lead.duplicate_flag = False
 
     # -------------------------------------------------------------------------
-    # AUTOMATION SERVICE HELPERS (previously in abstract mixin)
+    # AUTO-CREATE PROJECT (as soon as lead enters pipeline)
     # -------------------------------------------------------------------------
-    def _auto_send_acknowledgment(self, lead):
-        """ Send acknowledgment email + WhatsApp on lead creation (New stage) """
-        ICP = self.env['ir.config_parameter'].sudo()
-
-        # --- EMAIL ---
-        auto_email = ICP.get_param('crm_automation.auto_email_enabled', 'False') == 'True'
-
-        # Support native template attached to stage (new state)
-        stage_template = False
-        if lead.stage_id and 'mail_template_id' in lead.stage_id._fields and lead.stage_id.mail_template_id:
-            stage_template = lead.stage_id.mail_template_id
-        elif lead.stage_id and 'template_id' in lead.stage_id._fields and lead.stage_id.template_id:
-            stage_template = lead.stage_id.template_id
-
-        if stage_template and lead.email_from:
-            try:
-                stage_template.send_mail(lead.id, force_send=True)
-                lead.acknowledgment_sent = True
-
-                self.env['crm.email.log'].sudo().create({
-                    'lead_id': lead.id,
-                    'lead_name': lead.name or '',
-                    'partner_name': lead.contact_name or lead.partner_name or '',
-                    'email_to': lead.email_from,
-                    'template_used': stage_template.name,
-                    'status': 'sent',
-                })
-                _logger.info(f"[AUTO-NEW] Stage template sent for Lead {lead.id}")
-            except Exception as e:
-                self.env['crm.email.log'].sudo().create({
-                    'lead_id': lead.id,
-                    'lead_name': lead.name or '',
-                    'partner_name': lead.contact_name or lead.partner_name or '',
-                    'email_to': lead.email_from,
-                    'template_used': getattr(stage_template, 'name', 'Stage Template'),
-                    'status': 'failed',
-                    'error_message': str(e),
-                })
-                _logger.error(f"[AUTO-NEW] Stage template failed for Lead {lead.id}: {e}")
-
-        elif auto_email and lead.email_from:
-            try:
-                template = self.env.ref(
-                    'crm_lead_automation_engine.email_template_lead_acknowledgment',
-                    raise_if_not_found=False,
-                )
-                if template:
-                    template.send_mail(lead.id, force_send=True)
-                    lead.acknowledgment_sent = True
-
-                    self.env['crm.email.log'].sudo().create({
-                        'lead_id': lead.id,
-                        'lead_name': lead.name or '',
-                        'partner_name': lead.contact_name or lead.partner_name or '',
-                        'email_to': lead.email_from,
-                        'template_used': template.name,
-                        'status': 'sent',
-                    })
-                    _logger.info(f"[AUTO-NEW] Acknowledgment email sent for Lead {lead.id} to {lead.email_from}")
-                else:
-                    _logger.warning(f"[AUTO-NEW] Acknowledgment email template not found for Lead {lead.id}")
-            except Exception as e:
-                self.env['crm.email.log'].sudo().create({
-                    'lead_id': lead.id,
-                    'lead_name': lead.name or '',
-                    'partner_name': lead.contact_name or lead.partner_name or '',
-                    'email_to': lead.email_from,
-                    'template_used': 'Lead Acknowledgment Email',
-                    'status': 'failed',
-                    'error_message': str(e),
-                })
-                _logger.error(f"[AUTO-NEW] Acknowledgment email failed for Lead {lead.id}: {e}")
-        else:
-            if not auto_email:
-                _logger.info(f"[AUTO-NEW] Auto email disabled in settings. Skipped Lead {lead.id}")
-
-        # --- WHATSAPP ---
-        auto_wa = ICP.get_param('crm_automation.auto_whatsapp_enabled', 'False') == 'True'
-        if auto_wa and not lead.whatsapp_ack_sent:
-            phone = lead.phone or getattr(lead, 'mobile', False)
-            if phone and lead.partner_id:
-                try:
-                    if 'whatsapp.service' in self.env:
-                        contact_name = lead.contact_name or lead.partner_id.name or ''
-                        self.env['whatsapp.service'].send_template_message(
-                            partner=lead.partner_id,
-                            template_name='lead_auto_thankyou',
-                            variables=[contact_name],
-                        )
-                        lead.whatsapp_ack_sent = True
-                        lead.message_post(
-                            body="WhatsApp 'lead_auto_thankyou' sent automatically on lead creation.",
-                            message_type='comment',
-                            subtype_xmlid='mail.mt_note',
-                        )
-                        _logger.info(f"[AUTO-NEW] WhatsApp sent for Lead {lead.id}")
-                except Exception as e:
-                    lead.message_post(
-                        body=f"WhatsApp auto-send failed on creation: {e}",
-                        message_type='comment',
-                        subtype_xmlid='mail.mt_note',
-                    )
-                    _logger.error(f"[AUTO-NEW] WhatsApp failed for Lead {lead.id}: {e}")
-            else:
-                _logger.info(f"[AUTO-NEW] No phone/partner for WhatsApp. Skipped Lead {lead.id}")
-        elif not auto_wa:
-            _logger.info(f"[AUTO-NEW] Auto WhatsApp disabled in settings. Skipped Lead {lead.id}")
-
-    def _auto_on_qualify(self, lead):
-        """ Handle stage change to Qualify — send email + WhatsApp to client """
-        _logger.info(f"[AUTO] Lead {lead.id} moved to Qualify stage.")
-        ICP = self.env['ir.config_parameter'].sudo()
-
-        # Post internal note
-        if not lead.salesperson_notified and lead.user_id:
-            try:
-                lead.message_post(
-                    body=f"Lead qualified and assigned to {lead.user_id.name}.",
-                    message_type='comment',
-                    subtype_xmlid='mail.mt_note',
-                )
-                lead.salesperson_notified = True
-                _logger.info(f"[AUTO] Salesperson notified for Lead {lead.id}")
-            except Exception as e:
-                _logger.error(f"[AUTO] Error notifying salesperson for {lead.id}: {e}")
-
-        # --- EMAIL: Send Qualify notification to client ---
-        if not lead.qualify_email_sent and lead.email_from:
-            auto_qualify_email = ICP.get_param('crm_automation.qualify_email_enabled', 'False') == 'True'
-            if auto_qualify_email:
-                try:
-                    template = self.env.ref(
-                        'crm_lead_automation_engine.email_template_lead_qualified',
-                        raise_if_not_found=False,
-                    )
-                    if template:
-                        template.send_mail(lead.id, force_send=True)
-                        lead.qualify_email_sent = True
-
-                        # Log the email
-                        self.env['crm.email.log'].sudo().create({
-                            'lead_id': lead.id,
-                            'lead_name': lead.name or '',
-                            'partner_name': lead.contact_name or lead.partner_name or '',
-                            'email_to': lead.email_from,
-                            'template_used': template.name,
-                            'status': 'sent',
-                        })
-                        _logger.info(f"[AUTO-QUALIFY] Email sent for Lead {lead.id} to {lead.email_from}")
-                    else:
-                        _logger.warning(f"[AUTO-QUALIFY] Email template not found for Lead {lead.id}")
-                except Exception as e:
-                    self.env['crm.email.log'].sudo().create({
-                        'lead_id': lead.id,
-                        'lead_name': lead.name or '',
-                        'partner_name': lead.contact_name or lead.partner_name or '',
-                        'email_to': lead.email_from,
-                        'template_used': 'Lead Qualified Notification',
-                        'status': 'failed',
-                        'error_message': str(e),
-                    })
-                    _logger.error(f"[AUTO-QUALIFY] Email failed for Lead {lead.id}: {e}")
-            else:
-                _logger.info(f"[AUTO-QUALIFY] Qualify email disabled in settings. Skipped Lead {lead.id}")
-
-        # --- WHATSAPP: Send Qualify notification to client ---
-        if not lead.qualify_whatsapp_sent:
-            auto_qualify_wa = ICP.get_param('crm_automation.qualify_whatsapp_enabled', 'False') == 'True'
-            if auto_qualify_wa:
-                phone = lead.phone or getattr(lead, 'mobile', False)
-                if phone and lead.partner_id:
-                    try:
-                        if 'whatsapp.service' in self.env:
-                            contact_name = lead.contact_name or lead.partner_id.name or ''
-                            sp_name = lead.user_id.name if lead.user_id else 'N/A'
-                            sp_phone = lead.user_id.partner_id.phone if lead.user_id and lead.user_id.partner_id else 'N/A'
-                            sp_email = lead.user_id.email if lead.user_id else 'N/A'
-
-                            variables = [contact_name, sp_name, sp_phone, sp_email]
-                            self.env['whatsapp.service'].send_template_message(
-                                partner=lead.partner_id,
-                                template_name='lead_qualified_notification',
-                                variables=variables,
-                            )
-                            lead.qualify_whatsapp_sent = True
-                            lead.message_post(
-                                body=f"WhatsApp 'lead_qualified_notification' sent to client. "
-                                     f"Salesperson: {sp_name}, Phone: {sp_phone}, Email: {sp_email}",
-                                message_type='comment',
-                                subtype_xmlid='mail.mt_note',
-                            )
-                            _logger.info(f"[AUTO-QUALIFY] WhatsApp sent for Lead {lead.id}")
-                        else:
-                            _logger.info(f"[AUTO-QUALIFY] whatsapp.service not available. Skipped Lead {lead.id}")
-                    except Exception as e:
-                        lead.message_post(
-                            body=f"WhatsApp qualify notification failed: {e}",
-                            message_type='comment',
-                            subtype_xmlid='mail.mt_note',
-                        )
-                        _logger.error(f"[AUTO-QUALIFY] WhatsApp failed for Lead {lead.id}: {e}")
-                else:
-                    _logger.info(f"[AUTO-QUALIFY] No phone/partner for WhatsApp. Skipped Lead {lead.id}")
-            else:
-                _logger.info(f"[AUTO-QUALIFY] Qualify WhatsApp disabled in settings. Skipped Lead {lead.id}")
-
-    def _auto_on_won(self, lead):
-        """ Handle Won lead — delegates to marley_crm_enhancements conversion """
-        _logger.info(f"[AUTO] Lead {lead.id} marked as Won.")
+    def _auto_create_project(self, lead):
+        """Create a project linked to this lead when it enters the pipeline."""
+        if lead.linked_project_id:
+            return  # already has a project
+        _logger.info(f"[AUTO-PROJECT] Creating project for Lead {lead.id}")
         try:
-            if hasattr(lead, 'action_convert_to_won'):
-                lead.action_convert_to_won()
+            if 'project.project' not in self.env:
+                _logger.info("[AUTO-PROJECT] project module not installed, skipping.")
+                return
+            project_vals = {
+                'name': lead.name or 'Lead %s' % lead.id,
+                'partner_id': lead.partner_id.id if lead.partner_id else False,
+            }
+            project = self.env['project.project'].sudo().create(project_vals)
+            lead.write({'linked_project_id': project.id})
+            _logger.info(f"[AUTO-PROJECT] Created Project {project.id} for Lead {lead.id}")
         except Exception as e:
-            _logger.error(f"[AUTO] Won conversion error for Lead {lead.id}: {e}")
+            _logger.error(f"[AUTO-PROJECT] Failed for Lead {lead.id}: {e}")
 
     # -------------------------------------------------------------------------
-    # CREATE OVERRIDE
+    # CREATE OVERRIDE — lightweight only (no email/project here)
     # -------------------------------------------------------------------------
     @api.model_create_multi
     def create(self, vals_list):
@@ -538,76 +219,126 @@ class CrmLead(models.Model):
             except Exception as e:
                 _logger.error(f"Lead Creation Duplicate Check Error for {lead.id}: {e}")
 
-            # Auto-send acknowledgment for both pipeline opportunities and reporting leads
-            try:
-                stage_name = lead.stage_id.name.strip().lower() if lead.stage_id else 'new'
-                if stage_name == 'new' and not lead.acknowledgment_sent and not lead.duplicate_flag:
-                    _logger.info(f"[AUTO] Triggering New stage acknowledgment for Lead {lead.id}")
-                    self._auto_send_acknowledgment(lead)
-            except Exception as e:
-                _logger.error(f"[AUTO] New stage auto-send error for Lead {lead.id}: {e}")
-
         return leads
 
     # -------------------------------------------------------------------------
-    # WRITE OVERRIDE
+    # WRITE OVERRIDE — lightweight only
     # -------------------------------------------------------------------------
     def write(self, vals):
         res = super().write(vals)
 
+        # Duplicate detection on phone/email change
         if 'phone' in vals or 'email_from' in vals:
             self._check_and_mark_duplicates()
-
-        # Stage change automation — ONLY for pipeline opportunities
-        if 'stage_id' in vals:
-            for rec in self:
-                try:
-                    if rec.type != 'opportunity':
-                        _logger.info(f"[AUTO] Skipping stage automation for non-pipeline lead {rec.id} (type={rec.type})")
-                        continue
-
-                    new_stage = rec.stage_id
-                    new_name = new_stage.name.strip().lower() if new_stage else ''
-
-                    if new_name == 'new' and not rec.acknowledgment_sent:
-                        self._auto_send_acknowledgment(rec)
-
-                    if new_name in ['qualified', 'qualify']:
-                        self._auto_on_qualify(rec)
-
-                    if new_stage.is_won:
-                        self._auto_on_won(rec)
-
-                except Exception as e:
-                    _logger.error(f"[AUTO] Stage change error for Lead {rec.id}: {e}")
-
-        # When lead is converted to opportunity (enters pipeline) — use COMMON templates
-        if vals.get('type') == 'opportunity':
-            for rec in self:
-                try:
-                    stage_name = rec.stage_id.name.strip().lower() if rec.stage_id else 'new'
-                    if stage_name == 'new' and not rec.acknowledgment_sent and not rec.duplicate_flag:
-                        _logger.info(f"[AUTO] Lead {rec.id} converted to opportunity in New stage — triggering acknowledgment")
-                        self._auto_send_acknowledgment(rec)
-                    else:
-                        _logger.info(f"[AUTO] Lead {rec.id} converted to opportunity — ack already sent or not in New stage")
-                except Exception as e:
-                    _logger.error(f"[AUTO] Opportunity conversion auto-send error for Lead {rec.id}: {e}")
 
         return res
 
     # -------------------------------------------------------------------------
+    # STAGE EMAIL: Send stage-based email (called from automated action)
+    # Emails are sent via message_post so they appear in the chatter.
+    # -------------------------------------------------------------------------
+    def _send_stage_email(self):
+        """Send the appropriate stage-based email template for this lead.
+        Also auto-creates a project if one doesn't exist yet.
+        Called from the automated action on create/write of stage_id.
+        """
+        for record in self:
+            # Auto-create project if not yet created
+            try:
+                if not record.linked_project_id:
+                    self._auto_create_project(record)
+            except Exception as e:
+                _logger.error(f"[AUTO-PROJECT] Error for Lead {record.id}: {e}")
+
+            stage = record.stage_id
+            if not stage or not record.email_from:
+                continue
+
+            stage_name = stage.name.strip().lower()
+            template_name = False
+            flag_field = False
+
+            if stage_name == 'new' and not record.acknowledgment_sent:
+                template_name = 'New stage mail'
+                flag_field = 'acknowledgment_sent'
+            elif stage_name in ('qualify', 'qualified') and not record.qualify_email_sent:
+                template_name = 'Qualify stage'
+                flag_field = 'qualify_email_sent'
+            elif stage_name == 'proposition' and not record.proposition_email_sent:
+                if 'order_ids' in record._fields and record.order_ids:
+                    template_name = 'Proposition stage'
+                    flag_field = 'proposition_email_sent'
+            elif stage.is_won and not record.won_email_sent:
+                template_name = 'won stage'
+                flag_field = 'won_email_sent'
+
+            if not template_name or not flag_field:
+                continue
+
+            tmpl = self.env['mail.template'].search([
+                ('name', '=', template_name),
+                ('model', '=', 'crm.lead'),
+            ], limit=1)
+            if not tmpl:
+                _logger.warning("Stage email template '%s' not found.", template_name)
+                continue
+
+            # Build extra attachments for proposition/won (SO PDF)
+            extra_attachment_ids = []
+            if flag_field in ('proposition_email_sent', 'won_email_sent') and 'order_ids' in record._fields:
+                for so in record.order_ids:
+                    try:
+                        pdf_content, _ = self.env['ir.actions.report']._render(
+                            'sale.report_saleorder', so.ids,
+                        )
+                        att = self.env['ir.attachment'].create({
+                            'name': '%s.pdf' % so.name,
+                            'type': 'binary',
+                            'datas': base64.b64encode(pdf_content),
+                            'res_model': 'crm.lead',
+                            'res_id': record.id,
+                            'mimetype': 'application/pdf',
+                        })
+                        extra_attachment_ids.append(att.id)
+                    except Exception as e:
+                        _logger.warning("Failed to generate SO PDF for %s: %s", so.name, e)
+
+            # Send via message_post_with_source — appears in chatter
+            try:
+                # Collect template attachments + extra attachments
+                all_attachment_ids = list(tmpl.attachment_ids.ids) + extra_attachment_ids
+
+                record.message_post_with_source(
+                    source_ref=tmpl,
+                    subtype_xmlid='mail.mt_comment',
+                    email_layout_xmlid='mail.mail_notification_light',
+                    attachment_ids=all_attachment_ids if all_attachment_ids else None,
+                )
+            except AttributeError:
+                # Fallback for older API: use send_mail with force_send
+                _logger.info("message_post_with_source not available, using send_mail fallback.")
+                mail_id = tmpl.send_mail(record.id, force_send=True)
+                if mail_id and extra_attachment_ids:
+                    mail = self.env['mail.mail'].browse(mail_id)
+                    if mail.exists():
+                        mail.write({'attachment_ids': [(4, aid) for aid in extra_attachment_ids]})
+                        mail.send()
+
+            record.write({flag_field: True})
+            _logger.info(
+                "Stage email '%s' sent for Lead %d (%s).",
+                template_name, record.id, record.name,
+            )
+
+    # -------------------------------------------------------------------------
     # DEBUG / UI ACTION METHODS
     # -------------------------------------------------------------------------
-    def action_debug_send_acknowledgment(self):
-        for lead in self:
-            lead._auto_send_acknowledgment(lead)
-        return True
-
     def action_debug_reset_flags(self):
         """ Reset automation flags for testing. """
         self.write({
             'acknowledgment_sent': False,
+            'proposition_email_sent': False,
+            'won_email_sent': False,
             'salesperson_notified': False,
             'duplicate_flag': False,
             'qualify_email_sent': False,
@@ -619,7 +350,7 @@ class CrmLead(models.Model):
         """ Allow user to force duplicate check from UI """
         for lead in self:
              lead._check_and_mark_duplicates()
-        
+
         return {
             'type': 'ir.actions.client',
             'tag': 'display_notification',
@@ -633,14 +364,9 @@ class CrmLead(models.Model):
 
     @api.model
     def action_open_leads_with_whatsapp_check(self):
-        # 1. Base CRM action
         action = self.env['ir.actions.act_window']._for_xml_id('crm.crm_lead_all_leads')
-
-        # 2. Only admin gets the wizard
         if not self.env.is_admin():
             return action
-
-        # 3. Check for pending leads
         pending_domain = [
             ('stage_id.name', '=ilike', 'new'),
             '|',
@@ -649,8 +375,6 @@ class CrmLead(models.Model):
             ('whatsapp_ack_sent', '=', False)
         ]
         pending_leads = self.search(pending_domain)
-
-        # 4. If pending, return wizard action instead, passing the leads
         if pending_leads:
             return {
                 'type': 'ir.actions.act_window',
@@ -662,6 +386,4 @@ class CrmLead(models.Model):
                     'default_lead_ids': [(6, 0, pending_leads.ids)]
                 }
             }
-
         return action
-
