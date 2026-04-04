@@ -74,11 +74,19 @@
                             help="Re-run duplicate detection for this lead"/>
                 </div>
             </xpath>
-            <!-- Keep duplicate_flag accessible in form context (for invisible attrs) -->
-            <xpath expr="//field[@name='team_id']" position="after">
-                <field name="duplicate_flag" invisible="1"/>
-                <field name="lead_source_type" string="Lead Source" readonly="1"/>
-                <field name="linked_project_id" invisible="1"/>
+            <!-- Lead Source field + hidden fields, placed after priority in opportunity group -->
+            <xpath expr="//page[@name='internal_notes']" position="before">
+                <page string="Automation" name="automation_info">
+                    <group>
+                        <group string="Lead Info">
+                            <field name="lead_source_type" string="Lead Source" readonly="1"/>
+                            <field name="duplicate_flag" readonly="1"/>
+                        </group>
+                        <group string="Linked Records">
+                            <field name="linked_project_id" string="Project ID" readonly="1"/>
+                        </group>
+                    </group>
+                </page>
             </xpath>
         </field>
     </record>
