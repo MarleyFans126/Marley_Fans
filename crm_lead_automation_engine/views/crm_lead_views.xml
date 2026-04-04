@@ -75,10 +75,10 @@
                 </div>
             </xpath>
             <!-- Keep duplicate_flag accessible in form context (for invisible attrs) -->
-            <xpath expr="//field[@name='source_id']" position="after">
+            <xpath expr="//field[@name='team_id']" position="after">
                 <field name="duplicate_flag" invisible="1"/>
-                <field name="lead_source_type" string="Lead Source Type" readonly="1"/>
-                <field name="linked_project_id" string="Auto Project ID" readonly="1"/>
+                <field name="lead_source_type" string="Lead Source" readonly="1"/>
+                <field name="linked_project_id" invisible="1"/>
             </xpath>
         </field>
     </record>
