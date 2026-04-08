@@ -90,8 +90,13 @@ class CrmLead(models.Model):
     def action_view_project(self):
         """Open the project linked to this lead."""
         self.ensure_one()
-        project_id = self.linked_project_id or (self.project_id.id if self.project_id else False)
-        if not project_id:
+        # Try linked_project_id (Integer from automation engine) first, then project_id (Many2one)
+        pid = False
+        if 'linked_project_id' in self._fields and self.linked_project_id:
+            pid = self.linked_project_id
+        if not pid and self.project_id:
+            pid = self.project_id.id
+        if not pid:
             return {
                 'type': 'ir.actions.client',
                 'tag': 'display_notification',
@@ -102,15 +107,13 @@ class CrmLead(models.Model):
                     'sticky': False,
                 },
             }
-        project = self.env['project.project'].sudo().browse(project_id)
-        if not project.exists():
-            return False
         return {
             'type': 'ir.actions.act_window',
-            'name': project.name,
+            'name': 'Project',
             'res_model': 'project.project',
-            'res_id': project.id,
+            'res_id': pid,
             'view_mode': 'form',
+            'view_type': 'form',
             'target': 'current',
         }
 
