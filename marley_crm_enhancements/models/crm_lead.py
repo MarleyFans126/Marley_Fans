@@ -96,6 +96,18 @@ class CrmLead(models.Model):
             pid = self.linked_project_id
         if not pid and self.project_id:
             pid = self.project_id.id
+
+        # Validate the project actually exists
+        if pid:
+            project = self.env['project.project'].sudo().search([('id', '=', pid)], limit=1)
+            if not project:
+                # Project was deleted — clear stale reference
+                if 'linked_project_id' in self._fields and self.linked_project_id == pid:
+                    self.sudo().write({'linked_project_id': 0})
+                if self.project_id and self.project_id.id == pid:
+                    self.sudo().write({'project_id': False})
+                pid = False
+
         if not pid:
             return {
                 'type': 'ir.actions.client',
