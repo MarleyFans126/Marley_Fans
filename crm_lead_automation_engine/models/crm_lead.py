@@ -199,6 +199,9 @@ class CrmLead(models.Model):
             project_vals = {
                 'name': lead.name or 'Lead %s' % lead.id,
                 'partner_id': lead.partner_id.id if lead.partner_id else False,
+                'lead_id': lead.id,
+                'site_contact_person': lead.contact_name or '',
+                'site_contact_number': lead.phone or '',
             }
             project = self.env['project.project'].sudo().create(project_vals)
             lead.write({'linked_project_id': project.id})
