@@ -69,6 +69,11 @@ class AccountMove(models.Model):
         default=0.0,
         help='Enter percentage value (e.g. 70 for 70%).',
     )
+    advance_include_taxes = fields.Boolean(
+        string='Include Taxes in Advance',
+        default=False,
+        help='If checked, advance amount is calculated on total (with taxes). Otherwise on untaxed amount.',
+    )
     advance_amount_due = fields.Monetary(
         string='Advance To Be Paid',
         compute='_compute_advance_amount_due',
@@ -76,11 +81,11 @@ class AccountMove(models.Model):
         currency_field='currency_id',
     )
 
-    @api.depends('advance_payment_percentage', 'amount_total', 'amount_untaxed', 'proforma_with_taxes')
+    @api.depends('advance_payment_percentage', 'amount_total', 'amount_untaxed', 'advance_include_taxes')
     def _compute_advance_amount_due(self):
         for move in self:
             pct = move.advance_payment_percentage or 0.0
-            base = move.amount_total if move.proforma_with_taxes else move.amount_untaxed
+            base = move.amount_total if move.advance_include_taxes else move.amount_untaxed
             move.advance_amount_due = round(base * pct / 100.0, 2)
 
     # ------------------------------------------------------------------

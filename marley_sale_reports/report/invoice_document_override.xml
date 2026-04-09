@@ -71,7 +71,7 @@
                 <div style="margin-bottom: 8px; font-size: 15px;">
                     <strong>Kind Attention:</strong>
                     <span style="float: right; font-weight: bold;">
-                        Invoice # <t t-esc="o.name"/>
+                        Invoice # <t t-if="o.name and o.name != '/'" t-esc="o.name"/><t t-else="">Draft</t>
                     </span>
                 </div>
                 <div style="margin-bottom: 6px; font-size: 14px;">
@@ -184,6 +184,20 @@
                             &#8377; <t t-esc="'{:,.2f}'.format(tax_totals.get('total_amount_currency', o.amount_total))"/>
                         </td>
                     </tr>
+                    <t t-if="o.amount_residual and o.amount_residual != o.amount_total">
+                        <tr>
+                            <td style="padding: 8px 12px; text-align: right; font-size: 13px; border: 1px solid #ccc;">Amount Paid</td>
+                            <td style="padding: 8px 12px; text-align: right; font-size: 13px; font-weight: bold; border: 1px solid #ccc;">
+                                &#8377; <t t-esc="'{:,.2f}'.format(o.amount_total - o.amount_residual)"/>
+                            </td>
+                        </tr>
+                        <tr style="background-color: #fff3cd;">
+                            <td style="padding: 10px 12px; text-align: right; font-size: 14px; font-weight: bold; border: 2px solid #999;">Amount Due</td>
+                            <td style="padding: 10px 12px; text-align: right; font-size: 14px; font-weight: bold; border: 2px solid #999; color: #c00;">
+                                &#8377; <t t-esc="'{:,.2f}'.format(o.amount_residual)"/>
+                            </td>
+                        </tr>
+                    </t>
                 </table>
 
                 <div style="margin-bottom: 14px;">
