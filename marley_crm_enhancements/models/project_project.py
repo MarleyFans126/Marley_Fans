@@ -44,6 +44,7 @@ class ProjectProject(models.Model):
         ('to_pay', 'To Pay'),
         ('to_be_billed', 'To be Billed'),
     ], string='Transportation Terms', default='paid')
+    invoice_number = fields.Char(string='Invoice Number', compute='_compute_invoice_number', store=True, readonly=False)
     invoice_value = fields.Float(string='Invoice Value', compute='_compute_invoice_value', store=True, readonly=False)
     amount_in_words = fields.Char(string='Amount In Words', compute='_compute_amount_in_words', store=True)
 
@@ -109,6 +110,29 @@ class ProjectProject(models.Model):
                     rec.models_to_transport = ''
             elif not rec.models_to_transport:
                 rec.models_to_transport = ''
+
+    # ------------------------------------------------------------------
+    # Auto-fetch: Invoice number from linked invoices
+    # ------------------------------------------------------------------
+    @api.depends('lead_id')
+    def _compute_invoice_number(self):
+        for rec in self:
+            if not rec.invoice_number and rec.lead_id:
+                orders = self.env['sale.order'].search([
+                    ('opportunity_id', '=', rec.lead_id.id)
+                ])
+                if orders:
+                    invoices = orders.mapped('invoice_ids').filtered(
+                        lambda i: i.state == 'posted' and i.move_type == 'out_invoice' and i.name and i.name != '/'
+                    )
+                    if invoices:
+                        rec.invoice_number = ', '.join(invoices.mapped('name'))
+                    else:
+                        rec.invoice_number = ''
+                else:
+                    rec.invoice_number = ''
+            elif not rec.invoice_number:
+                rec.invoice_number = ''
 
     # ------------------------------------------------------------------
     # Auto-fetch: Invoice value from Sale Order / Invoice
