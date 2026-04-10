@@ -22,15 +22,33 @@ class ResConfigSettings(models.TransientModel):
         deactivated it. This guarantees it comes back on upgrade.
         """
         try:
+            # Reactivate via ir_model_data lookup (key column is only for website views)
             self.env.cr.execute("""
-                UPDATE ir_ui_view SET active = TRUE
-                WHERE key = 'crm_aajjo_integration.res_config_settings_view_form'
-                  AND active = FALSE
+                UPDATE ir_ui_view v SET active = TRUE
+                FROM ir_model_data d
+                WHERE d.res_id = v.id
+                  AND d.model = 'ir.ui.view'
+                  AND d.module = 'crm_aajjo_integration'
+                  AND d.name = 'res_config_settings_view_form'
+                  AND v.active = FALSE
             """)
             if self.env.cr.rowcount:
-                _logger.info("[AAJJO] Reactivated AAJJO settings view.")
+                _logger.info("[AAJJO] Reactivated AAJJO settings view (was deactivated).")
+
+            # Also ensure the view exists in ir_model_data — if it was deleted, force Odoo to recreate
+            self.env.cr.execute("""
+                SELECT v.id, v.active FROM ir_ui_view v
+                JOIN ir_model_data d ON d.res_id = v.id AND d.model = 'ir.ui.view'
+                WHERE d.module = 'crm_aajjo_integration'
+                  AND d.name = 'res_config_settings_view_form'
+            """)
+            row = self.env.cr.fetchone()
+            if row:
+                _logger.info("[AAJJO] Settings view exists (id=%s, active=%s).", row[0], row[1])
+            else:
+                _logger.warning("[AAJJO] Settings view NOT found in ir_model_data — will be recreated on upgrade.")
         except Exception as e:
-            _logger.warning("[AAJJO] Could not reactivate settings view: %s", e)
+            _logger.warning("[AAJJO] Could not check/reactivate settings view: %s", e)
 
     def action_verify_connection(self):
         self.ensure_one()
