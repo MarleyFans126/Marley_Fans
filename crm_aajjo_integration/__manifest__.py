@@ -20,6 +20,7 @@
         'views/aajjo_api_log_views.xml',
         # 'data/mail_templates.xml', # Moved to automation engine
     ],
+    'post_init_hook': '_reactivate_aajjo_settings_view',
     'installable': True,
     'application': True,
     'auto_install': False,

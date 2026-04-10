@@ -5,7 +5,7 @@
         <field name="model">res.config.settings</field>
         <field name="inherit_id" ref="crm.res_config_settings_view_form"/>
         <field name="arch" type="xml">
-            <xpath expr="//block[@name='convert_visitor_setting_container']" position="after">
+            <xpath expr="//app[@name='crm']" position="inside">
                 <block title="AAJJO Integration" name="aajjo_setting_container">
                     <setting string="AAJJO Configuration" help="Connect to AAJJO API for lead synchronization.">
                         <field name="enable_aajjo_sync"/>
