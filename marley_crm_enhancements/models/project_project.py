@@ -10,6 +10,17 @@ _logger = logging.getLogger(__name__)
 class ProjectProject(models.Model):
     _inherit = 'project.project'
 
+    def init(self):
+        """Drop old invoice_number varchar column so Odoo can recreate it as Many2one integer."""
+        self.env.cr.execute("""
+            SELECT data_type FROM information_schema.columns
+            WHERE table_name = 'project_project' AND column_name = 'invoice_number'
+        """)
+        row = self.env.cr.fetchone()
+        if row and row[0] in ('character varying', 'text'):
+            _logger.info("[PROJECT] Dropping old invoice_number varchar column for Many2one migration.")
+            self.env.cr.execute("ALTER TABLE project_project DROP COLUMN invoice_number")
+
     @api.model_create_multi
     def create(self, vals_list):
         """Auto-assign Installation stages to newly created projects."""
@@ -44,7 +55,9 @@ class ProjectProject(models.Model):
         ('to_pay', 'To Pay'),
         ('to_be_billed', 'To be Billed'),
     ], string='Transportation Terms', default='paid')
-    invoice_number = fields.Char(string='Invoice Number', compute='_compute_invoice_number', store=True, readonly=False)
+    invoice_id = fields.Many2one('account.move', string='Invoice Number',
+                                 domain="[('move_type', '=', 'out_invoice'), ('state', '=', 'posted')]",
+                                 copy=False)
     invoice_value = fields.Float(string='Invoice Value', compute='_compute_invoice_value', store=True, readonly=False)
     amount_in_words = fields.Char(string='Amount In Words', compute='_compute_amount_in_words', store=True)
 
@@ -112,69 +125,52 @@ class ProjectProject(models.Model):
                 rec.models_to_transport = ''
 
     # ------------------------------------------------------------------
-    # Auto-fetch: Invoice number from linked invoices
+    # Auto-fetch details when invoice is selected
     # ------------------------------------------------------------------
-    @api.depends('lead_id')
-    def _compute_invoice_number(self):
-        for rec in self:
-            if not rec.invoice_number and rec.lead_id:
-                orders = self.env['sale.order'].search([
-                    ('opportunity_id', '=', rec.lead_id.id)
-                ])
-                if orders:
-                    invoices = orders.mapped('invoice_ids').filtered(
-                        lambda i: i.state == 'posted' and i.move_type == 'out_invoice' and i.name and i.name != '/'
-                    )
-                    if invoices:
-                        rec.invoice_number = ', '.join(invoices.mapped('name'))
-                    else:
-                        rec.invoice_number = ''
-                else:
-                    rec.invoice_number = ''
-            elif not rec.invoice_number:
-                rec.invoice_number = ''
+    @api.onchange('invoice_id')
+    def _onchange_invoice_id(self):
+        """When an invoice is selected, auto-fill contact person, contact number, and invoice value."""
+        if self.invoice_id:
+            inv = self.invoice_id
+            # Auto-fetch invoice value
+            self.invoice_value = inv.amount_total
+            # Auto-fetch site contact person from invoice partner
+            partner = inv.partner_shipping_id or inv.partner_id
+            if partner:
+                self.site_contact_person = partner.name or ''
+                self.site_contact_number = partner.phone or partner.mobile or ''
 
     # ------------------------------------------------------------------
-    # Auto-fetch: Invoice value from Sale Order / Invoice
+    # Auto-compute: Invoice value from selected invoice
     # ------------------------------------------------------------------
-    @api.depends('lead_id')
+    @api.depends('invoice_id')
     def _compute_invoice_value(self):
         for rec in self:
-            if not rec.invoice_value and rec.lead_id:
-                orders = self.env['sale.order'].search([
-                    ('opportunity_id', '=', rec.lead_id.id)
-                ])
-                if orders:
-                    # Try from posted invoices first
-                    invoices = orders.mapped('invoice_ids').filtered(
-                        lambda i: i.state == 'posted' and i.move_type == 'out_invoice'
-                    )
-                    if invoices:
-                        rec.invoice_value = sum(invoices.mapped('amount_total'))
-                    else:
-                        # Fallback to SO total
-                        rec.invoice_value = sum(orders.mapped('amount_total'))
-                else:
-                    rec.invoice_value = 0.0
+            if rec.invoice_id:
+                rec.invoice_value = rec.invoice_id.amount_total
             elif not rec.invoice_value:
                 rec.invoice_value = 0.0
 
-    @api.depends('lead_id', 'sale_order_ids')
+    @api.depends('invoice_id', 'lead_id', 'sale_order_ids')
     def _compute_advance_received(self):
         for rec in self:
-            if not rec.lead_id:
-                rec.advance_received = rec.advance_received or 0.0
-                continue
-            orders = self.env['sale.order'].search([
-                ('opportunity_id', '=', rec.lead_id.id)
-            ])
-            invoices = orders.mapped('invoice_ids').filtered(
-                lambda i: i.state == 'posted' and i.move_type == 'out_invoice'
-            )
-            if invoices:
-                rec.advance_received = sum(
-                    inv.amount_total - inv.amount_residual for inv in invoices
+            # If a specific invoice is selected, use its payment data
+            if rec.invoice_id:
+                inv = rec.invoice_id
+                rec.advance_received = inv.amount_total - inv.amount_residual
+            elif rec.lead_id:
+                orders = self.env['sale.order'].search([
+                    ('opportunity_id', '=', rec.lead_id.id)
+                ])
+                invoices = orders.mapped('invoice_ids').filtered(
+                    lambda i: i.state == 'posted' and i.move_type == 'out_invoice'
                 )
+                if invoices:
+                    rec.advance_received = sum(
+                        inv.amount_total - inv.amount_residual for inv in invoices
+                    )
+                else:
+                    rec.advance_received = rec.advance_received or 0.0
             else:
                 rec.advance_received = rec.advance_received or 0.0
 

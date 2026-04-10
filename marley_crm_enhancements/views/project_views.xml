@@ -38,7 +38,7 @@
                         <group>
                             <field name="models_to_transport"/>
                             <field name="transportation_terms"/>
-                            <field name="invoice_number"/>
+                            <field name="invoice_id"/>
                             <field name="invoice_value" widget="monetary"/>
                             <field name="advance_received" widget="monetary"/>
                             <field name="balance_amount" widget="monetary" readonly="1"/>
