@@ -101,7 +101,7 @@ class CrmLead(models.Model):
     # -------------------------------------------------------------------------
     def init(self):
         """Cleanup stale views referencing fields from uninstalled modules."""
-        stale_fields = ['l10n_in_gsp', 'enable_aajjo_sync']
+        stale_fields = ['l10n_in_gsp']
         for field_name in stale_fields:
             try:
                 if field_name in self.env['res.config.settings']._fields:
