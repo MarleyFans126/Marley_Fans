@@ -9,7 +9,7 @@
     'author': 'Techmatic Systems',
     'website': 'https://www.techmaticsys.com',
     'category': 'Sales/CRM',
-    'depends': ['base', 'crm', 'sale_management', 'project', 'crm_lead_automation_engine'],
+    'depends': ['base', 'crm', 'sale_management', 'crm_lead_automation_engine'],
     'data': [
         'security/ir.model.access.csv',
         'data/ir_cron.xml',
