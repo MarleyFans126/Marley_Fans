@@ -61,6 +61,8 @@ class CrmLead(models.Model):
                 lead.lead_source_type = 'indiamart'
             elif lead.is_aajjo:
                 lead.lead_source_type = 'aajjo'
+            else:
+                lead.lead_source_type = False
 
     # Business Location — Cascading: State → City → Area
     business_state_id = fields.Many2one(
