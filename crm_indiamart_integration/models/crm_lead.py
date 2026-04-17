@@ -26,7 +26,7 @@ class CrmLead(models.Model):
 
     # Overriding standard fields to make them mandatory
     phone = fields.Char(required=True)
-    email_from = fields.Char(required=True)
+    email_from = fields.Char()
 
     # New Fields
     second_salesperson_id = fields.Many2one(
@@ -56,8 +56,7 @@ class CrmLead(models.Model):
     lead_source_type = fields.Selection([
         ('indiamart', 'IndiaMART'),
         ('aajjo', 'AAJJO'),
-        ('manual', 'Manual')
-    ], string='Lead Source Type', compute='_compute_lead_source_type', store=True)
+    ], string='Lead Source Type', compute='_compute_lead_source_type', store=True, default=False)
 
     is_manual_lead = fields.Boolean(
         string="Is Manual Lead",
@@ -84,8 +83,6 @@ class CrmLead(models.Model):
                 lead.lead_source_type = 'indiamart'
             elif getattr(lead, 'is_aajjo', False):
                 lead.lead_source_type = 'aajjo'
-            else:
-                lead.lead_source_type = 'manual'
 
     # =========================================================================
     # IndiaMART Pull API Integration
