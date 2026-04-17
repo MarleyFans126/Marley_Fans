@@ -28,7 +28,7 @@
             <!-- Rename Phone -->
             <xpath expr="//field[@name='phone']" position="attributes">
                 <attribute name="string">Mobile</attribute>
-                <attribute name="required">1</attribute>
+                <attribute name="required">0</attribute>
             </xpath>
 
             <!-- Make Email Required -->

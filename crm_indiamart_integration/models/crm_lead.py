@@ -25,7 +25,7 @@ class CrmLead(models.Model):
     _inherit = 'crm.lead'
 
     # Overriding standard fields to make them mandatory
-    phone = fields.Char(required=True)
+    phone = fields.Char()
     email_from = fields.Char()
 
     # New Fields
