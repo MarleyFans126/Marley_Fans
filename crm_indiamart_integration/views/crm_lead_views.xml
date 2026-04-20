@@ -28,12 +28,12 @@
             <!-- Rename Phone -->
             <xpath expr="//field[@name='phone']" position="attributes">
                 <attribute name="string">Mobile</attribute>
-                <attribute name="required">1</attribute>
+                <attribute name="required">0</attribute>
             </xpath>
 
             <!-- Make Email Required -->
             <xpath expr="//field[@name='email_from']" position="attributes">
-                <attribute name="required">1</attribute>
+                <attribute name="required">0</attribute>
             </xpath>
 
             <!-- Checkboxes under Contact (Before Email) -->
@@ -49,14 +49,20 @@
                 <field name="second_salesperson_id"/>
                 <field name="business_state_id"
                         options="{'no_create': False}"/>
-                <field name="business_city_id"
+                <!-- <field name="business_city_id"
                         options="{'no_create': False, 'quick_create': True}"
                         context="{'default_state_id': business_state_id}"/>
                 <field name="business_area_id"
                         options="{'no_create': False, 'quick_create': True}"
-                        context="{'default_city_id': business_city_id}"/>
+                        context="{'default_city_id': business_city_id}"/> -->
+                <field name="business_city"/>
+                <field name="business_area"/>
                 <field name="business_pincode" placeholder="Pincode"/>
+<<<<<<< HEAD
                 <field name="lead_source_type" string="Lead Source" readonly="1"/>
+=======
+                <field name="function"/>
+>>>>>>> 76bce2ed555850497d1a2ec3e19cdc367c8ae027
             </xpath>
 
         </field>

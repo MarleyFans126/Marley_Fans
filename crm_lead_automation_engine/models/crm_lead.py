@@ -49,8 +49,10 @@ class CrmLead(models.Model):
     lead_source_type = fields.Selection([
         ('indiamart', 'IndiaMART'),
         ('aajjo', 'AAJJO'),
-        ('manual', 'Manual'),
-    ], string='Source', compute='_compute_lead_source_type', store=True)
+    ], string='Source', compute='_compute_lead_source_type', store=True, default=False)
+
+    lead_source = fields.Char(string='Lead Source', tracking=True)
+    inquiry_creation_date = fields.Datetime(string='Inquiry Creation Date', tracking=True)
 
     @api.depends('is_indiamart', 'is_aajjo', 'is_manual_lead')
     def _compute_lead_source_type(self):
@@ -60,7 +62,7 @@ class CrmLead(models.Model):
             elif lead.is_aajjo:
                 lead.lead_source_type = 'aajjo'
             else:
-                lead.lead_source_type = 'manual'
+                lead.lead_source_type = False
 
     # Business Location — Cascading: State → City → Area
     business_state_id = fields.Many2one(
@@ -81,20 +83,39 @@ class CrmLead(models.Model):
         domain="[('city_id', '=', business_city_id)]",
         tracking=True,
     )
+    business_city = fields.Char(
+        string='Business City',
+        tracking=True,
+    )
+    business_area = fields.Char(
+        string='Business Area',
+        tracking=True,
+    )
     business_pincode = fields.Char(string='Pincode', size=6, tracking=True)
 
-    @api.onchange('business_state_id')
-    def _onchange_business_state_id(self):
-        """Clear city and area when state changes."""
-        self.business_city_id = False
-        self.business_area_id = False
+    # @api.onchange('business_state_id')
+    # def _onchange_business_state_id(self):
+    #     """Clear city and area when state changes."""
+    #     self.business_city_id = False
+    #     self.business_area_id = False
 
-    @api.onchange('business_city_id')
-    def _onchange_business_city_id(self):
-        """Clear area when city changes; auto-set state from city."""
-        self.business_area_id = False
-        if self.business_city_id and self.business_city_id.state_id:
-            self.business_state_id = self.business_city_id.state_id
+    # @api.onchange('business_city_id')
+    # def _onchange_business_city_id(self):
+    #     """Clear area when city changes; auto-set state from city."""
+    #     self.business_area_id = False
+    #     if self.business_city_id and self.business_city_id.state_id:
+    #         self.business_state_id = self.business_city_id.state_id
+
+
+    @api.onchange('partner_id')
+    def _onchange_partner_location(self):
+        for rec in self:
+            if rec.partner_id:
+                rec.business_state_id = rec.partner_id.state_id
+                rec.business_city = rec.partner_id.city
+                rec.business_area = rec.partner_id.street
+                rec.business_pincode = rec.partner_id.zip
+
 
     # -------------------------------------------------------------------------
     # INIT: Cleanup stale views on module upgrade
@@ -222,6 +243,12 @@ class CrmLead(models.Model):
             except Exception as e:
                 _logger.error(f"Lead Creation Duplicate Check Error for {lead.id}: {e}")
 
+            if lead.partner_id:
+                lead.business_state_id = lead.partner_id.state_id.id
+                lead.business_city = lead.partner_id.city
+                lead.business_area = lead.partner_id.street
+                lead.business_pincode = lead.partner_id.zip
+
         return leads
 
     # -------------------------------------------------------------------------
@@ -233,6 +260,11 @@ class CrmLead(models.Model):
         # Duplicate detection on phone/email change
         if 'phone' in vals or 'email_from' in vals:
             self._check_and_mark_duplicates()
+
+        if 'partner_id' in vals:
+            for lead in self:
+                if lead.partner_id:
+                    lead._onchange_partner_location()
 
         return res
 

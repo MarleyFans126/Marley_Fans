@@ -24,6 +24,10 @@
             <xpath expr="//field[@name='team_id']" position="after">
                 <field name="lead_source_type" string="Source" readonly="1" optional="show"/>
             </xpath>
+
+            <xpath expr="//field[@name='lead_source_type']" position="after">
+                <field name="lead_source" string="Source" readonly="1" optional="show"/>
+            </xpath>
         </field>
     </record>
 
@@ -48,6 +52,10 @@
             <!-- Source column after Team -->
             <xpath expr="//field[@name='team_id']" position="after">
                 <field name="lead_source_type" string="Source" readonly="1" optional="show"/>
+            </xpath>
+
+            <xpath expr="//field[@name='lead_source_type']" position="after">
+                <field name="lead_source" string="Source" readonly="1" optional="show"/>
             </xpath>
         </field>
     </record>
@@ -79,7 +87,8 @@
                 <page string="Automation" name="automation_info">
                     <group>
                         <group string="Lead Info">
-                            <field name="lead_source_type" string="Lead Source" readonly="1"/>
+                            <field name="lead_source_type" string="Lead Source" readonly="1" invisible="lead_source"/>
+                            <field name="lead_source" string="Lead Source" invisible="lead_source_type"/>
                             <field name="duplicate_flag" readonly="1"/>
                         </group>
                         <group string="Linked Records">
@@ -87,6 +96,9 @@
                         </group>
                     </group>
                 </page>
+            </xpath>
+            <xpath expr="//field[@name='partner_id']" position="before">
+                <field name="inquiry_creation_date"/>
             </xpath>
         </field>
     </record>
@@ -105,7 +117,6 @@
                 <separator/>
                 <filter string="IndiaMART" name="source_indiamart" domain="[('lead_source_type', '=', 'indiamart')]"/>
                 <filter string="AAJJO" name="source_aajjo" domain="[('lead_source_type', '=', 'aajjo')]"/>
-                <filter string="Manual" name="source_manual" domain="[('lead_source_type', '=', 'manual')]"/>
             </filter>
         </field>
     </record>
