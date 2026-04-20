@@ -83,6 +83,8 @@ class CrmLead(models.Model):
                 lead.lead_source_type = 'indiamart'
             elif getattr(lead, 'is_aajjo', False):
                 lead.lead_source_type = 'aajjo'
+            else:
+                lead.lead_source_type = False
 
     # =========================================================================
     # IndiaMART Pull API Integration

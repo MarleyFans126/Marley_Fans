@@ -137,6 +137,68 @@ class CrmLead(models.Model):
             except Exception as e:
                 _logger.warning("[INIT] Could not clean stale views for %s: %s", field_name, e)
 
+        # Clear stale Selection-field values across ALL models.  Leftover values that are
+        # not in the current options list crash the web SelectionField renderer:
+        #   TypeError: Cannot read properties of undefined (reading '1') at get string
+        # Only scan text/varchar columns (selection fields with translate=True become jsonb).
+        # Use savepoints so one bad query doesn't abort the whole upgrade transaction.
+        try:
+            self.env.cr.execute(
+                "SELECT table_name, column_name, data_type "
+                "FROM information_schema.columns "
+                "WHERE table_schema = 'public'"
+            )
+            db_cols = {}
+            for table, col, dtype in self.env.cr.fetchall():
+                if dtype in ('character varying', 'text', 'char'):
+                    db_cols.setdefault(table, set()).add(col)
+
+            total_cleaned = 0
+            for model_name, Model in self.env.registry.items():
+                if Model._abstract or Model._transient:
+                    continue
+                table = Model._table
+                table_cols = db_cols.get(table)
+                if not table_cols:
+                    continue
+                model = self.env[model_name].sudo()
+                for fname, field in model._fields.items():
+                    if field.type != 'selection' or not field.store:
+                        continue
+                    if fname not in table_cols:
+                        continue
+                    try:
+                        selection = field.get_values(self.env)
+                    except Exception:
+                        continue
+                    if not selection:
+                        continue
+                    self.env.cr.execute('SAVEPOINT sel_cleanup')
+                    try:
+                        self.env.cr.execute(
+                            'UPDATE "%s" SET "%s" = NULL '
+                            'WHERE "%s" IS NOT NULL AND "%s" <> ALL(%%s)'
+                            % (table, fname, fname, fname),
+                            (list(selection),),
+                        )
+                        if self.env.cr.rowcount:
+                            total_cleaned += self.env.cr.rowcount
+                            _logger.info(
+                                "[INIT] Cleared %d %s row(s) with stale %s value",
+                                self.env.cr.rowcount, table, fname,
+                            )
+                        self.env.cr.execute('RELEASE SAVEPOINT sel_cleanup')
+                    except Exception as inner:
+                        self.env.cr.execute('ROLLBACK TO SAVEPOINT sel_cleanup')
+                        _logger.warning(
+                            "[INIT] Cleanup for %s.%s failed: %s",
+                            table, fname, inner,
+                        )
+            if total_cleaned:
+                _logger.info("[INIT] Selection cleanup cleared %d total row(s)", total_cleaned)
+        except Exception as e:
+            _logger.warning("[INIT] Could not clean stale Selection values: %s", e)
+
     # -------------------------------------------------------------------------
     # HELPER: Phone Normalization
     # -------------------------------------------------------------------------
