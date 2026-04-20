@@ -14,21 +14,43 @@ MARLEY_SALE_REPORT_NAMES = {
 class IrActionsReport(models.Model):
     _inherit = 'ir.actions.report'
 
-    def _render_qweb_pdf(self, report_ref, res_ids=None, data=None):
-        result = super()._render_qweb_pdf(report_ref=report_ref, res_ids=res_ids, data=data)
+    def _marley_stamp_print(self, report_ref, res_ids):
+        """Stamp last_print_date on sale.order records when a Marley report runs."""
+        if not res_ids:
+            return
         try:
             report = self._get_report(report_ref)
-            if (
-                report
-                and report.report_name in MARLEY_SALE_REPORT_NAMES
-                and report.model == 'sale.order'
-                and res_ids
-            ):
-                orders = self.env['sale.order'].sudo().browse(res_ids).exists()
-                if orders:
-                    orders.with_context(skip_revision_bump=True).write({
-                        'last_print_date': fields.Datetime.now(),
-                    })
         except Exception as e:
-            _logger.warning("Could not stamp last_print_date on sale.order: %s", e)
+            _logger.warning("Marley: could not resolve report %s: %s", report_ref, e)
+            return
+        if not report or report.model != 'sale.order':
+            return
+        if report.report_name not in MARLEY_SALE_REPORT_NAMES:
+            return
+        try:
+            orders = self.env['sale.order'].sudo().browse(res_ids).exists()
+            if orders:
+                orders.with_context(skip_revision_bump=True).write({
+                    'last_print_date': fields.Datetime.now(),
+                })
+                _logger.info(
+                    "Marley: stamped last_print_date on sale.order ids=%s via report %s",
+                    orders.ids, report.report_name,
+                )
+        except Exception as e:
+            _logger.warning("Marley: could not stamp last_print_date: %s", e)
+
+    def _render_qweb_pdf(self, report_ref, res_ids=None, data=None):
+        result = super()._render_qweb_pdf(report_ref=report_ref, res_ids=res_ids, data=data)
+        self._marley_stamp_print(report_ref, res_ids)
+        return result
+
+    def _pre_render_qweb_pdf(self, report_ref, res_ids=None, data=None):
+        result = super()._pre_render_qweb_pdf(report_ref=report_ref, res_ids=res_ids, data=data)
+        self._marley_stamp_print(report_ref, res_ids)
+        return result
+
+    def _render_qweb_html(self, report_ref, res_ids=None, data=None):
+        result = super()._render_qweb_html(report_ref=report_ref, res_ids=res_ids, data=data)
+        self._marley_stamp_print(report_ref, res_ids)
         return result
