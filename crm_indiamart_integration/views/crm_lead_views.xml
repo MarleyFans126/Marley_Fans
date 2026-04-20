@@ -56,6 +56,7 @@
                         options="{'no_create': False, 'quick_create': True}"
                         context="{'default_city_id': business_city_id}"/>
                 <field name="business_pincode" placeholder="Pincode"/>
+                <field name="lead_source_type" string="Lead Source" readonly="1"/>
             </xpath>
 
         </field>
