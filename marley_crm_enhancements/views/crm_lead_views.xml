@@ -9,26 +9,29 @@
         <field name="priority">50</field>
         <field name="arch" type="xml">
 
-            <!-- Projects smart button in button_box — always visible -->
+            <!-- Installation Tasks smart button — visible only when tasks exist -->
             <xpath expr="//div[@name='button_box']" position="inside">
                 <button name="action_view_project"
                         type="object"
                         class="oe_stat_button"
-                        icon="fa-tasks">
-                    <div class="o_stat_info">
-                        <span class="o_stat_value">1</span>
-                        <span class="o_stat_text">Project</span>
-                    </div>
+                        icon="fa-tasks"
+                        invisible="project_count == 0">
+                    <field name="project_count" widget="statinfo" string="Tasks"/>
                 </button>
             </xpath>
 
-            <!-- Create Quotation button in header -->
+            <!-- Create Quotation / Create Task buttons in header -->
             <xpath expr="//form//header" position="inside">
                 <button name="action_create_quotation"
                         string="Create Quotation"
                         type="object"
                         class="btn-primary"
                         icon="fa-file-text-o"/>
+                <button name="action_create_project"
+                        string="Create Task"
+                        type="object"
+                        class="btn-primary"
+                        icon="fa-tasks"/>
             </xpath>
 
             <!-- Project link field after team_id -->

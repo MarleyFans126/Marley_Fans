@@ -26,6 +26,15 @@ class ProjectTask(models.Model):
 
     stage_id = fields.Many2one(default=_get_default_stage_id)
 
+    # Link task directly to the CRM opportunity / lead
+    lead_id = fields.Many2one(
+        'crm.lead',
+        string='Opportunity',
+        index=True,
+        copy=False,
+        help='CRM opportunity this installation task was created for.',
+    )
+
     # ------------------------------------------------------------------
     # Installation Fields
     # ------------------------------------------------------------------

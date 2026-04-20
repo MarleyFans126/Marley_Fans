@@ -87,47 +87,64 @@ class CrmLead(models.Model):
         help='Project created when lead is marked as Won.',
     )
 
+    project_count = fields.Integer(
+        string='Task Count',
+        compute='_compute_project_count',
+    )
+
+    def _compute_project_count(self):
+        has_task_model = 'project.task' in self.env
+        for lead in self:
+            if not has_task_model or not lead.id:
+                lead.project_count = 0
+                continue
+            lead.project_count = self.env['project.task'].sudo().search_count(
+                [('lead_id', '=', lead.id)]
+            )
+
+    @api.model
+    def _get_installation_project(self):
+        """Return the singleton 'Installation' project, creating it if needed."""
+        Project = self.env['project.project'].sudo()
+        project = Project.search([('name', '=', 'Installation')], limit=1)
+        if project:
+            return project
+        stage_xmlids = [
+            'marley_crm_enhancements.project_stage_installation',
+            'marley_crm_enhancements.project_stage_in_progress',
+            'marley_crm_enhancements.project_stage_done',
+            'marley_crm_enhancements.project_stage_cancelled',
+        ]
+        stages = []
+        for xmlid in stage_xmlids:
+            s = self.env.ref(xmlid, raise_if_not_found=False)
+            if s:
+                stages.append(s.id)
+        return Project.create({
+            'name': 'Installation',
+            'type_ids': [(6, 0, stages)] if stages else False,
+        })
+
     def action_view_project(self):
-        """Open the project linked to this lead."""
+        """Open installation tasks linked to this lead."""
         self.ensure_one()
-        # Try linked_project_id (Integer from automation engine) first, then project_id (Many2one)
-        pid = False
-        if 'linked_project_id' in self._fields and self.linked_project_id:
-            pid = self.linked_project_id
-        if not pid and self.project_id:
-            pid = self.project_id.id
-
-        # Validate the project actually exists
-        if pid:
-            project = self.env['project.project'].sudo().search([('id', '=', pid)], limit=1)
-            if not project:
-                # Project was deleted — clear stale reference
-                if 'linked_project_id' in self._fields and self.linked_project_id == pid:
-                    self.sudo().write({'linked_project_id': 0})
-                if self.project_id and self.project_id.id == pid:
-                    self.sudo().write({'project_id': False})
-                pid = False
-
-        if not pid:
-            return {
-                'type': 'ir.actions.client',
-                'tag': 'display_notification',
-                'params': {
-                    'title': 'No Project',
-                    'message': 'No project linked to this lead yet.',
-                    'type': 'warning',
-                    'sticky': False,
-                },
-            }
-        return {
+        tasks = self.env['project.task'].sudo().search([('lead_id', '=', self.id)])
+        action = {
             'type': 'ir.actions.act_window',
-            'name': 'Project',
-            'res_model': 'project.project',
-            'res_id': pid,
-            'view_mode': 'form',
-            'view_type': 'form',
-            'target': 'current',
+            'name': _('Installation Tasks'),
+            'res_model': 'project.task',
+            'domain': [('lead_id', '=', self.id)],
+            'context': {
+                'default_lead_id': self.id,
+                'default_partner_id': self.partner_id.id if self.partner_id else False,
+                'default_project_id': self._get_installation_project().id,
+            },
         }
+        if len(tasks) == 1:
+            action.update({'view_mode': 'form', 'res_id': tasks.id})
+        else:
+            action['view_mode'] = 'list,form'
+        return action
 
     # ------------------------------------------------------------------
     # Won Conversion: Lead → Customer + Sales Order + Project
@@ -152,39 +169,31 @@ class CrmLead(models.Model):
         # Step 3: Link existing quotations/SOs to the partner
         self._link_quotations_to_partner(partner)
 
-        # Step 4: Get all linked sale orders for project linking
+        # Step 4: Get all linked sale orders
         sale_orders = self.env['sale.order'].sudo().search([
             ('opportunity_id', '=', self.id),
         ])
 
-        # Step 5: Create project linked to customer AND sale orders
-        project = self._create_project(partner, sale_orders)
-        if project:
-            self.project_id = project.id
-
-        # Step 6: Log in chatter
+        # Step 5: Log in chatter (project is created manually via "Create Project" button)
         so_names = ', '.join(sale_orders.mapped('name')) if sale_orders else 'None'
         is_manual = self._context.get('skip_won_status')
-        title = "Lead Project Created" if is_manual else "Lead Won — Conversion Summary"
-        
+        title = "Lead Conversion" if is_manual else "Lead Won — Conversion Summary"
+
         body = Markup("<b>%s</b><br/>") % title
         if partner:
             body += Markup("Customer: %s<br/>") % partner.name
-        if project:
-            body += Markup("Project: %s<br/>") % project.name
         if sale_orders:
             body += Markup("Sales Orders: %s<br/>") % so_names
         self.message_post(body=body)
 
-        # Step 7: Internal notification only (no client email — handled by Automated Action)
+        # Step 6: Internal notification only (no client email — handled by Automated Action)
         if not is_manual:
-            self._notify_won_internal(partner, project, sale_orders)
+            self._notify_won_internal(partner, None, sale_orders)
 
         _logger.info(
-            "Won conversion done for Lead %s | partner=%s | project=%s | SOs=%s",
+            "Won conversion done for Lead %s | partner=%s | SOs=%s",
             self.id,
             partner.id if partner else None,
-            project.id if project else None,
             sale_orders.ids if sale_orders else [],
         )
         return True
@@ -382,6 +391,41 @@ class CrmLead(models.Model):
     # ------------------------------------------------------------------
     # Create Quotation from Lead
     # ------------------------------------------------------------------
+
+    def action_create_project(self):
+        """Open a new installation task form pre-filled from this lead.
+        The task is added to the shared singleton 'Installation' project.
+        """
+        self.ensure_one()
+
+        partner = self.partner_id
+        if not partner:
+            partner = self._find_or_create_customer()
+            self.partner_id = partner
+
+        project = self._get_installation_project()
+        install_stage = self.env.ref(
+            'marley_crm_enhancements.project_stage_installation',
+            raise_if_not_found=False,
+        )
+
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('New Installation Task'),
+            'res_model': 'project.task',
+            'view_mode': 'form',
+            'context': {
+                'default_name': self.name or '',
+                'default_project_id': project.id,
+                'default_partner_id': partner.id if partner else False,
+                'default_lead_id': self.id,
+                'default_stage_id': install_stage.id if install_stage else False,
+                'default_is_installation': True,
+                'default_inst_site_contact': self.contact_name or '',
+                'default_inst_site_phone': self.phone or '',
+            },
+            'target': 'current',
+        }
 
     def action_create_quotation(self):
         """Open a new sale.order form pre-filled from this lead."""

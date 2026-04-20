@@ -336,17 +336,11 @@ class CrmLead(models.Model):
     # -------------------------------------------------------------------------
     def _send_stage_email(self):
         """Send the appropriate stage-based email template for this lead.
-        Also auto-creates a project if one doesn't exist yet.
         Called from the automated action on create/write of stage_id.
+        Project creation is manual — triggered by the "Create Project" button
+        on the lead form, not by stage changes.
         """
         for record in self:
-            # Auto-create project if not yet created
-            try:
-                if not record.linked_project_id:
-                    self._auto_create_project(record)
-            except Exception as e:
-                _logger.error(f"[AUTO-PROJECT] Error for Lead {record.id}: {e}")
-
             stage = record.stage_id
             if not stage or not record.email_from:
                 continue
