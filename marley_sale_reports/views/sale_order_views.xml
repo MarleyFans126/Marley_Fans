@@ -18,6 +18,19 @@
                         invisible="not partner_id"/>
             </xpath>
 
+            <!-- Revision label shown right under the quotation number -->
+            <xpath expr="//div[hasclass('oe_title')]" position="inside">
+                <h2 class="text-muted">
+                    Rev <field name="revision_number" readonly="1" class="oe_inline"/>
+                </h2>
+            </xpath>
+
+            <!-- Also expose Revision in the header group (next to Expiration, Quotation Date) -->
+            <xpath expr="//field[@name='validity_date']" position="after">
+                <field name="revision_number" readonly="1"/>
+                <field name="last_print_date" readonly="1" invisible="not last_print_date"/>
+            </xpath>
+
             <!-- Add commercial terms tab -->
             <xpath expr="//notebook" position="inside">
                 <page string="Quotation Print" name="marley_quotation_details">
@@ -34,6 +47,35 @@
                     </group>
                     <group string="Cover Letter Body">
                         <field name="cover_letter" nolabel="1" colspan="2" placeholder="Custom cover letter text (leave blank for default)"/>
+                    </group>
+                </page>
+                <page string="Precise Info for Proforma" name="marley_proforma_info">
+                    <group>
+                        <group string="Sales">
+                            <field name="user_id"/>
+                            <field name="second_user_id"/>
+                            <field name="team_id"/>
+                            <field name="require_signature"/>
+                            <field name="require_payment"/>
+                            <field name="client_order_ref" string="P.O. Reference#"/>
+                            <field name="po_reference_date"/>
+                            <field name="proforma_date"/>
+                        </group>
+                        <group string="Delivery">
+                            <field name="picking_policy"/>
+                            <field name="commitment_date" string="Delivery Date"/>
+                        </group>
+                    </group>
+                    <group string="Proforma Print Options">
+                        <group>
+                            <field name="proforma_with_taxes"/>
+                            <field name="proforma_print_terms"/>
+                            <field name="advance_payment_percentage"/>
+                            <field name="advance_include_taxes"/>
+                        </group>
+                        <group>
+                            <field name="advance_amount_due" readonly="1"/>
+                        </group>
                     </group>
                 </page>
                 <page string="Commercial Terms" name="marley_commercial_terms">

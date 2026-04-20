@@ -128,6 +128,86 @@ class SaleOrder(models.Model):
     bank_ifsc = fields.Char(string='IFSC Code', default='HDFC0000364')
     bank_branch = fields.Char(string='Bank Branch', default='Kukatpally, Hyderabad')
 
+    # ── Revision tracking (incremented on edit after print) ─────
+    revision_number = fields.Integer(
+        string='Revision',
+        default=0,
+        readonly=True,
+        copy=False,
+    )
+    last_print_date = fields.Datetime(
+        string='Last Printed On',
+        readonly=True,
+        copy=False,
+    )
+
+    _REVISION_IGNORED_FIELDS = {
+        'revision_number',
+        'last_print_date',
+        'message_ids',
+        'message_follower_ids',
+        'message_partner_ids',
+        'access_token',
+        'access_warning',
+        'activity_ids',
+    }
+
+    def write(self, vals):
+        bump_candidates = [k for k in vals if k not in self._REVISION_IGNORED_FIELDS]
+        res = super().write(vals)
+        if bump_candidates and not self.env.context.get('skip_revision_bump'):
+            for order in self:
+                # Once the quotation has been printed at least once, every
+                # subsequent edit increments the revision counter.
+                if order.last_print_date:
+                    order.with_context(skip_revision_bump=True).write({
+                        'revision_number': (order.revision_number or 0) + 1,
+                    })
+        return res
+
+    # ── Proforma-specific Fields ─────────────────────────────────
+    second_user_id = fields.Many2one(
+        'res.users', string='Additional Salesperson',
+        domain=[('share', '=', False)],
+    )
+    po_reference_date = fields.Date(string='P.O. Reference Date')
+    proforma_date = fields.Date(string='Proforma Invoice Date')
+
+    # ── Proforma Print Options ───────────────────────────────────
+    proforma_with_taxes = fields.Boolean(
+        string='Print With Taxes',
+        default=False,
+        help='If checked, taxes will be shown in the Proforma Invoice PDF.',
+    )
+    proforma_print_terms = fields.Boolean(
+        string='Print Terms & Conditions',
+        default=True,
+        help='If checked, terms, payment schedule, bank details and delivery sections will be printed in the Proforma Invoice PDF.',
+    )
+    advance_payment_percentage = fields.Float(
+        string='Advance Payment %',
+        default=0.0,
+        help='Enter percentage value (e.g. 70 for 70%).',
+    )
+    advance_include_taxes = fields.Boolean(
+        string='Include Taxes in Advance',
+        default=False,
+        help='If checked, advance amount is calculated on total (with taxes). Otherwise on untaxed amount.',
+    )
+    advance_amount_due = fields.Monetary(
+        string='Advance To Be Paid',
+        compute='_compute_advance_amount_due',
+        store=True,
+        currency_field='currency_id',
+    )
+
+    @api.depends('advance_payment_percentage', 'amount_total', 'amount_untaxed', 'advance_include_taxes')
+    def _compute_advance_amount_due(self):
+        for order in self:
+            pct = order.advance_payment_percentage or 0.0
+            base = order.amount_total if order.advance_include_taxes else order.amount_untaxed
+            order.advance_amount_due = round(base * pct / 100.0, 2)
+
     # ── Installation Cost Fields ─────────────────────────────────
     x_installation_cost = fields.Float(string='Installation Cost (per unit)')
     x_installation_qty = fields.Integer(string='Installation Qty', default=0)

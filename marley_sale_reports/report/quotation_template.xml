@@ -73,8 +73,14 @@
                     <!-- ===== KIND ATTENTION + QUOTATION # ===== -->
                     <div style="margin-bottom: 8px; font-size: 15px;">
                         <strong>Kind Attention:</strong>
-                        <span style="float: right; font-weight: bold;">
+                        <span style="float: right; font-weight: bold; text-align: right;">
                             Quotation # <t t-esc="doc.name"/>
+                            <t t-if="doc.revision_number and doc.revision_number &gt; 0">
+                                <br/>
+                                <span style="font-size: 13px; font-weight: bold; color: #555;">
+                                    Rev <t t-esc="doc.revision_number"/>
+                                </span>
+                            </t>
                         </span>
                     </div>
                     <div style="margin-bottom: 6px; font-size: 14px;">
