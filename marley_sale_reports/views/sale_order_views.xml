@@ -29,13 +29,12 @@
             <!-- Revision label shown right under the quotation number -->
             <xpath expr="//div[hasclass('oe_title')]" position="inside">
                 <h2 class="text-muted">
-                    Rev <field name="revision_number" readonly="1" class="oe_inline"/>
+                    Rev <field name="revision_number" class="oe_inline"/>
                 </h2>
             </xpath>
 
-            <!-- Also expose Revision in the header group (next to Expiration, Quotation Date) -->
+            <!-- Last printed date (optional info, revision is only shown in the title) -->
             <xpath expr="//field[@name='validity_date']" position="after">
-                <field name="revision_number" readonly="1"/>
                 <field name="last_print_date" readonly="1" invisible="not last_print_date"/>
             </xpath>
 

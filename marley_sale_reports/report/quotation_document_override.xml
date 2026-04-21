@@ -37,29 +37,19 @@
                 <!-- ============ RUNNING FOOTER (repeats on every page) ============ -->
                 <div class="footer" style="margin: 0; padding: 0; font-family: Arial, sans-serif;">
                     <div style="border-top: 3px solid #e30613; padding-top: 8px;">
-                        <table style="width: 100%; border-collapse: collapse; font-size: 9px; color: #333;">
+                        <table style="width: 100%; border-collapse: collapse; font-size: 10px; color: #333;">
                             <tr>
-                                <td style="width: 20%; vertical-align: top; padding-right: 10px;">
-                                    <strong style="color: #1a3c7a;">Analogue:</strong><br/>
-                                    92814 44711
+                                <td style="width: 50%; vertical-align: top;">
+                                    <strong style="color: #e30613;">Website:</strong> www.marleyfans.in
                                 </td>
-                                <td style="width: 25%; vertical-align: top; padding-right: 10px;">
-                                    <strong style="color: #1a3c7a;">Web:</strong><br/>
-                                    marleyhvlsfans@gmail.com<br/>
-                                    www.marleyfans.in
+                                <td style="width: 50%; vertical-align: top; text-align: right;">
+                                    <strong style="color: #e30613;">GSTIN:</strong> 36AAPCM1629P1ZS<br/>
+                                    <strong style="color: #e30613;">CIN:</strong> U29308TG2021PTC156778
                                 </td>
-                                <td style="width: 35%; vertical-align: top; padding-right: 10px;">
-                                    <strong style="color: #1a3c7a;">Address:</strong><br/>
-                                    GROUND FLOOR, PLOT NO.7/PART,<br/>
-                                    SHED NO.4, PHASE &#8211; IV,<br/>
-                                    IDA Jeedimetla, QUTHBULLAPUR,<br/>
-                                    Hyderabad, Medchal Malkajgiri,<br/>
-                                    Telangana-500055
-                                </td>
-                                <td style="width: 20%; vertical-align: top;">
-                                    <strong style="color: #1a3c7a;">Business:</strong><br/>
-                                    U29308TG2021PTC156778<br/>
-                                    GSTIN
+                            </tr>
+                            <tr>
+                                <td colspan="2" style="padding-top: 4px; font-size: 9px; white-space: nowrap;">
+                                    <strong style="color: #e30613;">Address:</strong> Second Floor, Swapna Nilayam, H.NO.5-5-81/7/A, Plot No.20, High Tension Rd, Prakash Nagar, Kukatpally, Hyderabad, Telangana 500072, India
                                 </td>
                             </tr>
                         </table>
@@ -95,64 +85,65 @@
                     </div>
 
                     <!-- ===== INFO ROW ===== -->
-                    <table style="width: 100%; border-collapse: collapse; margin-bottom: 16px; border: 1px solid #ccc;">
+                    <table style="width: 100%; border-collapse: collapse; margin-bottom: 16px; border: 1px solid #f5a9ac;">
                         <tr style="background-color: #f5f5f5;">
-                            <td style="border: 1px solid #ccc; padding: 8px 10px; font-weight: bold; font-size: 13px; width: 20%;">Proposal Date</td>
-                            <td style="border: 1px solid #ccc; padding: 8px 10px; font-weight: bold; font-size: 13px; width: 20%;">Expiration</td>
-                            <td style="border: 1px solid #ccc; padding: 8px 10px; font-weight: bold; font-size: 13px; width: 30%;">Sales Representative</td>
-                            <td style="border: 1px solid #ccc; padding: 8px 10px; font-weight: bold; font-size: 13px; width: 30%;">Connect</td>
+                            <td style="border: 1px solid #f5a9ac; padding: 8px 10px; font-weight: bold; font-size: 13px; width: 20%;">Proposal Date</td>
+                            <td style="border: 1px solid #f5a9ac; padding: 8px 10px; font-weight: bold; font-size: 13px; width: 20%;">Expiration</td>
+                            <td style="border: 1px solid #f5a9ac; padding: 8px 10px; font-weight: bold; font-size: 13px; width: 30%;">Sales Representative</td>
+                            <td style="border: 1px solid #f5a9ac; padding: 8px 10px; font-weight: bold; font-size: 13px; width: 30%;">Connect</td>
                         </tr>
                         <tr>
-                            <td style="border: 1px solid #ccc; padding: 8px 10px; font-size: 13px;">
+                            <td style="border: 1px solid #f5a9ac; padding: 8px 10px; font-size: 13px;">
                                 <t t-esc="doc.date_order" t-options='{"widget": "date", "format": "dd-MMM-yyyy"}'/>
                             </td>
-                            <td style="border: 1px solid #ccc; padding: 8px 10px; font-size: 13px;">
+                            <td style="border: 1px solid #f5a9ac; padding: 8px 10px; font-size: 13px;">
                                 <t t-if="doc.validity_date">
                                     <t t-esc="doc.validity_date" t-options='{"widget": "date", "format": "dd-MMM-yyyy"}'/>
                                 </t>
                             </td>
-                            <td style="border: 1px solid #ccc; padding: 8px 10px; font-size: 13px;">
+                            <td style="border: 1px solid #f5a9ac; padding: 8px 10px; font-size: 13px;">
                                 <t t-esc="doc.user_id.name or ''"/>
                             </td>
-                            <td style="border: 1px solid #ccc; padding: 8px 10px; font-size: 13px;">
-                                <t t-if="doc.user_id.phone"><t t-esc="doc.user_id.phone"/> </t>
+                            <td style="border: 1px solid #f5a9ac; padding: 8px 10px; font-size: 13px;">
+                                <t t-set="rep_phone" t-value="(doc.user_id.phone or doc.user_id.partner_id.phone or '') if doc.user_id else ''"/>
+                                <t t-if="rep_phone"><t t-esc="rep_phone"/><br/></t>
                                 <t t-if="doc.user_id.email"><t t-esc="doc.user_id.email"/></t>
                             </td>
                         </tr>
                     </table>
 
                     <!-- ===== PRODUCT LINES TABLE ===== -->
-                    <table style="width: 100%; border-collapse: collapse; margin-bottom: 0; border: 1px solid #ccc;">
+                    <table style="width: 100%; border-collapse: collapse; margin-bottom: 0; border: 1px solid #f5a9ac;">
                         <thead>
                             <tr style="background-color: #f0f0f0; font-weight: bold;">
-                                <th style="border: 1px solid #ccc; padding: 10px 8px; text-align: left; font-size: 13px; width: 42%;">DESCRIPTION</th>
-                                <th style="border: 1px solid #ccc; padding: 10px 8px; text-align: center; font-size: 13px; width: 13%;">QUANTITY</th>
-                                <th style="border: 1px solid #ccc; padding: 10px 8px; text-align: right; font-size: 13px; width: 15%;">UNIT PRICE</th>
-                                <th style="border: 1px solid #ccc; padding: 10px 8px; text-align: center; font-size: 13px; width: 14%;">TAXES</th>
-                                <th style="border: 1px solid #ccc; padding: 10px 8px; text-align: right; font-size: 13px; width: 16%;">AMOUNT</th>
+                                <th style="border: 1px solid #f5a9ac; padding: 10px 8px; text-align: left; font-size: 13px; width: 42%;">DESCRIPTION</th>
+                                <th style="border: 1px solid #f5a9ac; padding: 10px 8px; text-align: center; font-size: 13px; width: 13%;">QUANTITY</th>
+                                <th style="border: 1px solid #f5a9ac; padding: 10px 8px; text-align: right; font-size: 13px; width: 15%;">UNIT PRICE</th>
+                                <th style="border: 1px solid #f5a9ac; padding: 10px 8px; text-align: center; font-size: 13px; width: 14%;">TAXES</th>
+                                <th style="border: 1px solid #f5a9ac; padding: 10px 8px; text-align: right; font-size: 13px; width: 16%;">AMOUNT</th>
                             </tr>
                         </thead>
                         <tbody>
                             <t t-foreach="doc.order_line.filtered(lambda l: not l.display_type)" t-as="line">
                                 <tr style="page-break-inside: avoid;">
-                                    <td style="border: 1px solid #ccc; padding: 10px 8px; font-size: 13px; vertical-align: top; line-height: 1.7;">
+                                    <td style="border: 1px solid #f5a9ac; padding: 10px 8px; font-size: 13px; vertical-align: top; line-height: 1.7;">
                                         <strong><t t-esc="line.product_id.name or line.name"/></strong>
                                         <t t-if="line.name and line.name != line.product_id.name">
                                             <br/><span style="font-size: 12px; color: #333; white-space: pre-line;"><t t-esc="line.name"/></span>
                                         </t>
                                     </td>
-                                    <td style="border: 1px solid #ccc; padding: 10px 8px; text-align: center; font-size: 13px; vertical-align: top;">
+                                    <td style="border: 1px solid #f5a9ac; padding: 10px 8px; text-align: center; font-size: 13px; vertical-align: top;">
                                         <t t-esc="'%.2f' % line.product_uom_qty"/> <t t-esc="line.product_uom_id.name or 'Units'"/>
                                     </td>
-                                    <td style="border: 1px solid #ccc; padding: 10px 8px; text-align: right; font-size: 13px; vertical-align: top;">
+                                    <td style="border: 1px solid #f5a9ac; padding: 10px 8px; text-align: right; font-size: 13px; vertical-align: top;">
                                         <t t-esc="'{:,.2f}'.format(line.price_unit)"/>
                                     </td>
-                                    <td style="border: 1px solid #ccc; padding: 10px 8px; text-align: center; font-size: 12px; vertical-align: top;">
+                                    <td style="border: 1px solid #f5a9ac; padding: 10px 8px; text-align: center; font-size: 12px; vertical-align: top;">
                                         <t t-foreach="line.tax_ids" t-as="tax">
                                             <t t-esc="tax.name"/><br/>
                                         </t>
                                     </td>
-                                    <td style="border: 1px solid #ccc; padding: 10px 8px; text-align: right; font-size: 13px; vertical-align: top; font-weight: bold;">
+                                    <td style="border: 1px solid #f5a9ac; padding: 10px 8px; text-align: right; font-size: 13px; vertical-align: top; font-weight: bold;">
                                         &#8377; <t t-esc="'{:,.2f}'.format(line.price_subtotal)"/>
                                     </td>
                                 </tr>
@@ -165,27 +156,27 @@
                     <table style="width: 50%; margin-left: auto; border-collapse: collapse; margin-bottom: 20px;">
                         <t t-foreach="tax_totals.get('subtotals', [])" t-as="subtotal">
                             <tr>
-                                <td style="padding: 8px 12px; text-align: right; font-size: 13px; border: 1px solid #ccc;">
+                                <td style="padding: 8px 12px; text-align: right; font-size: 13px; border: 1px solid #f5a9ac;">
                                     <t t-esc="subtotal.get('name', 'Untaxed Amount')"/>
                                 </td>
-                                <td style="padding: 8px 12px; text-align: right; font-size: 13px; font-weight: bold; border: 1px solid #ccc; width: 35%;">
+                                <td style="padding: 8px 12px; text-align: right; font-size: 13px; font-weight: bold; border: 1px solid #f5a9ac; width: 35%;">
                                     &#8377; <t t-esc="'{:,.2f}'.format(subtotal.get('base_amount_currency', 0))"/>
                                 </td>
                             </tr>
                             <t t-foreach="subtotal.get('tax_groups', [])" t-as="tax_group">
                                 <tr>
-                                    <td style="padding: 8px 12px; text-align: right; font-size: 13px; border: 1px solid #ccc;">
+                                    <td style="padding: 8px 12px; text-align: right; font-size: 13px; border: 1px solid #f5a9ac;">
                                         <t t-esc="tax_group.get('group_name', 'Tax')"/>
                                     </td>
-                                    <td style="padding: 8px 12px; text-align: right; font-size: 13px; font-weight: bold; border: 1px solid #ccc;">
+                                    <td style="padding: 8px 12px; text-align: right; font-size: 13px; font-weight: bold; border: 1px solid #f5a9ac;">
                                         &#8377; <t t-esc="'{:,.2f}'.format(tax_group.get('tax_amount_currency', 0))"/>
                                     </td>
                                 </tr>
                             </t>
                         </t>
                         <tr style="background-color: #f0f0f0;">
-                            <td style="padding: 10px 12px; text-align: right; font-size: 14px; font-weight: bold; border: 2px solid #999;">Total</td>
-                            <td style="padding: 10px 12px; text-align: right; font-size: 14px; font-weight: bold; border: 2px solid #999;">
+                            <td style="padding: 10px 12px; text-align: right; font-size: 14px; font-weight: bold; border: 2px solid #f5a9ac;">Total</td>
+                            <td style="padding: 10px 12px; text-align: right; font-size: 14px; font-weight: bold; border: 2px solid #f5a9ac;">
                                 &#8377; <t t-esc="'{:,.2f}'.format(tax_totals.get('total_amount_currency', doc.amount_total))"/>
                             </td>
                         </tr>

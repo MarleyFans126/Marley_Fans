@@ -169,41 +169,18 @@ class SaleOrder(models.Model):
             start = d.year if d.month >= 4 else d.year - 1
             order.financial_year_label = '%d-%d' % (start, start + 1)
 
-    # ── Revision tracking (incremented on edit after print) ─────
+    # ── Revision tracking (manual) ──────────────────────────────
     revision_number = fields.Integer(
         string='Revision',
         default=0,
-        readonly=True,
         copy=False,
+        help='Manually set the revision number for this quotation.',
     )
     last_print_date = fields.Datetime(
         string='Last Printed On',
         readonly=True,
         copy=False,
     )
-
-    _REVISION_IGNORED_FIELDS = {
-        'revision_number',
-        'last_print_date',
-        'message_ids',
-        'message_follower_ids',
-        'message_partner_ids',
-        'access_token',
-        'access_warning',
-        'activity_ids',
-    }
-
-    def write(self, vals):
-        bump_candidates = [k for k in vals if k not in self._REVISION_IGNORED_FIELDS]
-        res = super().write(vals)
-        skip = self.env.context.get('skip_revision_bump')
-        if bump_candidates and not skip:
-            for order in self:
-                new_rev = (order.revision_number or 0) + 1
-                order.with_context(skip_revision_bump=True).write({
-                    'revision_number': new_rev,
-                })
-        return res
 
     # ── Proforma-specific Fields ─────────────────────────────────
     second_user_id = fields.Many2one(
