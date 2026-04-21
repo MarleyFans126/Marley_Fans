@@ -175,35 +175,16 @@ class SaleOrder(models.Model):
         'activity_ids',
     }
 
-    def action_mark_printed_debug(self):
-        """Debug helper: manually stamp last_print_date = now()."""
-        self.ensure_one()
-        self.with_context(skip_revision_bump=True).write({
-            'last_print_date': fields.Datetime.now(),
-        })
-        self.message_post(body="Marley: last_print_date manually stamped (debug).")
-        return True
-
     def write(self, vals):
         bump_candidates = [k for k in vals if k not in self._REVISION_IGNORED_FIELDS]
         res = super().write(vals)
         skip = self.env.context.get('skip_revision_bump')
-        _logger.info(
-            "Marley revision: write vals_keys=%s bump=%s skip=%s ids=%s",
-            list(vals.keys()), bool(bump_candidates), skip, self.ids,
-        )
         if bump_candidates and not skip:
             for order in self:
-                _logger.info(
-                    "Marley revision: order %s last_print_date=%s rev=%s",
-                    order.id, order.last_print_date, order.revision_number,
-                )
-                if order.last_print_date:
-                    new_rev = (order.revision_number or 0) + 1
-                    order.with_context(skip_revision_bump=True).write({
-                        'revision_number': new_rev,
-                    })
-                    _logger.info("Marley revision: bumped order %s -> rev %s", order.id, new_rev)
+                new_rev = (order.revision_number or 0) + 1
+                order.with_context(skip_revision_bump=True).write({
+                    'revision_number': new_rev,
+                })
         return res
 
     # ── Proforma-specific Fields ─────────────────────────────────
