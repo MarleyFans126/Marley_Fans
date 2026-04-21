@@ -141,16 +141,6 @@ class SaleOrder(models.Model):
         copy=False,
     )
 
-    def action_mark_printed_debug(self):
-        """Manual button: stamp last_print_date = now() so we can test the
-        revision-bump logic independently of the PDF render hook."""
-        self.ensure_one()
-        self.with_context(skip_revision_bump=True).write({
-            'last_print_date': fields.Datetime.now(),
-        })
-        _logger.info("Marley revision: manually stamped last_print_date on order %s", self.id)
-        return True
-
     _REVISION_IGNORED_FIELDS = {
         'revision_number',
         'last_print_date',
@@ -165,25 +155,14 @@ class SaleOrder(models.Model):
     def write(self, vals):
         bump_candidates = [k for k in vals if k not in self._REVISION_IGNORED_FIELDS]
         res = super().write(vals)
-        skip = self.env.context.get('skip_revision_bump')
-        _logger.info(
-            "Marley revision: write() vals_keys=%s bump_candidates=%s skip=%s ids=%s",
-            list(vals.keys()), bump_candidates, skip, self.ids,
-        )
-        if bump_candidates and not skip:
+        if bump_candidates and not self.env.context.get('skip_revision_bump'):
             for order in self:
                 # Once the quotation has been printed at least once, every
                 # subsequent edit increments the revision counter.
-                _logger.info(
-                    "Marley revision: order %s last_print_date=%s rev=%s",
-                    order.id, order.last_print_date, order.revision_number,
-                )
                 if order.last_print_date:
-                    new_rev = (order.revision_number or 0) + 1
                     order.with_context(skip_revision_bump=True).write({
-                        'revision_number': new_rev,
+                        'revision_number': (order.revision_number or 0) + 1,
                     })
-                    _logger.info("Marley revision: bumped order %s -> %s", order.id, new_rev)
         return res
 
     # ── Proforma-specific Fields ─────────────────────────────────
