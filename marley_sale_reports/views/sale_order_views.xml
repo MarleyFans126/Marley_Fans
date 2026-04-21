@@ -16,6 +16,11 @@
                         class="btn-success"
                         icon="fa-whatsapp"
                         invisible="not partner_id"/>
+                <button name="action_mark_printed_debug"
+                        string="Mark as Printed (debug)"
+                        type="object"
+                        class="btn-secondary"
+                        help="Manually stamp last_print_date = now(). Use to verify the revision bump works."/>
             </xpath>
 
             <!-- Revision label shown right under the quotation number -->
