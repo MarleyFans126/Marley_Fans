@@ -1,5 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- Product template views intentionally left empty -->
-    <!-- Product specs are entered directly in quotation line descriptions -->
+
+    <!-- Per-product warranty terms (shown on quotations/proforma) -->
+    <record id="product_template_form_view_inherit_marley" model="ir.ui.view">
+        <field name="name">product.template.form.inherit.marley</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='sales']" position="inside">
+                <group string="Marley Quotation Print">
+                    <field name="warranty_terms"
+                           placeholder="Warranty text shown on quotations / proforma invoices for this product..."/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
 </odoo>

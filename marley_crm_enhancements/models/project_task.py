@@ -26,6 +26,33 @@ class ProjectTask(models.Model):
 
     stage_id = fields.Many2one(default=_get_default_stage_id)
 
+    # ------------------------------------------------------------------
+    # Default project: the singleton "Installation" project
+    # ------------------------------------------------------------------
+    @api.model
+    def _get_default_installation_project(self):
+        Project = self.env['project.project'].sudo()
+        project = Project.search([('name', '=', 'Installation')], limit=1)
+        if project:
+            return project.id
+        stage_xmlids = [
+            'marley_crm_enhancements.project_stage_installation',
+            'marley_crm_enhancements.project_stage_in_progress',
+            'marley_crm_enhancements.project_stage_done',
+            'marley_crm_enhancements.project_stage_cancelled',
+        ]
+        stages = []
+        for xmlid in stage_xmlids:
+            s = self.env.ref(xmlid, raise_if_not_found=False)
+            if s:
+                stages.append(s.id)
+        return Project.create({
+            'name': 'Installation',
+            'type_ids': [(6, 0, stages)] if stages else False,
+        }).id
+
+    project_id = fields.Many2one(default=_get_default_installation_project)
+
     # Link task directly to the CRM opportunity / lead
     lead_id = fields.Many2one(
         'crm.lead',

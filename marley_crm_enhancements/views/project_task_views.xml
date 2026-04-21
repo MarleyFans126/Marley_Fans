@@ -25,6 +25,24 @@
                         groups="project.group_project_user"/>
             </xpath>
 
+            <!-- Rename "Deadline" label to "Dispatch Date" -->
+            <xpath expr="//label[@for='date_deadline']" position="attributes">
+                <attribute name="string">Dispatch Date</attribute>
+            </xpath>
+
+            <!-- Project is always the shared Installation project — not editable -->
+            <xpath expr="//field[@name='project_id']" position="attributes">
+                <attribute name="readonly">1</attribute>
+                <attribute name="force_save">1</attribute>
+            </xpath>
+
+            <!-- Move Sales Representative + Scheduled Installation Date
+                 to the top-right group, right after Dispatch Date -->
+            <xpath expr="//div[@id='date_deadline_and_recurring_task']" position="after">
+                <field name="inst_sales_rep"/>
+                <field name="inst_installation_date"/>
+            </xpath>
+
             <xpath expr="//notebook" position="inside">
                 <page string="Installation" name="installation_tab">
 
@@ -42,11 +60,9 @@
 
                     <div invisible="not is_installation">
 
-                        <!-- Row 1: Sales Rep + Installation Date + Company -->
+                        <!-- Row 1: Contact + Company (Sales Rep + Installation Date moved to top of form) -->
                         <group string="Installation Details">
                             <group>
-                                <field name="inst_sales_rep"/>
-                                <field name="inst_installation_date"/>
                                 <field name="inst_site_contact"/>
                                 <field name="inst_site_phone" widget="phone"/>
                             </group>

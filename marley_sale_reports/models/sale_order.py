@@ -92,8 +92,31 @@ class SaleOrder(models.Model):
     # ------------------------------------------------------------------
     warranty_terms = fields.Text(
         string='Warranty Terms',
-        default='5 Years warranty on Mechanical items & 1 year OEM warranty on Motors & VFD Drive',
+        compute='_compute_warranty_terms',
+        store=True,
+        readonly=False,
+        help='Auto-fetched from the products in this order (deduplicated). '
+             'Can be edited manually to override for this quotation.',
     )
+
+    @api.depends('order_line.product_id', 'order_line.product_id.warranty_terms')
+    def _compute_warranty_terms(self):
+        for order in self:
+            terms = []
+            seen = set()
+            for line in order.order_line:
+                product = line.product_id
+                text = (product.warranty_terms or '').strip() if product else ''
+                if text and text not in seen:
+                    seen.add(text)
+                    terms.append(text)
+            if terms:
+                order.warranty_terms = '\n\n'.join(terms)
+            elif not order.warranty_terms:
+                order.warranty_terms = (
+                    '5 Years warranty on Mechanical items & '
+                    '1 year OEM warranty on Motors & VFD Drive'
+                )
     delivery_terms = fields.Text(
         string='Delivery Terms',
         default='1-2 Weeks from the date of receipt of your technically and commercially clear purchase order.',
