@@ -50,7 +50,7 @@ class IrActionsReport(models.Model):
         self._marley_stamp_print(report_ref, res_ids)
         return result
 
-    def _render_qweb_html(self, report_ref, res_ids=None, data=None):
-        result = super()._render_qweb_html(report_ref=report_ref, res_ids=res_ids, data=data)
-        self._marley_stamp_print(report_ref, res_ids)
+    def _render_qweb_html(self, report_ref, docids, data=None):
+        result = super()._render_qweb_html(report_ref, docids, data=data)
+        self._marley_stamp_print(report_ref, docids)
         return result
