@@ -18,6 +18,14 @@
                         invisible="not partner_id"/>
             </xpath>
 
+            <!-- Prefix the quotation number with the financial year -->
+            <xpath expr="//h1/field[@name='name']" position="before">
+                <field name="financial_year_label"
+                       readonly="1"
+                       class="oe_inline"
+                       invisible="not financial_year_label"/><span invisible="not financial_year_label">/</span>
+            </xpath>
+
             <!-- Revision label shown right under the quotation number -->
             <xpath expr="//div[hasclass('oe_title')]" position="inside">
                 <h2 class="text-muted">
