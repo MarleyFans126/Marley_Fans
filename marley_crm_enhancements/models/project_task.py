@@ -107,6 +107,69 @@ class ProjectTask(models.Model):
     # Other
     inst_other_info = fields.Text(string='Other Important Information')
 
+    # ── Editable installation product lines (override sale order lines) ──
+    installation_line_ids = fields.One2many(
+        'project.task.installation.line',
+        'task_id',
+        string='Installation Lines',
+        copy=True,
+    )
+    inst_total_quantity = fields.Float(
+        string='Total Quantity',
+        compute='_compute_installation_totals',
+        store=False,
+    )
+    inst_total_weight = fields.Float(
+        string='Total Weight',
+        compute='_compute_installation_totals',
+        store=False,
+        digits=(12, 3),
+    )
+    inst_grand_total = fields.Float(
+        string='Grand Total',
+        compute='_compute_installation_totals',
+        store=False,
+        digits='Product Price',
+    )
+
+    @api.depends('installation_line_ids.quantity',
+                 'installation_line_ids.weight',
+                 'installation_line_ids.price_subtotal')
+    def _compute_installation_totals(self):
+        for task in self:
+            task.inst_total_quantity = sum(task.installation_line_ids.mapped('quantity'))
+            task.inst_total_weight = sum(task.installation_line_ids.mapped('weight'))
+            task.inst_grand_total = sum(task.installation_line_ids.mapped('price_subtotal'))
+
+    def action_fill_installation_lines_from_so(self):
+        """Populate installation_line_ids from the related sale order's product lines."""
+        for task in self:
+            so = task._get_related_sale_order()
+            if not so:
+                continue
+            # Clear existing lines and repopulate
+            task.installation_line_ids = [(5, 0, 0)]
+            new_lines = []
+            for seq, line in enumerate(so.order_line.filtered(
+                lambda l: not l.display_type and l.product_id
+            ), start=10):
+                per_unit_weight = (
+                    (getattr(line.product_id, 'marley_weight', 0.0) or 0.0)
+                    or (line.product_id.weight or 0.0)
+                )
+                new_lines.append((0, 0, {
+                    'sequence': seq,
+                    'product_id': line.product_id.id,
+                    'name': line.product_id.name or line.name,
+                    'quantity': line.product_uom_qty,
+                    'uom_id': line.product_uom_id.id if line.product_uom_id else False,
+                    'weight': per_unit_weight * (line.product_uom_qty or 0.0),
+                    'unit_price': line.price_unit,
+                }))
+            if new_lines:
+                task.installation_line_ids = new_lines
+        return True
+
     # ------------------------------------------------------------------
     # Auto-fetch: Company Details from Sale Order → Partner / Lead
     # ------------------------------------------------------------------

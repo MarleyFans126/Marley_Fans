@@ -1,1 +1,3 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_project_task_installation_line_user,project.task.installation.line (user),model_project_task_installation_line,project.group_project_user,1,1,1,1
+access_project_task_installation_line_manager,project.task.installation.line (manager),model_project_task_installation_line,project.group_project_manager,1,1,1,1

@@ -130,7 +130,7 @@
 
                     <!-- ============ PRODUCT MODEL / TERMS ============ -->
                     <h4 style="text-align: center; color: #333; font-weight: bold; font-size: 14px; margin: 22px 0 12px 0;">
-                        Product Model/ Box &amp; quantity | weight | Terms
+                        Product &amp; Packaging Details
                     </h4>
 
                     <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px; border-top: 1px solid #f5a9ac;">
@@ -193,16 +193,18 @@
                     </table>
 
                     <!-- ============ PRODUCT LINES TABLE ============ -->
-                    <!-- Try task.sale_order_id → task.lead_id sale orders → project.lead_id sale orders -->
+                    <!-- Prefer task.installation_line_ids (editable on UI) else fall back to sale order lines -->
+                    <t t-set="use_task_lines" t-value="bool(doc.installation_line_ids)"/>
                     <t t-set="so_list" t-value="doc.sale_order_id"/>
-                    <t t-if="not so_list and 'lead_id' in doc._fields and doc.lead_id">
+                    <t t-if="not use_task_lines and not so_list and 'lead_id' in doc._fields and doc.lead_id">
                         <t t-set="so_list" t-value="doc.env['sale.order'].sudo().search([('opportunity_id', '=', doc.lead_id.id)])"/>
                     </t>
-                    <t t-if="not so_list and doc.project_id and 'lead_id' in doc.project_id._fields and doc.project_id.lead_id">
+                    <t t-if="not use_task_lines and not so_list and doc.project_id and 'lead_id' in doc.project_id._fields and doc.project_id.lead_id">
                         <t t-set="so_list" t-value="doc.env['sale.order'].sudo().search([('opportunity_id', '=', doc.project_id.lead_id.id)])"/>
                     </t>
-                    <t t-if="so_list">
-                        <t t-set="product_lines" t-value="so_list.mapped('order_line').filtered(lambda l: not l.display_type and l.product_id)"/>
+                    <t t-if="use_task_lines or so_list">
+                        <t t-if="use_task_lines" t-set="product_lines" t-value="doc.installation_line_ids"/>
+                        <t t-if="not use_task_lines" t-set="product_lines" t-value="so_list.mapped('order_line').filtered(lambda l: not l.display_type and l.product_id)"/>
                         <t t-if="product_lines">
                             <table style="width: 100%; border-collapse: collapse; margin-bottom: 0; page-break-inside: auto;">
                                 <thead>
@@ -234,29 +236,44 @@
                                     <t t-set="total_weight" t-value="0"/>
                                     <t t-foreach="product_lines" t-as="line">
                                         <t t-set="sno" t-value="sno + 1"/>
-                                        <t t-set="line_weight" t-value="(line.product_id.marley_weight or line.product_id.weight or 0.0) * line.product_uom_qty"/>
-                                        <t t-set="grand_total" t-value="grand_total + line.price_subtotal"/>
-                                        <t t-set="total_qty" t-value="total_qty + line.product_uom_qty"/>
-                                        <t t-set="total_weight" t-value="total_weight + line_weight"/>
+                                        <t t-if="use_task_lines">
+                                            <t t-set="l_qty" t-value="line.quantity"/>
+                                            <t t-set="l_uom" t-value="line.uom_id"/>
+                                            <t t-set="l_price" t-value="line.unit_price"/>
+                                            <t t-set="l_subtotal" t-value="line.price_subtotal"/>
+                                            <t t-set="l_weight" t-value="line.weight"/>
+                                            <t t-set="l_label" t-value="line.product_id.name or line.name or ''"/>
+                                        </t>
+                                        <t t-if="not use_task_lines">
+                                            <t t-set="l_qty" t-value="line.product_uom_qty"/>
+                                            <t t-set="l_uom" t-value="line.product_uom_id"/>
+                                            <t t-set="l_price" t-value="line.price_unit"/>
+                                            <t t-set="l_subtotal" t-value="line.price_subtotal"/>
+                                            <t t-set="l_weight" t-value="(line.product_id.marley_weight or line.product_id.weight or 0.0) * line.product_uom_qty"/>
+                                            <t t-set="l_label" t-value="line.product_id.name or line.name or ''"/>
+                                        </t>
+                                        <t t-set="grand_total" t-value="grand_total + l_subtotal"/>
+                                        <t t-set="total_qty" t-value="total_qty + l_qty"/>
+                                        <t t-set="total_weight" t-value="total_weight + l_weight"/>
                                         <tr style="border-bottom: 1px solid #f5a9ac; page-break-inside: avoid;">
                                             <td style="padding: 14px 12px; text-align: center; font-size: 13px; vertical-align: top;">
                                                 <t t-esc="sno"/>
                                             </td>
                                             <td style="padding: 14px 12px; font-size: 13px; vertical-align: top;">
-                                                <t t-esc="line.product_id.name or line.name"/>
+                                                <t t-esc="l_label"/>
                                             </td>
                                             <td style="padding: 14px 12px; text-align: center; font-size: 13px; vertical-align: top;">
-                                                <t t-esc="'%.2f' % line.product_uom_qty"/>
-                                                <t t-if="line.product_uom_id"> <t t-esc="line.product_uom_id.name"/></t>
+                                                <t t-esc="'%.2f' % l_qty"/>
+                                                <t t-if="l_uom"> <t t-esc="l_uom.name"/></t>
                                             </td>
                                             <td style="padding: 14px 12px; text-align: right; font-size: 13px; vertical-align: top;">
-                                                <t t-esc="'%.2f' % line_weight"/> kg
+                                                <t t-esc="'%.2f' % l_weight"/> kg
                                             </td>
                                             <td style="padding: 14px 12px; text-align: right; font-size: 13px; vertical-align: top;">
-                                                &#8377; <t t-esc="'{:,.2f}'.format(line.price_unit)"/>
+                                                &#8377; <t t-esc="'{:,.2f}'.format(l_price)"/>
                                             </td>
                                             <td style="padding: 14px 12px; text-align: right; font-size: 13px; vertical-align: top; font-weight: bold;">
-                                                &#8377; <t t-esc="'{:,.2f}'.format(line.price_subtotal)"/>
+                                                &#8377; <t t-esc="'{:,.2f}'.format(l_subtotal)"/>
                                             </td>
                                         </tr>
                                     </t>
@@ -284,10 +301,7 @@
                     </t>
 
                     <!-- ============ SITE SPECIFICATION ============ -->
-                    <h4 style="text-align: center; color: #333; font-weight: bold; font-size: 14px; margin: 22px 0 12px 0;">
-                        Site Specification
-                    </h4>
-
+                    
                     <table style="width: 80%; margin: 0 auto; border-collapse: collapse; margin-bottom: 24px; border-top: 1px solid #f5a9ac; page-break-inside: avoid;">
                         <tr>
                             <td style="border-bottom: 1px solid #f5a9ac; border-left: 1px solid #f5a9ac; padding: 16px 24px; width: 40%; font-weight: bold; font-size: 14px; vertical-align: middle;">

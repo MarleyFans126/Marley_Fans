@@ -107,6 +107,36 @@
                             </group>
                         </group>
 
+                        <!-- Editable Installation Product Lines -->
+                        <group string="Installation Product Lines">
+                            <div class="mb-2">
+                                <button name="action_fill_installation_lines_from_so"
+                                        type="object"
+                                        string="Import from Sale Order"
+                                        class="btn-sm btn-outline-primary"
+                                        icon="fa-download"
+                                        help="Replace lines with data from the linked sale order."/>
+                            </div>
+                            <field name="installation_line_ids" nolabel="1" colspan="2">
+                                <list editable="bottom" string="Installation Lines">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="product_id"/>
+                                    <field name="name"/>
+                                    <field name="quantity"/>
+                                    <field name="uom_id" optional="hide"/>
+                                    <field name="weight"/>
+                                    <field name="unit_price"/>
+                                    <field name="price_subtotal" readonly="1"/>
+                                    <field name="currency_id" column_invisible="1"/>
+                                </list>
+                            </field>
+                            <group>
+                                <field name="inst_total_quantity" readonly="1"/>
+                                <field name="inst_total_weight" readonly="1"/>
+                                <field name="inst_grand_total" widget="monetary" readonly="1"/>
+                            </group>
+                        </group>
+
                         <!-- Row 4: Site Specification -->
                         <group string="Site Specification">
                             <group>

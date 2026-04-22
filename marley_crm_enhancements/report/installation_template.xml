@@ -133,7 +133,7 @@
 
                     <!-- ============ PRODUCT MODEL / TERMS ============ -->
                     <h4 style="text-align: center; color: #333; font-weight: bold; font-size: 14px; margin: 22px 0 12px 0;">
-                        Product Model/ Box &amp; quantity | weight | Terms
+                        Product &amp; Packaging Details
                     </h4>
 
                     <!-- Fetch sale orders linked to this project's lead -->
@@ -284,10 +284,7 @@
                     </t>
 
                     <!-- ============ SITE SPECIFICATION ============ -->
-                    <h4 style="text-align: center; color: #333; font-weight: bold; font-size: 14px; margin: 22px 0 12px 0;">
-                        Site Specification
-                    </h4>
-
+                    
                     <table style="width: 80%; margin: 0 auto; border-collapse: collapse; margin-bottom: 24px; border-top: 1px solid #f5a9ac; page-break-inside: avoid;">
                         <tr>
                             <td style="border-bottom: 1px solid #f5a9ac; border-left: 1px solid #f5a9ac; padding: 16px 24px; width: 40%; font-weight: bold; font-size: 14px; vertical-align: middle;">
