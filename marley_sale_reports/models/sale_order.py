@@ -217,6 +217,19 @@ class SaleOrder(models.Model):
         store=True,
         currency_field='currency_id',
     )
+    advance_received = fields.Monetary(
+        string='Advance Received',
+        currency_field='currency_id',
+        default=0.0,
+        help='Advance amount already received from the client. Deducted from the total on the proforma invoice.',
+    )
+    balance_due = fields.Monetary(
+        string='Balance Due',
+        compute='_compute_balance_due',
+        store=True,
+        currency_field='currency_id',
+        help='Total amount minus advance received.',
+    )
 
     @api.depends('advance_payment_percentage', 'amount_total', 'amount_untaxed', 'advance_include_taxes')
     def _compute_advance_amount_due(self):
@@ -224,6 +237,11 @@ class SaleOrder(models.Model):
             pct = order.advance_payment_percentage or 0.0
             base = order.amount_total if order.advance_include_taxes else order.amount_untaxed
             order.advance_amount_due = round(base * pct / 100.0, 2)
+
+    @api.depends('amount_total', 'advance_received')
+    def _compute_balance_due(self):
+        for order in self:
+            order.balance_due = (order.amount_total or 0.0) - (order.advance_received or 0.0)
 
     # ── Installation Cost Fields ─────────────────────────────────
     x_installation_cost = fields.Float(string='Installation Cost (per unit)')

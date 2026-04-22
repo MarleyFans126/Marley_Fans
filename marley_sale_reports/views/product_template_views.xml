@@ -9,6 +9,7 @@
         <field name="arch" type="xml">
             <xpath expr="//page[@name='sales']" position="inside">
                 <group string="Marley Quotation Print">
+                    <field name="marley_weight"/>
                     <field name="warranty_terms"
                            placeholder="Warranty text shown on quotations / proforma invoices for this product..."/>
                 </group>

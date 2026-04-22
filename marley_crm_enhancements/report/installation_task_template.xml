@@ -24,18 +24,20 @@
                 <!-- ============ RUNNING FOOTER (repeats on every page) ============ -->
                 <div class="footer" style="margin: 0; padding: 0; font-family: Arial, sans-serif;">
                     <div style="border-top: 3px solid #e30613; padding-top: 8px;">
-                        <table style="width: 100%; border-collapse: collapse; font-size: 10px; color: #333;">
+                        <table style="width: 100%; border-collapse: collapse; font-size: 10px; color: #333; border: none;">
                             <tr>
-                                <td style="width: 50%; vertical-align: top;">
+                                <td style="width: 40%; vertical-align: top; border: none; padding: 0;">
                                     <strong style="color: #e30613;">Website:</strong> www.marleyfans.in
                                 </td>
-                                <td style="width: 50%; vertical-align: top; text-align: right;">
-                                    <strong style="color: #e30613;">GSTIN:</strong> 36AAPCM1629P1ZS<br/>
+                                <td style="width: 30%; vertical-align: top; border: none; padding: 0; text-align: center;">
                                     <strong style="color: #e30613;">CIN:</strong> U29308TG2021PTC156778
+                                </td>
+                                <td style="width: 30%; vertical-align: top; border: none; padding: 0; text-align: right;">
+                                    <strong style="color: #e30613;">GSTIN:</strong> 36AAPCM1629P1ZS
                                 </td>
                             </tr>
                             <tr>
-                                <td colspan="2" style="padding-top: 4px; font-size: 9px; white-space: nowrap;">
+                                <td colspan="3" style="padding: 4px 0 0 0; font-size: 9px; white-space: nowrap; border: none;">
                                     <strong style="color: #e30613;">Address:</strong> Second Floor, Swapna Nilayam, H.NO.5-5-81/7/A, Plot No.20, High Tension Rd, Prakash Nagar, Kukatpally, Hyderabad, Telangana 500072, India
                                 </td>
                             </tr>
@@ -191,39 +193,51 @@
                     </table>
 
                     <!-- ============ PRODUCT LINES TABLE ============ -->
-                    <t t-set="so" t-value="doc.sale_order_id"/>
-                    <t t-if="so">
-                        <t t-set="product_lines" t-value="so.order_line.filtered(lambda l: not l.display_type and l.product_id)"/>
+                    <!-- Try task.sale_order_id → task.lead_id sale orders → project.lead_id sale orders -->
+                    <t t-set="so_list" t-value="doc.sale_order_id"/>
+                    <t t-if="not so_list and 'lead_id' in doc._fields and doc.lead_id">
+                        <t t-set="so_list" t-value="doc.env['sale.order'].sudo().search([('opportunity_id', '=', doc.lead_id.id)])"/>
+                    </t>
+                    <t t-if="not so_list and doc.project_id and 'lead_id' in doc.project_id._fields and doc.project_id.lead_id">
+                        <t t-set="so_list" t-value="doc.env['sale.order'].sudo().search([('opportunity_id', '=', doc.project_id.lead_id.id)])"/>
+                    </t>
+                    <t t-if="so_list">
+                        <t t-set="product_lines" t-value="so_list.mapped('order_line').filtered(lambda l: not l.display_type and l.product_id)"/>
                         <t t-if="product_lines">
                             <table style="width: 100%; border-collapse: collapse; margin-bottom: 0; page-break-inside: auto;">
                                 <thead>
                                     <tr style="border-top: 2px solid #f5a9ac; border-bottom: 2px solid #f5a9ac;">
-                                        <th style="padding: 10px 12px; text-align: left; font-weight: bold; font-size: 13px; color: #555; width: 10%;">
+                                        <th style="padding: 10px 12px; text-align: left; font-weight: bold; font-size: 13px; color: #555; width: 7%;">
                                             Sr. No.
                                         </th>
-                                        <th style="padding: 10px 12px; text-align: left; font-weight: bold; font-size: 13px; color: #555; width: 50%;">
+                                        <th style="padding: 10px 12px; text-align: left; font-weight: bold; font-size: 13px; color: #555; width: 33%;">
                                             Product
                                         </th>
-                                        <th style="padding: 10px 12px; text-align: center; font-weight: bold; font-size: 13px; color: #555; width: 20%;">
-                                            Box Qty
+                                        <th style="padding: 10px 12px; text-align: center; font-weight: bold; font-size: 13px; color: #555; width: 12%;">
+                                            Quantity
                                         </th>
-                                        <th style="padding: 10px 12px; text-align: right; font-weight: bold; font-size: 13px; color: #555; width: 20%;">
-                                            Weight/unit
+                                        <th style="padding: 10px 12px; text-align: right; font-weight: bold; font-size: 13px; color: #555; width: 12%;">
+                                            Weight
+                                        </th>
+                                        <th style="padding: 10px 12px; text-align: right; font-weight: bold; font-size: 13px; color: #555; width: 17%;">
+                                            Unit Price
+                                        </th>
+                                        <th style="padding: 10px 12px; text-align: right; font-weight: bold; font-size: 13px; color: #555; width: 19%;">
+                                            Total Price
                                         </th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <t t-set="sno" t-value="0"/>
-                                    <t t-set="total_box_qty" t-value="0"/>
+                                    <t t-set="grand_total" t-value="0"/>
+                                    <t t-set="total_qty" t-value="0"/>
                                     <t t-set="total_weight" t-value="0"/>
-                                    <t t-set="total_product_qty" t-value="0"/>
                                     <t t-foreach="product_lines" t-as="line">
                                         <t t-set="sno" t-value="sno + 1"/>
-                                        <t t-set="l_box_qty" t-value="line.x_box_qty if 'x_box_qty' in line._fields and line.x_box_qty else line.product_uom_qty"/>
-                                        <t t-set="l_weight" t-value="line.x_weight_per_unit if 'x_weight_per_unit' in line._fields and line.x_weight_per_unit else (line.product_id.weight or 0)"/>
-                                        <t t-set="total_box_qty" t-value="total_box_qty + l_box_qty"/>
-                                        <t t-set="total_weight" t-value="total_weight + (l_box_qty * l_weight)"/>
-                                        <t t-set="total_product_qty" t-value="total_product_qty + l_box_qty"/>
+                                        <t t-set="line_weight" t-value="(line.product_id.marley_weight or line.product_id.weight or 0.0) * line.product_uom_qty"/>
+                                        <t t-set="grand_total" t-value="grand_total + line.price_subtotal"/>
+                                        <t t-set="total_qty" t-value="total_qty + line.product_uom_qty"/>
+                                        <t t-set="total_weight" t-value="total_weight + line_weight"/>
                                         <tr style="border-bottom: 1px solid #f5a9ac; page-break-inside: avoid;">
                                             <td style="padding: 14px 12px; text-align: center; font-size: 13px; vertical-align: top;">
                                                 <t t-esc="sno"/>
@@ -232,10 +246,17 @@
                                                 <t t-esc="line.product_id.name or line.name"/>
                                             </td>
                                             <td style="padding: 14px 12px; text-align: center; font-size: 13px; vertical-align: top;">
-                                                <t t-esc="'%.1f' % l_box_qty"/>
+                                                <t t-esc="'%.2f' % line.product_uom_qty"/>
+                                                <t t-if="line.product_uom_id"> <t t-esc="line.product_uom_id.name"/></t>
                                             </td>
                                             <td style="padding: 14px 12px; text-align: right; font-size: 13px; vertical-align: top;">
-                                                <t t-esc="'%.1f' % l_weight"/> kg.
+                                                <t t-esc="'%.2f' % line_weight"/> kg
+                                            </td>
+                                            <td style="padding: 14px 12px; text-align: right; font-size: 13px; vertical-align: top;">
+                                                &#8377; <t t-esc="'{:,.2f}'.format(line.price_unit)"/>
+                                            </td>
+                                            <td style="padding: 14px 12px; text-align: right; font-size: 13px; vertical-align: top; font-weight: bold;">
+                                                &#8377; <t t-esc="'{:,.2f}'.format(line.price_subtotal)"/>
                                             </td>
                                         </tr>
                                     </t>
@@ -245,17 +266,17 @@
                             <!-- TOTALS ROW -->
                             <table style="width: 100%; border-collapse: collapse; margin-bottom: 25px; border-top: 2px solid #f5a9ac; border-bottom: 2px solid #f5a9ac; page-break-inside: avoid;">
                                 <tr>
-                                    <td style="padding: 10px 14px; width: 33%; font-size: 13px;">
-                                        <strong>Total Box Qty:</strong>&#160;&#160;
-                                        <t t-esc="'%.1f' % total_box_qty"/>
-                                    </td>
-                                    <td style="padding: 10px 14px; width: 34%; font-size: 13px; border-left: 1px solid #f5a9ac;">
-                                        <strong>Total Weight:</strong>&#160;&#160;
-                                        <t t-esc="'%.1f' % total_weight"/> kg
+                                    <td style="padding: 10px 14px; width: 34%; font-size: 13px;">
+                                        <strong>Total Quantity:</strong>&#160;&#160;
+                                        <t t-esc="'%.2f' % total_qty"/>
                                     </td>
                                     <td style="padding: 10px 14px; width: 33%; font-size: 13px; border-left: 1px solid #f5a9ac;">
-                                        <strong>Product total Qty:</strong>&#160;&#160;
-                                        <t t-esc="int(total_product_qty)"/>
+                                        <strong>Total Weight:</strong>&#160;&#160;
+                                        <t t-esc="'%.2f' % total_weight"/> kg
+                                    </td>
+                                    <td style="padding: 10px 14px; width: 33%; font-size: 14px; text-align: right; border-left: 1px solid #f5a9ac;">
+                                        <strong>Grand Total:</strong>&#160;&#160;
+                                        &#8377; <t t-esc="'{:,.2f}'.format(grand_total)"/>
                                     </td>
                                 </tr>
                             </table>

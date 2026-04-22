@@ -24,6 +24,8 @@
                     .marley-q-body tr { page-break-inside: avoid; }
                     .marley-q-body .section-heading { font-size: 15px; font-weight: bold; text-decoration: underline; margin: 18px 0 8px 0; }
                     .marley-q-body .section-text { font-size: 13px; margin: 6px 0; line-height: 1.7; }
+                                    .footer table, .footer table tr, .footer table td,
+                    .bank-details-table, .bank-details-table tr, .bank-details-table td { border: 0 !important; border-collapse: collapse !important; }
                 </style>
 
                 <!-- ============ RUNNING HEADER (logo only) ============ -->
@@ -38,18 +40,20 @@
                 <!-- ============ RUNNING FOOTER (repeats on every page) ============ -->
                 <div class="footer" style="margin: 0; padding: 0; font-family: Arial, sans-serif;">
                     <div style="border-top: 3px solid #e30613; padding-top: 8px;">
-                        <table style="width: 100%; border-collapse: collapse; font-size: 10px; color: #333;">
+                        <table style="width: 100%; border-collapse: collapse; font-size: 10px; color: #333; border: none;">
                             <tr>
-                                <td style="width: 50%; vertical-align: top;">
+                                <td style="width: 40%; vertical-align: top; border: none; padding: 0;">
                                     <strong style="color: #e30613;">Website:</strong> www.marleyfans.in
                                 </td>
-                                <td style="width: 50%; vertical-align: top; text-align: right;">
-                                    <strong style="color: #e30613;">GSTIN:</strong> 36AAPCM1629P1ZS<br/>
+                                <td style="width: 30%; vertical-align: top; border: none; padding: 0; text-align: center;">
                                     <strong style="color: #e30613;">CIN:</strong> U29308TG2021PTC156778
+                                </td>
+                                <td style="width: 30%; vertical-align: top; border: none; padding: 0; text-align: right;">
+                                    <strong style="color: #e30613;">GSTIN:</strong> 36AAPCM1629P1ZS
                                 </td>
                             </tr>
                             <tr>
-                                <td colspan="2" style="padding-top: 4px; font-size: 9px; white-space: nowrap;">
+                                <td colspan="3" style="padding: 4px 0 0 0; font-size: 9px; white-space: nowrap; border: none;">
                                     <strong style="color: #e30613;">Address:</strong> Second Floor, Swapna Nilayam, H.NO.5-5-81/7/A, Plot No.20, High Tension Rd, Prakash Nagar, Kukatpally, Hyderabad, Telangana 500072, India
                                 </td>
                             </tr>
@@ -144,9 +148,12 @@
                                 <tr style="page-break-inside: avoid;">
                                     <td style="border: 1px solid #f5a9ac; padding: 10px 8px; font-size: 13px; vertical-align: top; line-height: 1.7;">
                                         <strong><t t-esc="line.product_id.name or line.name"/></strong>
-                                        <t t-if="line.name and line.name != line.product_id.name">
-                                            <br/><span style="font-size: 12px; color: #333; white-space: pre-line;"><t t-esc="line.name"/></span>
-                                        </t>
+                                            <t t-set="_pname" t-value="(line.product_id.name or '').strip()"/>
+                                            <t t-set="_lname" t-value="(line.name or '').strip()"/>
+                                            <t t-set="_extra" t-value="_lname[len(_pname):].strip() if _pname and _lname.startswith(_pname) else _lname"/>
+                                            <t t-if="_extra and _extra != _pname">
+                                                <br/><span style="font-size: 12px; color: #333; white-space: pre-line;"><t t-esc="_extra"/></span>
+                                            </t>
                                     </td>
                                     <td style="border: 1px solid #f5a9ac; padding: 10px 8px; text-align: center; font-size: 13px; vertical-align: top;">
                                         <t t-esc="'%.2f' % line.product_uom_qty"/> <t t-esc="line.product_uom_id.name or 'Units'"/>
@@ -201,11 +208,7 @@
                     <!-- ===== TAXES &amp; DUTIES ===== -->
                     <div style="margin-bottom: 14px;">
                         <div class="section-heading">TAXES &amp; DUTIES:</div>
-                        <p class="section-text">
-                            GST at the rate of 18% shall be applicable on above quoted price.
-                            If there is any change in Tax structure or any statutory levies are introduced by the appropriate Government at the
-                            time of shipment additional charges will have to be borne by the BUYER as per actual.
-                        </p>
+                        <p class="section-text">GST at the rate of 18% shall be applicable on above quoted price. If there is any change in Tax structure or any statutory levies are introduced by the appropriate Government at the time of shipment additional charges will have to be borne by the BUYER as per actual.</p>
                     </div>
 
                     <!-- ===== EXCLUSION ===== -->
@@ -219,11 +222,20 @@
                     <!-- ===== TERMS &amp; CONDITIONS ===== -->
                     <div style="margin-bottom: 14px;">
                         <div class="section-heading">TERMS &amp; CONDITIONS:</div>
-                        <p class="section-text">
-                            <strong>Quality assurance &amp; Warranty:</strong> -
-                            <t t-if="doc.warranty_terms"><t t-esc="doc.warranty_terms"/></t>
-                            <t t-else="">Marley fan warranty will be 5 Years on Mechanical items &amp; 1 year OEM warranty on Motors &amp; VFD Drive.</t>
+                        <p class="section-text" style="margin-bottom: 4px;">
+                            <strong>Quality assurance &amp; Warranty:</strong>
                         </p>
+                        <t t-set="_seen_w" t-value="[]"/>
+                        <t t-foreach="doc.order_line.filtered(lambda l: l.product_id and (l.product_id.warranty_terms or '').strip())" t-as="_wline">
+                            <t t-set="_wt" t-value="_wline.product_id.warranty_terms.strip()"/>
+                            <t t-if="_wt not in _seen_w">
+                                <t t-set="_dummy" t-value="_seen_w.append(_wt)"/>
+                                <p class="section-text" style="margin: 2px 0 2px 14px; white-space: pre-line;">&#8226; <t t-esc="_wt"/></p>
+                            </t>
+                        </t>
+                        <t t-if="not _seen_w">
+                            <p class="section-text" style="margin: 2px 0 2px 14px;">&#8226; 5 Years warranty on Mechanical items &amp; 1 year OEM warranty on Motors &amp; VFD Drive.</p>
+                        </t>
                     </div>
 
                     <!-- ===== PAYMENT SCHEDULE ===== -->
@@ -237,13 +249,13 @@ Payments to be issued to us by way of Pay-order/DD/at par Cheque. All payments r
                     <!-- ===== BANK DETAILS ===== -->
                     <div style="margin-bottom: 14px;">
                         <strong style="font-size: 15px;">Bank Details :</strong>
-                        <table style="margin-top: 6px; font-size: 13px; line-height: 1.7;">
-                            <tr><td style="padding: 3px 10px 3px 0;">Account Name</td><td>: Marley Enterprises Private Limited</td></tr>
-                            <tr><td style="padding: 3px 10px 3px 0;">Account No.</td><td>: <t t-esc="doc.bank_account_number or '50200092737354'"/></td></tr>
-                            <tr><td style="padding: 3px 10px 3px 0;">Bank Name</td><td>: <t t-esc="doc.bank_name or 'HDFC Bank'"/></td></tr>
-                            <tr><td style="padding: 3px 10px 3px 0;">Bank Branch</td><td>: <t t-esc="doc.bank_branch or 'Kukatpally, Hyderabad'"/></td></tr>
-                            <tr><td style="padding: 3px 10px 3px 0;">IFSC Code</td><td>: <t t-esc="doc.bank_ifsc or 'HDFC0000364'"/></td></tr>
-                        </table>
+                        <div style="margin-top: 6px; font-size: 13px; line-height: 1.7;">
+                                <div><span style="display: inline-block; width: 120px;">Account Name</span>: Marley Enterprises Private Limited</div>
+                                <div><span style="display: inline-block; width: 120px;">Account No.</span>: <t t-esc="doc.bank_account_number or '50200092737354'"/></div>
+                                <div><span style="display: inline-block; width: 120px;">Bank Name</span>: <t t-esc="doc.bank_name or 'HDFC Bank'"/></div>
+                                <div><span style="display: inline-block; width: 120px;">Bank Branch</span>: <t t-esc="doc.bank_branch or 'Kukatpally, Hyderabad'"/></div>
+                                <div><span style="display: inline-block; width: 120px;">IFSC Code</span>: <t t-esc="doc.bank_ifsc or 'HDFC0000364'"/></div>
+                            </div>
                     </div>
 
                     <!-- ===== DELIVERY SCHEDULE ===== -->

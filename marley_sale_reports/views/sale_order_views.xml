@@ -79,9 +79,11 @@
                             <field name="proforma_print_terms"/>
                             <field name="advance_payment_percentage"/>
                             <field name="advance_include_taxes"/>
+                            <field name="advance_received"/>
                         </group>
                         <group>
                             <field name="advance_amount_due" readonly="1"/>
+                            <field name="balance_due" readonly="1"/>
                         </group>
                     </group>
                 </page>

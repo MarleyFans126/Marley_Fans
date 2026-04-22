@@ -68,7 +68,7 @@ class ProjectTask(models.Model):
     is_installation = fields.Boolean(string='Installation Task', default=True)
 
     # Auto-fetched from Sale Order / Invoice / Partner
-    inst_sales_rep = fields.Char(string='Sales Representative', compute='_compute_installation_details', store=True, readonly=False)
+    inst_sales_rep = fields.Char(string='Sales Representative', compute='_compute_installation_details', readonly=True)
     inst_installation_date = fields.Date(string='Scheduled Installation Date')
     inst_company_name = fields.Char(string='Company Name', compute='_compute_installation_details', store=True, readonly=False)
     inst_company_address = fields.Text(string='Company Address', compute='_compute_installation_details', store=True, readonly=False)
@@ -83,7 +83,7 @@ class ProjectTask(models.Model):
         ('to_pay', 'To Pay'),
         ('to_be_billed', 'To be Billed'),
     ], string='Transportation Terms', default='paid')
-    inst_invoice_value = fields.Float(string='Invoice Value', compute='_compute_invoice_details', store=True, readonly=False)
+    inst_invoice_value = fields.Float(string='Invoice Value', compute='_compute_invoice_details', readonly=True)
     inst_amount_in_words = fields.Char(string='Amount In Words', compute='_compute_amount_words')
 
     # Installation Site Address (may differ from company address)
@@ -94,8 +94,8 @@ class ProjectTask(models.Model):
     inst_site_address_zip = fields.Char(string='Site Pincode')
 
     # Advance Received (auto-fetched from payments against invoices)
-    inst_advance_received = fields.Float(string='Advance Received', compute='_compute_advance_received', store=True, readonly=True)
-    inst_balance_amount = fields.Float(string='Balance Amount', compute='_compute_balance_amount', store=True, readonly=True)
+    inst_advance_received = fields.Float(string='Advance Received', compute='_compute_advance_received', readonly=True)
+    inst_balance_amount = fields.Float(string='Balance Amount', compute='_compute_balance_amount', readonly=True)
 
     # Site Specification
     inst_ext_rod_length = fields.Char(string='Ext Rod Length', help='e.g. 500 mm')
@@ -110,7 +110,8 @@ class ProjectTask(models.Model):
     # ------------------------------------------------------------------
     # Auto-fetch: Company Details from Sale Order → Partner / Lead
     # ------------------------------------------------------------------
-    @api.depends('sale_order_id', 'partner_id', 'project_id.lead_id')
+    @api.depends('sale_order_id', 'sale_order_id.user_id',
+                 'partner_id', 'project_id.lead_id', 'lead_id')
     def _compute_installation_details(self):
         for task in self:
             if not task.is_installation:
@@ -122,14 +123,16 @@ class ProjectTask(models.Model):
                 task.inst_site_phone = task.inst_site_phone or ''
                 continue
 
-            # Sales Representative — from SO salesperson or project lead's salesperson
-            if not task.inst_sales_rep:
-                if task.sale_order_id and task.sale_order_id.user_id:
-                    task.inst_sales_rep = task.sale_order_id.user_id.name
-                elif task.project_id and hasattr(task.project_id, 'lead_id') and task.project_id.lead_id and task.project_id.lead_id.user_id:
-                    task.inst_sales_rep = task.project_id.lead_id.user_id.name
-                else:
-                    task.inst_sales_rep = ''
+            # Sales Representative — SO salesperson first, then lead's salesperson
+            so = task._get_related_sale_order()
+            if so and so.user_id:
+                task.inst_sales_rep = so.user_id.name
+            elif 'lead_id' in task._fields and task.lead_id and task.lead_id.user_id:
+                task.inst_sales_rep = task.lead_id.user_id.name
+            elif task.project_id and 'lead_id' in task.project_id._fields and task.project_id.lead_id and task.project_id.lead_id.user_id:
+                task.inst_sales_rep = task.project_id.lead_id.user_id.name
+            else:
+                task.inst_sales_rep = ''
 
             # Company Details — from partner (customer)
             partner = task.partner_id or (task.sale_order_id.partner_id if task.sale_order_id else False)
@@ -175,26 +178,52 @@ class ProjectTask(models.Model):
                     task.inst_site_contact = ''
                     task.inst_site_phone = ''
 
+    def _get_related_sale_order(self):
+        """Return the best sale.order for this task: direct link, else via lead."""
+        self.ensure_one()
+        if self.sale_order_id:
+            return self.sale_order_id
+        lead = False
+        if 'lead_id' in self._fields and self.lead_id:
+            lead = self.lead_id
+        elif self.project_id and 'lead_id' in self.project_id._fields and self.project_id.lead_id:
+            lead = self.project_id.lead_id
+        if lead:
+            return self.env['sale.order'].sudo().search(
+                [('opportunity_id', '=', lead.id)], limit=1,
+            )
+        return self.env['sale.order']
+
     # ------------------------------------------------------------------
-    # Auto-fetch: Advance received from payments on linked invoices
+    # Auto-fetch: Advance received — user-entered on SO, or payments on invoices
     # ------------------------------------------------------------------
-    @api.depends('sale_order_id', 'sale_order_id.invoice_ids.amount_residual',
-                 'sale_order_id.invoice_ids.payment_state')
+    @api.depends('sale_order_id',
+                 'sale_order_id.advance_received',
+                 'sale_order_id.invoice_ids.amount_residual',
+                 'sale_order_id.invoice_ids.payment_state',
+                 'project_id.lead_id',
+                 'lead_id')
     def _compute_advance_received(self):
         for task in self:
-            if not task.is_installation or not task.sale_order_id:
-                task.inst_advance_received = task.inst_advance_received or 0.0
+            task.inst_advance_received = 0.0
+            if not task.is_installation:
                 continue
-            invoices = task.sale_order_id.invoice_ids.filtered(
+            so = task._get_related_sale_order()
+            if not so:
+                continue
+            # 1) user-entered advance on the sale order wins
+            so_advance = getattr(so, 'advance_received', 0.0) or 0.0
+            if so_advance:
+                task.inst_advance_received = so_advance
+                continue
+            # 2) otherwise derive from posted invoices payment state
+            invoices = so.invoice_ids.filtered(
                 lambda i: i.state == 'posted' and i.move_type == 'out_invoice'
             )
             if invoices:
-                # amount_total - amount_residual = amount already paid/received
                 task.inst_advance_received = sum(
                     inv.amount_total - inv.amount_residual for inv in invoices
                 )
-            else:
-                task.inst_advance_received = task.inst_advance_received or 0.0
 
     # ------------------------------------------------------------------
     # Balance = Invoice Value - Advance Received
@@ -207,34 +236,44 @@ class ProjectTask(models.Model):
     # ------------------------------------------------------------------
     # Auto-fetch: Product models from Sale Order lines
     # ------------------------------------------------------------------
-    @api.depends('sale_order_id')
+    @api.depends('sale_order_id', 'project_id.lead_id', 'lead_id')
     def _compute_product_details(self):
         for task in self:
-            if not task.is_installation or not task.sale_order_id:
+            if not task.is_installation:
+                task.inst_models_to_transport = task.inst_models_to_transport or ''
+                continue
+            so = task._get_related_sale_order()
+            if not so:
                 task.inst_models_to_transport = task.inst_models_to_transport or ''
                 continue
             if not task.inst_models_to_transport:
-                lines = task.sale_order_id.order_line.filtered(lambda l: not l.display_type and l.product_id)
+                lines = so.order_line.filtered(lambda l: not l.display_type and l.product_id)
                 product_names = lines.mapped('product_id.name')
                 task.inst_models_to_transport = ' | '.join(set(product_names)) if product_names else ''
 
     # ------------------------------------------------------------------
     # Auto-fetch: Invoice value from Sale Order / Invoice
     # ------------------------------------------------------------------
-    @api.depends('sale_order_id')
+    @api.depends('sale_order_id',
+                 'sale_order_id.amount_total',
+                 'project_id.lead_id',
+                 'lead_id')
     def _compute_invoice_details(self):
         for task in self:
-            if not task.is_installation or not task.sale_order_id:
-                task.inst_invoice_value = task.inst_invoice_value or 0.0
+            task.inst_invoice_value = 0.0
+            if not task.is_installation:
                 continue
-            if not task.inst_invoice_value:
-                # Try from invoice first
-                invoices = task.sale_order_id.invoice_ids.filtered(lambda i: i.state == 'posted' and i.move_type == 'out_invoice')
-                if invoices:
-                    task.inst_invoice_value = sum(invoices.mapped('amount_total'))
-                else:
-                    # Fallback to SO amount
-                    task.inst_invoice_value = task.sale_order_id.amount_total
+            so = task._get_related_sale_order()
+            if not so:
+                continue
+            # Posted invoices totals first, otherwise SO total (proforma amount)
+            invoices = so.invoice_ids.filtered(
+                lambda i: i.state == 'posted' and i.move_type == 'out_invoice'
+            )
+            if invoices:
+                task.inst_invoice_value = sum(invoices.mapped('amount_total'))
+            else:
+                task.inst_invoice_value = so.amount_total or 0.0
 
     # ------------------------------------------------------------------
     # Amount in words
