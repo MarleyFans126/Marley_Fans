@@ -68,7 +68,7 @@ class ProjectTask(models.Model):
     is_installation = fields.Boolean(string='Installation Task', default=True)
 
     # Auto-fetched from Sale Order / Invoice / Partner
-    inst_sales_rep = fields.Char(string='Sales Representative', compute='_compute_installation_details', readonly=True)
+    inst_sales_rep = fields.Char(string='Sales Representative', compute='_compute_installation_details', store=True, readonly=True)
     inst_installation_date = fields.Date(string='Scheduled Installation Date')
     inst_company_name = fields.Char(string='Company Name', compute='_compute_installation_details', store=True, readonly=False)
     inst_company_address = fields.Text(string='Company Address', compute='_compute_installation_details', store=True, readonly=False)
