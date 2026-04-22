@@ -22,28 +22,21 @@
                 </div>
 
                 <!-- ============ RUNNING FOOTER (repeats on every page) ============ -->
-                <div class="footer" style="margin: 0; padding: 0;">
-                    <div style="border-top: 2px solid #e30613; padding-top: 6px;">
-                        <table style="width: 100%; font-size: 9px; line-height: 1.3;">
+                <div class="footer" style="margin: 0; padding: 0; font-family: Arial, sans-serif;">
+                    <div style="border-top: 3px solid #e30613; padding-top: 8px;">
+                        <table style="width: 100%; border-collapse: collapse; font-size: 10px; color: #333;">
                             <tr>
-                                <td style="width: 20%; vertical-align: top; padding-right: 5px;">
-                                    <strong style="color: #1b2a4a;">Analogue:</strong><br/>
-                                    92814 44711
+                                <td style="width: 50%; vertical-align: top;">
+                                    <strong style="color: #e30613;">Website:</strong> www.marleyfans.in
                                 </td>
-                                <td style="width: 25%; vertical-align: top; padding-right: 5px;">
-                                    <strong style="color: #1b2a4a;">Web:</strong><br/>
-                                    marleyhvlsfans@gmail.com<br/>
-                                    www.marleyfans.in
+                                <td style="width: 50%; vertical-align: top; text-align: right;">
+                                    <strong style="color: #e30613;">GSTIN:</strong> 36AAPCM1629P1ZS<br/>
+                                    <strong style="color: #e30613;">CIN:</strong> U29308TG2021PTC156778
                                 </td>
-                                <td style="width: 35%; vertical-align: top; padding-right: 5px;">
-                                    <strong style="color: #1b2a4a;">Address:</strong><br/>
-                                    GROUND FLOOR, PLOT NO.7/PART, SHED NO.4, PHASE – IV,
-                                    IDA Jeedimetla, QUTHBULLAPUR, Hyderabad, Medchal Malkajgiri, Telangana-500055.
-                                </td>
-                                <td style="width: 20%; vertical-align: top;">
-                                    <strong style="color: #1b2a4a;">Business:</strong><br/>
-                                    U29308TG2021PTC156778<br/>
-                                    GSTIN
+                            </tr>
+                            <tr>
+                                <td colspan="2" style="padding-top: 4px; font-size: 9px; white-space: nowrap;">
+                                    <strong style="color: #e30613;">Address:</strong> Second Floor, Swapna Nilayam, H.NO.5-5-81/7/A, Plot No.20, High Tension Rd, Prakash Nagar, Kukatpally, Hyderabad, Telangana 500072, India
                                 </td>
                             </tr>
                         </table>
@@ -55,36 +48,36 @@
 
                     <!-- ============ TITLE ============ -->
                     <div style="text-align: center; margin: 10px 0 22px 0;">
-                        <span style="font-size: 18px; color: #333;">
+                        <span style="font-size: 20px; font-weight: bold; color: #e30613; text-decoration: underline; letter-spacing: 1px;">
                             Installation for: <t t-esc="doc.inst_company_name or doc.partner_id.name or '-'"/>
                         </span>
                     </div>
 
                     <!-- ============ DETAILS TABLE ============ -->
-                    <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px; border-top: 1px solid #e0e0e0;">
+                    <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px; border-top: 1px solid #f5a9ac;">
                         <tr>
-                            <td style="border-bottom: 1px solid #e0e0e0; border-left: 1px solid #e0e0e0; padding: 16px 24px; width: 38%; font-weight: bold; font-size: 14px; vertical-align: middle;">
+                            <td style="border-bottom: 1px solid #f5a9ac; border-left: 1px solid #f5a9ac; padding: 16px 24px; width: 38%; font-weight: bold; font-size: 14px; vertical-align: middle;">
                                 Sales Representative
                             </td>
-                            <td style="border-bottom: 1px solid #e0e0e0; border-right: 1px solid #e0e0e0; padding: 16px 24px; font-size: 14px; vertical-align: middle;">
+                            <td style="border-bottom: 1px solid #f5a9ac; border-right: 1px solid #f5a9ac; padding: 16px 24px; font-size: 14px; vertical-align: middle;">
                                 <t t-esc="doc.inst_sales_rep or ''"/>
                             </td>
                         </tr>
                         <tr>
-                            <td style="border-bottom: 1px solid #e0e0e0; border-left: 1px solid #e0e0e0; padding: 16px 24px; font-weight: bold; font-size: 14px; vertical-align: middle;">
+                            <td style="border-bottom: 1px solid #f5a9ac; border-left: 1px solid #f5a9ac; padding: 16px 24px; font-weight: bold; font-size: 14px; vertical-align: middle;">
                                 Scheduled Installation Date
                             </td>
-                            <td style="border-bottom: 1px solid #e0e0e0; border-right: 1px solid #e0e0e0; padding: 16px 24px; font-size: 14px; vertical-align: middle;">
+                            <td style="border-bottom: 1px solid #f5a9ac; border-right: 1px solid #f5a9ac; padding: 16px 24px; font-size: 14px; vertical-align: middle;">
                                 <t t-if="doc.inst_installation_date">
                                     <t t-esc="doc.inst_installation_date" t-options='{"widget": "date", "format": "MMM dd, yyyy"}'/>
                                 </t>
                             </td>
                         </tr>
                         <tr>
-                            <td style="border-bottom: 1px solid #e0e0e0; border-left: 1px solid #e0e0e0; padding: 16px 24px; font-weight: bold; font-size: 14px; vertical-align: top;">
+                            <td style="border-bottom: 1px solid #f5a9ac; border-left: 1px solid #f5a9ac; padding: 16px 24px; font-weight: bold; font-size: 14px; vertical-align: top;">
                                 Company Details
                             </td>
-                            <td style="border-bottom: 1px solid #e0e0e0; border-right: 1px solid #e0e0e0; padding: 16px 24px; font-size: 14px; vertical-align: top; line-height: 1.7;">
+                            <td style="border-bottom: 1px solid #f5a9ac; border-right: 1px solid #f5a9ac; padding: 16px 24px; font-size: 14px; vertical-align: top; line-height: 1.7;">
                                 <t t-esc="doc.inst_company_name or ''"/><br/>
                                 <t t-if="doc.inst_company_address">
                                     <span style="white-space: pre-wrap;"><t t-esc="doc.inst_company_address"/></span><br/>
@@ -108,21 +101,21 @@
                             </td>
                         </tr>
                         <tr>
-                            <td style="border-bottom: 1px solid #e0e0e0; border-left: 1px solid #e0e0e0; padding: 16px 24px; font-weight: bold; font-size: 14px; vertical-align: top;">
+                            <td style="border-bottom: 1px solid #f5a9ac; border-left: 1px solid #f5a9ac; padding: 16px 24px; font-weight: bold; font-size: 14px; vertical-align: top;">
                                 Site Contact Person<br/>
                                 Contact number
                             </td>
-                            <td style="border-bottom: 1px solid #e0e0e0; border-right: 1px solid #e0e0e0; padding: 16px 24px; font-size: 14px; vertical-align: top; line-height: 1.7;">
+                            <td style="border-bottom: 1px solid #f5a9ac; border-right: 1px solid #f5a9ac; padding: 16px 24px; font-size: 14px; vertical-align: top; line-height: 1.7;">
                                 <t t-esc="doc.inst_site_contact or ''"/><br/>
                                 <t t-esc="doc.inst_site_phone or ''"/>
                             </td>
                         </tr>
                         <t t-if="doc.inst_site_address_street or doc.inst_site_address_city">
                             <tr>
-                                <td style="border-bottom: 1px solid #e0e0e0; border-left: 1px solid #e0e0e0; padding: 16px 24px; font-weight: bold; font-size: 14px; vertical-align: top;">
+                                <td style="border-bottom: 1px solid #f5a9ac; border-left: 1px solid #f5a9ac; padding: 16px 24px; font-weight: bold; font-size: 14px; vertical-align: top;">
                                     Installation Site Address
                                 </td>
-                                <td style="border-bottom: 1px solid #e0e0e0; border-right: 1px solid #e0e0e0; padding: 16px 24px; font-size: 14px; vertical-align: top; line-height: 1.7;">
+                                <td style="border-bottom: 1px solid #f5a9ac; border-right: 1px solid #f5a9ac; padding: 16px 24px; font-size: 14px; vertical-align: top; line-height: 1.7;">
                                     <t t-if="doc.inst_site_address_street"><t t-esc="doc.inst_site_address_street"/>,<br/></t>
                                     <t t-if="doc.inst_site_address_street2"><t t-esc="doc.inst_site_address_street2"/>,<br/></t>
                                     <t t-if="doc.inst_site_address_city"><t t-esc="doc.inst_site_address_city"/></t>
@@ -138,60 +131,60 @@
                         Product Model/ Box &amp; quantity | weight | Terms
                     </h4>
 
-                    <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px; border-top: 1px solid #e0e0e0;">
+                    <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px; border-top: 1px solid #f5a9ac;">
                         <tr>
-                            <td style="border-bottom: 1px solid #e0e0e0; border-left: 1px solid #e0e0e0; padding: 16px 24px; width: 60%; font-size: 14px; vertical-align: middle;">
+                            <td style="border-bottom: 1px solid #f5a9ac; border-left: 1px solid #f5a9ac; padding: 16px 24px; width: 60%; font-size: 14px; vertical-align: middle;">
                                 Models to transport
                             </td>
-                            <td style="border-bottom: 1px solid #e0e0e0; border-right: 1px solid #e0e0e0; padding: 16px 24px; font-size: 14px; vertical-align: middle;">
+                            <td style="border-bottom: 1px solid #f5a9ac; border-right: 1px solid #f5a9ac; padding: 16px 24px; font-size: 14px; vertical-align: middle;">
                                 | <t t-esc="doc.inst_models_to_transport or ''"/> |
                             </td>
                         </tr>
                         <tr>
-                            <td style="border-bottom: 1px solid #e0e0e0; border-left: 1px solid #e0e0e0; padding: 16px 24px; font-size: 14px; vertical-align: middle;">
+                            <td style="border-bottom: 1px solid #f5a9ac; border-left: 1px solid #f5a9ac; padding: 16px 24px; font-size: 14px; vertical-align: middle;">
                                 Transportation terms:
                             </td>
-                            <td style="border-bottom: 1px solid #e0e0e0; border-right: 1px solid #e0e0e0; padding: 16px 24px; font-size: 14px; vertical-align: middle;">
+                            <td style="border-bottom: 1px solid #f5a9ac; border-right: 1px solid #f5a9ac; padding: 16px 24px; font-size: 14px; vertical-align: middle;">
                                 <t t-if="doc.inst_transportation_terms == 'paid'">Paid</t>
                                 <t t-if="doc.inst_transportation_terms == 'to_pay'">To Pay</t>
                                 <t t-if="doc.inst_transportation_terms == 'to_be_billed'">To be Billed</t>
                             </td>
                         </tr>
                         <tr>
-                            <td style="border-bottom: 1px solid #e0e0e0; border-left: 1px solid #e0e0e0; padding: 16px 24px; font-size: 14px; font-weight: bold; vertical-align: middle;">
+                            <td style="border-bottom: 1px solid #f5a9ac; border-left: 1px solid #f5a9ac; padding: 16px 24px; font-size: 14px; font-weight: bold; vertical-align: middle;">
                                 Invoice Value:
                             </td>
-                            <td style="border-bottom: 1px solid #e0e0e0; border-right: 1px solid #e0e0e0; padding: 16px 24px; font-size: 14px; vertical-align: middle;">
+                            <td style="border-bottom: 1px solid #f5a9ac; border-right: 1px solid #f5a9ac; padding: 16px 24px; font-size: 14px; vertical-align: middle;">
                                 <t t-if="doc.inst_invoice_value">
                                     <t t-esc="'{:,.1f}'.format(doc.inst_invoice_value)"/>
                                 </t>
                             </td>
                         </tr>
                         <tr>
-                            <td style="border-bottom: 1px solid #e0e0e0; border-left: 1px solid #e0e0e0; padding: 16px 24px; font-size: 14px; font-weight: bold; vertical-align: middle;">
+                            <td style="border-bottom: 1px solid #f5a9ac; border-left: 1px solid #f5a9ac; padding: 16px 24px; font-size: 14px; font-weight: bold; vertical-align: middle;">
                                 Advance Received:
                             </td>
-                            <td style="border-bottom: 1px solid #e0e0e0; border-right: 1px solid #e0e0e0; padding: 16px 24px; font-size: 14px; vertical-align: middle;">
+                            <td style="border-bottom: 1px solid #f5a9ac; border-right: 1px solid #f5a9ac; padding: 16px 24px; font-size: 14px; vertical-align: middle;">
                                 <t t-if="doc.inst_advance_received">
                                     &#8377; <t t-esc="'{:,.2f}'.format(doc.inst_advance_received)"/>
                                 </t>
                             </td>
                         </tr>
                         <tr>
-                            <td style="border-bottom: 1px solid #e0e0e0; border-left: 1px solid #e0e0e0; padding: 16px 24px; font-size: 14px; font-weight: bold; vertical-align: middle;">
+                            <td style="border-bottom: 1px solid #f5a9ac; border-left: 1px solid #f5a9ac; padding: 16px 24px; font-size: 14px; font-weight: bold; vertical-align: middle;">
                                 Balance Amount:
                             </td>
-                            <td style="border-bottom: 1px solid #e0e0e0; border-right: 1px solid #e0e0e0; padding: 16px 24px; font-size: 14px; vertical-align: middle; font-weight: bold;">
+                            <td style="border-bottom: 1px solid #f5a9ac; border-right: 1px solid #f5a9ac; padding: 16px 24px; font-size: 14px; vertical-align: middle; font-weight: bold;">
                                 <t t-if="doc.inst_balance_amount">
                                     &#8377; <t t-esc="'{:,.2f}'.format(doc.inst_balance_amount)"/>
                                 </t>
                             </td>
                         </tr>
                         <tr>
-                            <td style="border-bottom: 1px solid #e0e0e0; border-left: 1px solid #e0e0e0; padding: 16px 24px; font-size: 14px; font-weight: bold; vertical-align: middle;">
+                            <td style="border-bottom: 1px solid #f5a9ac; border-left: 1px solid #f5a9ac; padding: 16px 24px; font-size: 14px; font-weight: bold; vertical-align: middle;">
                                 Amount In Words:
                             </td>
-                            <td style="border-bottom: 1px solid #e0e0e0; border-right: 1px solid #e0e0e0; padding: 16px 24px; font-size: 14px; vertical-align: middle;">
+                            <td style="border-bottom: 1px solid #f5a9ac; border-right: 1px solid #f5a9ac; padding: 16px 24px; font-size: 14px; vertical-align: middle;">
                                 <t t-esc="doc.inst_amount_in_words or ''"/>
                             </td>
                         </tr>
@@ -204,7 +197,7 @@
                         <t t-if="product_lines">
                             <table style="width: 100%; border-collapse: collapse; margin-bottom: 0; page-break-inside: auto;">
                                 <thead>
-                                    <tr style="border-top: 2px solid #ccc; border-bottom: 2px solid #ccc;">
+                                    <tr style="border-top: 2px solid #f5a9ac; border-bottom: 2px solid #f5a9ac;">
                                         <th style="padding: 10px 12px; text-align: left; font-weight: bold; font-size: 13px; color: #555; width: 10%;">
                                             Sr. No.
                                         </th>
@@ -231,7 +224,7 @@
                                         <t t-set="total_box_qty" t-value="total_box_qty + l_box_qty"/>
                                         <t t-set="total_weight" t-value="total_weight + (l_box_qty * l_weight)"/>
                                         <t t-set="total_product_qty" t-value="total_product_qty + l_box_qty"/>
-                                        <tr style="border-bottom: 1px solid #e0e0e0; page-break-inside: avoid;">
+                                        <tr style="border-bottom: 1px solid #f5a9ac; page-break-inside: avoid;">
                                             <td style="padding: 14px 12px; text-align: center; font-size: 13px; vertical-align: top;">
                                                 <t t-esc="sno"/>
                                             </td>
@@ -250,17 +243,17 @@
                             </table>
 
                             <!-- TOTALS ROW -->
-                            <table style="width: 100%; border-collapse: collapse; margin-bottom: 25px; border-top: 2px solid #ccc; border-bottom: 2px solid #ccc; page-break-inside: avoid;">
+                            <table style="width: 100%; border-collapse: collapse; margin-bottom: 25px; border-top: 2px solid #f5a9ac; border-bottom: 2px solid #f5a9ac; page-break-inside: avoid;">
                                 <tr>
                                     <td style="padding: 10px 14px; width: 33%; font-size: 13px;">
                                         <strong>Total Box Qty:</strong>&#160;&#160;
                                         <t t-esc="'%.1f' % total_box_qty"/>
                                     </td>
-                                    <td style="padding: 10px 14px; width: 34%; font-size: 13px; border-left: 1px solid #e0e0e0;">
+                                    <td style="padding: 10px 14px; width: 34%; font-size: 13px; border-left: 1px solid #f5a9ac;">
                                         <strong>Total Weight:</strong>&#160;&#160;
                                         <t t-esc="'%.1f' % total_weight"/> kg
                                     </td>
-                                    <td style="padding: 10px 14px; width: 33%; font-size: 13px; border-left: 1px solid #e0e0e0;">
+                                    <td style="padding: 10px 14px; width: 33%; font-size: 13px; border-left: 1px solid #f5a9ac;">
                                         <strong>Product total Qty:</strong>&#160;&#160;
                                         <t t-esc="int(total_product_qty)"/>
                                     </td>
@@ -274,52 +267,52 @@
                         Site Specification
                     </h4>
 
-                    <table style="width: 80%; margin: 0 auto; border-collapse: collapse; margin-bottom: 24px; border-top: 1px solid #e0e0e0; page-break-inside: avoid;">
+                    <table style="width: 80%; margin: 0 auto; border-collapse: collapse; margin-bottom: 24px; border-top: 1px solid #f5a9ac; page-break-inside: avoid;">
                         <tr>
-                            <td style="border-bottom: 1px solid #e0e0e0; border-left: 1px solid #e0e0e0; padding: 16px 24px; width: 40%; font-weight: bold; font-size: 14px; vertical-align: middle;">
+                            <td style="border-bottom: 1px solid #f5a9ac; border-left: 1px solid #f5a9ac; padding: 16px 24px; width: 40%; font-weight: bold; font-size: 14px; vertical-align: middle;">
                                 Ext rod length
                             </td>
-                            <td style="border-bottom: 1px solid #e0e0e0; border-right: 1px solid #e0e0e0; padding: 16px 24px; font-size: 14px; vertical-align: middle;">
+                            <td style="border-bottom: 1px solid #f5a9ac; border-right: 1px solid #f5a9ac; padding: 16px 24px; font-size: 14px; vertical-align: middle;">
                                 <t t-esc="doc.inst_ext_rod_length or ''"/>
                             </td>
                         </tr>
                         <tr>
-                            <td style="border-bottom: 1px solid #e0e0e0; border-left: 1px solid #e0e0e0; padding: 16px 24px; font-weight: bold; font-size: 14px; vertical-align: middle;">
+                            <td style="border-bottom: 1px solid #f5a9ac; border-left: 1px solid #f5a9ac; padding: 16px 24px; font-weight: bold; font-size: 14px; vertical-align: middle;">
                                 Field height
                             </td>
-                            <td style="border-bottom: 1px solid #e0e0e0; border-right: 1px solid #e0e0e0; padding: 16px 24px; font-size: 14px; vertical-align: middle;">
+                            <td style="border-bottom: 1px solid #f5a9ac; border-right: 1px solid #f5a9ac; padding: 16px 24px; font-size: 14px; vertical-align: middle;">
                                 <t t-esc="doc.inst_field_height or ''"/>
                             </td>
                         </tr>
                         <tr>
-                            <td style="border-bottom: 1px solid #e0e0e0; border-left: 1px solid #e0e0e0; padding: 16px 24px; font-weight: bold; font-size: 14px; vertical-align: middle;">
+                            <td style="border-bottom: 1px solid #f5a9ac; border-left: 1px solid #f5a9ac; padding: 16px 24px; font-weight: bold; font-size: 14px; vertical-align: middle;">
                                 Required Electrical wire
                             </td>
-                            <td style="border-bottom: 1px solid #e0e0e0; border-right: 1px solid #e0e0e0; padding: 16px 24px; font-size: 14px; vertical-align: middle;">
+                            <td style="border-bottom: 1px solid #f5a9ac; border-right: 1px solid #f5a9ac; padding: 16px 24px; font-size: 14px; vertical-align: middle;">
                                 <t t-esc="doc.inst_electrical_wire or ''"/>
                             </td>
                         </tr>
                         <tr>
-                            <td style="border-bottom: 1px solid #e0e0e0; border-left: 1px solid #e0e0e0; padding: 16px 24px; font-weight: bold; font-size: 14px; vertical-align: middle;">
+                            <td style="border-bottom: 1px solid #f5a9ac; border-left: 1px solid #f5a9ac; padding: 16px 24px; font-weight: bold; font-size: 14px; vertical-align: middle;">
                                 Mounting structure
                             </td>
-                            <td style="border-bottom: 1px solid #e0e0e0; border-right: 1px solid #e0e0e0; padding: 16px 24px; font-size: 14px; vertical-align: middle;">
+                            <td style="border-bottom: 1px solid #f5a9ac; border-right: 1px solid #f5a9ac; padding: 16px 24px; font-size: 14px; vertical-align: middle;">
                                 <t t-esc="doc.inst_mounting_structure or ''"/>
                             </td>
                         </tr>
                         <tr>
-                            <td style="border-bottom: 1px solid #e0e0e0; border-left: 1px solid #e0e0e0; padding: 16px 24px; font-weight: bold; font-size: 14px; vertical-align: middle;">
+                            <td style="border-bottom: 1px solid #f5a9ac; border-left: 1px solid #f5a9ac; padding: 16px 24px; font-weight: bold; font-size: 14px; vertical-align: middle;">
                                 Distance between crane top and Rafter bottom
                             </td>
-                            <td style="border-bottom: 1px solid #e0e0e0; border-right: 1px solid #e0e0e0; padding: 16px 24px; font-size: 14px; vertical-align: middle;">
+                            <td style="border-bottom: 1px solid #f5a9ac; border-right: 1px solid #f5a9ac; padding: 16px 24px; font-size: 14px; vertical-align: middle;">
                                 <t t-esc="doc.inst_crane_rafter_distance or ''"/>
                             </td>
                         </tr>
                         <tr>
-                            <td style="border-bottom: 1px solid #e0e0e0; border-left: 1px solid #e0e0e0; padding: 16px 24px; font-weight: bold; font-size: 14px; vertical-align: top;">
+                            <td style="border-bottom: 1px solid #f5a9ac; border-left: 1px solid #f5a9ac; padding: 16px 24px; font-weight: bold; font-size: 14px; vertical-align: top;">
                                 Other important Information
                             </td>
-                            <td style="border-bottom: 1px solid #e0e0e0; border-right: 1px solid #e0e0e0; padding: 16px 24px; font-size: 14px; white-space: pre-wrap; line-height: 1.7;">
+                            <td style="border-bottom: 1px solid #f5a9ac; border-right: 1px solid #f5a9ac; padding: 16px 24px; font-size: 14px; white-space: pre-wrap; line-height: 1.7;">
                                 <t t-esc="doc.inst_other_info or ''"/>
                             </td>
                         </tr>
