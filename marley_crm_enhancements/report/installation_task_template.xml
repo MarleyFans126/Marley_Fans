@@ -193,19 +193,10 @@
                     </table>
 
                     <!-- ============ PRODUCT LINES TABLE ============ -->
-                    <!-- Prefer task.installation_line_ids (editable on UI) else fall back to sale order lines -->
-                    <t t-set="use_task_lines" t-value="bool(doc.installation_line_ids)"/>
-                    <t t-set="so_list" t-value="doc.sale_order_id"/>
-                    <t t-if="not use_task_lines and not so_list and 'lead_id' in doc._fields and doc.lead_id">
-                        <t t-set="so_list" t-value="doc.env['sale.order'].sudo().search([('opportunity_id', '=', doc.lead_id.id)])"/>
-                    </t>
-                    <t t-if="not use_task_lines and not so_list and doc.project_id and 'lead_id' in doc.project_id._fields and doc.project_id.lead_id">
-                        <t t-set="so_list" t-value="doc.env['sale.order'].sudo().search([('opportunity_id', '=', doc.project_id.lead_id.id)])"/>
-                    </t>
-                    <t t-if="use_task_lines or so_list">
-                        <t t-if="use_task_lines" t-set="product_lines" t-value="doc.installation_line_ids"/>
-                        <t t-if="not use_task_lines" t-set="product_lines" t-value="so_list.mapped('order_line').filtered(lambda l: not l.display_type and l.product_id)"/>
-                        <t t-if="product_lines">
+                    <!-- Only render the editable task lines. If the task has none, no table is printed. -->
+                    <t t-set="use_task_lines" t-value="True"/>
+                    <t t-set="product_lines" t-value="doc.installation_line_ids"/>
+                    <t t-if="product_lines">
                             <table style="width: 100%; border-collapse: collapse; margin-bottom: 0; page-break-inside: auto;">
                                 <thead>
                                     <tr style="border-top: 2px solid #f5a9ac; border-bottom: 2px solid #f5a9ac;">
@@ -297,7 +288,6 @@
                                     </td>
                                 </tr>
                             </table>
-                        </t>
                     </t>
 
                     <!-- ============ SITE SPECIFICATION ============ -->
