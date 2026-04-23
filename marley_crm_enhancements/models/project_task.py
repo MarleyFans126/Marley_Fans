@@ -174,7 +174,12 @@ class ProjectTask(models.Model):
     # Auto-fetch: Company Details from Sale Order → Partner / Lead
     # ------------------------------------------------------------------
     @api.depends('sale_order_id', 'sale_order_id.user_id',
-                 'partner_id', 'project_id.lead_id', 'lead_id')
+                 'sale_order_id.partner_id',
+                 'partner_id', 'project_id.lead_id', 'lead_id',
+                 'lead_id.partner_id', 'project_id.lead_id.partner_id',
+                 'partner_id.name', 'partner_id.street', 'partner_id.street2',
+                 'partner_id.city', 'partner_id.state_id', 'partner_id.zip',
+                 'partner_id.vat')
     def _compute_installation_details(self):
         for task in self:
             if not task.is_installation:
@@ -197,11 +202,20 @@ class ProjectTask(models.Model):
             else:
                 task.inst_sales_rep = ''
 
-            # Company Details — from partner (customer)
-            partner = task.partner_id or (task.sale_order_id.partner_id if task.sale_order_id else False)
-            if partner and not task.inst_company_name:
+            # Company Details — resolved from task.partner_id, the related
+            # sale order's partner, or the opportunity's partner.
+            lead = False
+            if 'lead_id' in task._fields and task.lead_id:
+                lead = task.lead_id
+            elif task.project_id and 'lead_id' in task.project_id._fields and task.project_id.lead_id:
+                lead = task.project_id.lead_id
+            partner = (
+                task.partner_id
+                or (so.partner_id if so else False)
+                or (lead.partner_id if lead else False)
+            )
+            if partner:
                 task.inst_company_name = partner.name or ''
-
                 # Build address
                 addr_parts = []
                 if partner.street:
@@ -220,10 +234,8 @@ class ProjectTask(models.Model):
                 if city_line:
                     addr_parts.append(city_line)
                 task.inst_company_address = '\n'.join(addr_parts) if addr_parts else ''
-
-                # GSTIN
                 task.inst_gstin = partner.vat or ''
-            elif not partner:
+            else:
                 task.inst_company_name = task.inst_company_name or ''
                 task.inst_company_address = task.inst_company_address or ''
                 task.inst_gstin = task.inst_gstin or ''

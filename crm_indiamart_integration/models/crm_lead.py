@@ -597,9 +597,9 @@ class CrmLead(models.Model):
                 or api_lead.get('email')
             )
 
-            if not phone or not email:
+            if not phone and not email:
                 _logger.warning(
-                    "Skipping lead %s — missing phone or email.",
+                    "Skipping lead %s — no phone and no email.",
                     api_lead_id,
                 )
                 skipped_invalid += 1

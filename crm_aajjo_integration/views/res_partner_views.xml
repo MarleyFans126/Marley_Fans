@@ -7,10 +7,15 @@
         <field name="arch" type="xml">
             <xpath expr="//field[@name='email']" position="replace">
                 <label for="email" class="oe_edit_only"/>
-                <div class="o_row">
+                <div class="o_row" style="flex-wrap: nowrap;">
                     <!-- Removing widget='email' to prevent 'mailto:' link -->
-                    <field name="email" widget="char"/>
-                    <button name="action_open_mail_composer" type="object" icon="fa-envelope" class="btn-link" title="Send Email" invisible="not email"/>
+                    <field name="email" widget="char" class="oe_inline" style="min-width: 260px; flex: 1 1 auto;"/>
+                    <button name="action_open_mail_composer"
+                            type="object"
+                            icon="fa-envelope"
+                            class="btn-link ms-1 flex-shrink-0"
+                            title="Send Email"
+                            invisible="not email"/>
                 </div>
             </xpath>
         </field>
