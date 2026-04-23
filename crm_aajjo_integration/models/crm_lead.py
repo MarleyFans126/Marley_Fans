@@ -9,6 +9,69 @@ _logger = logging.getLogger(__name__)
 class CrmLead(models.Model):
     _inherit = 'crm.lead'
 
+    def init(self):
+        """Migrate existing AAJJO leads to opportunities in the New stage.
+
+        Covers historical data where the ``is_aajjo`` flag may not have been
+        set: anything with ``aajjo_lead_id`` populated or
+        ``lead_source_type = 'aajjo'`` is treated as an AAJJO record.
+        """
+        try:
+            new_stage = self.env.ref('crm.stage_lead1', raise_if_not_found=False)
+            stage_id = new_stage.id if new_stage else None
+            where = """
+                (is_aajjo = TRUE
+                 OR aajjo_lead_id IS NOT NULL
+                 OR lead_source_type = 'aajjo')
+                AND type <> 'opportunity'
+            """
+            if stage_id:
+                self.env.cr.execute(
+                    f"""
+                    UPDATE crm_lead
+                    SET type = 'opportunity',
+                        stage_id = COALESCE(stage_id, %s),
+                        is_aajjo = TRUE
+                    WHERE {where}
+                    """,
+                    (stage_id,),
+                )
+            else:
+                self.env.cr.execute(
+                    f"""
+                    UPDATE crm_lead
+                    SET type = 'opportunity',
+                        is_aajjo = TRUE
+                    WHERE {where}
+                    """
+                )
+            if self.env.cr.rowcount:
+                _logger.info(
+                    "[INIT] Converted %d existing AAJJO leads to opportunities.",
+                    self.env.cr.rowcount,
+                )
+            # Move records assigned to OdooBot (id=1) onto a real admin user so
+            # they show up under the current user's "My Pipeline".
+            admin = self.env.ref('base.user_admin', raise_if_not_found=False)
+            if admin and admin.id != 1:
+                self.env.cr.execute(
+                    """
+                    UPDATE crm_lead
+                    SET user_id = %s
+                    WHERE is_aajjo = TRUE
+                      AND type = 'opportunity'
+                      AND user_id = 1
+                    """,
+                    (admin.id,),
+                )
+                if self.env.cr.rowcount:
+                    _logger.info(
+                        "[INIT] Reassigned %d AAJJO opportunities from OdooBot to admin.",
+                        self.env.cr.rowcount,
+                    )
+        except Exception as e:
+            _logger.warning("[INIT] AAJJO lead→opportunity migration failed: %s", e)
+
     # -------------------------------------------------------------------------
     # AAJJO INTEGRATION FIELDS
     # -------------------------------------------------------------------------
@@ -129,6 +192,13 @@ class CrmLead(models.Model):
         if not lead_name:
             lead_name = f"AAJJO Inquiry - {contact_name or mobile}"
         
+        # Land AAJJO records directly in the "New" opportunity stage
+        new_stage = self.env.ref('crm.stage_lead1', raise_if_not_found=False)
+        if not new_stage:
+            new_stage = self.env['crm.stage'].sudo().search(
+                [], order='sequence, id', limit=1,
+            )
+
         vals = {
             'name': lead_name,
             'contact_name': contact_name,
@@ -139,9 +209,11 @@ class CrmLead(models.Model):
             'is_aajjo': True,
             'description': lead_details,
             'city': city,
-            'type': 'lead',
+            'type': 'opportunity',
         }
-        
+        if new_stage:
+            vals['stage_id'] = new_stage.id
+
         default_team = self.env['crm.team'].search([], limit=1)
         if default_team:
             vals['team_id'] = default_team.id
