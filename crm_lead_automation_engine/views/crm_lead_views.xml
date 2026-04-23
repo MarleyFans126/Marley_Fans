@@ -118,6 +118,26 @@
                 <filter string="IndiaMART" name="source_indiamart" domain="[('lead_source_type', '=', 'indiamart')]"/>
                 <filter string="AAJJO" name="source_aajjo" domain="[('lead_source_type', '=', 'aajjo')]"/>
             </filter>
+
+            <!-- Widen "My Leads" to include records where user is second_salesperson -->
+            <filter name="assigned_to_me" position="attributes">
+                <attribute name="domain">['|', ('user_id', '=', uid), ('second_salesperson_id', '=', uid)]</attribute>
+            </filter>
+        </field>
+    </record>
+
+    <!--
+      Widen "My Pipeline" on the opportunity search view too so that leads
+      where the current user is the Second Salesperson appear under it.
+    -->
+    <record id="view_crm_case_opportunities_filter_inherit_automation" model="ir.ui.view">
+        <field name="name">crm.lead.opportunity.search.inherit.automation</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.view_crm_case_opportunities_filter"/>
+        <field name="arch" type="xml">
+            <filter name="assigned_to_me" position="attributes">
+                <attribute name="domain">['|', ('user_id', '=', uid), ('second_salesperson_id', '=', uid)]</attribute>
+            </filter>
         </field>
     </record>
 </odoo>
