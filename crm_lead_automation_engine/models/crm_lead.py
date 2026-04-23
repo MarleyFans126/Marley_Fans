@@ -121,7 +121,34 @@ class CrmLead(models.Model):
     # INIT: Cleanup stale views on module upgrade
     # -------------------------------------------------------------------------
     def init(self):
-        """Cleanup stale views referencing fields from uninstalled modules."""
+        """Cleanup stale views referencing fields from uninstalled modules.
+
+        Also force-update the built-in "Personal Leads" record rule so that a
+        salesperson whose profile is "Own Documents Only" can also see leads
+        where they are the Second Salesperson. The original rule is shipped
+        with ``noupdate="1"`` so editing it via XML doesn't stick — we patch
+        it in place here.
+        """
+        # Widen the CRM "Personal Leads" rule to include second_salesperson_id
+        try:
+            rule = self.env.ref('crm.crm_rule_personal_lead', raise_if_not_found=False)
+            if rule and 'second_salesperson_id' in self._fields:
+                new_domain = (
+                    "['|', '|', ('user_id', '=', user.id), "
+                    "('user_id', '=', False), "
+                    "('second_salesperson_id', '=', user.id)]"
+                )
+                if rule.domain_force != new_domain:
+                    rule.sudo().write({
+                        'domain_force': new_domain,
+                        'name': 'Personal Leads (incl. Second Salesperson)',
+                    })
+                    _logger.info(
+                        "[INIT] Patched crm.crm_rule_personal_lead to include second_salesperson_id."
+                    )
+        except Exception as e:
+            _logger.warning("[INIT] Could not patch Personal Leads rule: %s", e)
+
         stale_fields = ['l10n_in_gsp']
         for field_name in stale_fields:
             try:
