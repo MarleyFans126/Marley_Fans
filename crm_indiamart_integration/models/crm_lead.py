@@ -24,6 +24,67 @@ QUERY_TYPE_SELECTION = [
 class CrmLead(models.Model):
     _inherit = 'crm.lead'
 
+    def init(self):
+        """Migrate existing IndiaMART leads to opportunities in the New stage.
+
+        Covers historical data where the ``is_indiamart`` flag may not have been
+        set: anything with ``lead_source_type = 'indiamart'`` is treated as an
+        IndiaMART record.
+        """
+        try:
+            new_stage = self.env.ref('crm.stage_lead1', raise_if_not_found=False)
+            stage_id = new_stage.id if new_stage else None
+            where = """
+                (is_indiamart = TRUE OR lead_source_type = 'indiamart')
+                AND type <> 'opportunity'
+            """
+            if stage_id:
+                self.env.cr.execute(
+                    f"""
+                    UPDATE crm_lead
+                    SET type = 'opportunity',
+                        stage_id = COALESCE(stage_id, %s),
+                        is_indiamart = TRUE
+                    WHERE {where}
+                    """,
+                    (stage_id,),
+                )
+            else:
+                self.env.cr.execute(
+                    f"""
+                    UPDATE crm_lead
+                    SET type = 'opportunity',
+                        is_indiamart = TRUE
+                    WHERE {where}
+                    """
+                )
+            if self.env.cr.rowcount:
+                _logger.info(
+                    "[INIT] Converted %d existing IndiaMART leads to opportunities.",
+                    self.env.cr.rowcount,
+                )
+            # Move records assigned to OdooBot (id=1) onto a real admin user so
+            # they show up under the current user's "My Pipeline".
+            admin = self.env.ref('base.user_admin', raise_if_not_found=False)
+            if admin and admin.id != 1:
+                self.env.cr.execute(
+                    """
+                    UPDATE crm_lead
+                    SET user_id = %s
+                    WHERE is_indiamart = TRUE
+                      AND type = 'opportunity'
+                      AND user_id = 1
+                    """,
+                    (admin.id,),
+                )
+                if self.env.cr.rowcount:
+                    _logger.info(
+                        "[INIT] Reassigned %d IndiaMART opportunities from OdooBot to admin.",
+                        self.env.cr.rowcount,
+                    )
+        except Exception as e:
+            _logger.warning("[INIT] IndiaMART lead→opportunity migration failed: %s", e)
+
     # Overriding standard fields to make them mandatory
     phone = fields.Char()
     email_from = fields.Char()
@@ -493,7 +554,12 @@ class CrmLead(models.Model):
         skipped_dup = 0
         skipped_invalid = 0
 
-        stage = self.env['crm.stage'].sudo().search([], limit=1)
+        # Land incoming IndiaMART records directly in the "New" opportunity stage
+        stage = self.env.ref('crm.stage_lead1', raise_if_not_found=False)
+        if not stage:
+            stage = self.env['crm.stage'].sudo().search(
+                [], order='sequence, id', limit=1,
+            )
         team = self.env['crm.team'].sudo().search([], limit=1)
         source = self.env.ref(
             'crm_indiamart_integration.utm_source_indiamart',
@@ -582,7 +648,7 @@ class CrmLead(models.Model):
                     'team_id': team.id if team else False,
                     'external_lead_id': api_lead_id,
                     'lead_query_type': query_type,
-                    'type': 'lead',
+                    'type': 'opportunity',
                     'active': True,
                     'lead_source_type': 'indiamart',
                     'second_salesperson_id': False,
