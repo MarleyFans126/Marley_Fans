@@ -110,14 +110,21 @@ class CrmLead(models.Model):
 
         url = base_url.rstrip('/')
         headers = {'Authorization': f'Basic {api_username}:{api_key}'}
-        
-        from datetime import datetime, timedelta
+
+        # AAJJO API expects Indian Standard Time (UTC+5:30). The Odoo server
+        # is UTC, so datetime.now() was returning UTC times — causing the fetch
+        # window to be 5.5 h behind current IST and only returning stale leads.
+        # We consistently compute and store the sync cursor in IST.
+        from datetime import datetime, timedelta, timezone
+        IST = timezone(timedelta(hours=5, minutes=30))
+        now_ist = datetime.now(IST)
+
         if last_sync:
-            start_dt = str(last_sync)
+            start_dt = str(last_sync)[:19]
         else:
-            start_dt = (datetime.now() - timedelta(days=7)).strftime('%Y-%m-%d %H:%M:%S')
-            
-        end_dt = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            start_dt = (now_ist - timedelta(days=7)).strftime('%Y-%m-%d %H:%M:%S')
+
+        end_dt = now_ist.strftime('%Y-%m-%d %H:%M:%S')
 
         params = {
             'StartDate': start_dt,
