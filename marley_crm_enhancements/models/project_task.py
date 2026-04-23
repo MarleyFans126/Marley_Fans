@@ -203,7 +203,8 @@ class ProjectTask(models.Model):
                 task.inst_sales_rep = ''
 
             # Company Details — resolved from task.partner_id, the related
-            # sale order's partner, or the opportunity's partner.
+            # sale order's partner, the opportunity's partner, or the
+            # project's customer.
             lead = False
             if 'lead_id' in task._fields and task.lead_id:
                 lead = task.lead_id
@@ -213,6 +214,7 @@ class ProjectTask(models.Model):
                 task.partner_id
                 or (so.partner_id if so else False)
                 or (lead.partner_id if lead else False)
+                or (task.project_id.partner_id if task.project_id else False)
             )
             if partner:
                 task.inst_company_name = partner.name or ''
