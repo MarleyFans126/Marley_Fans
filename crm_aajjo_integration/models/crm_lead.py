@@ -1,4 +1,4 @@
-from odoo import models, fields, api, _
+from odoo import models, fields, api, _, SUPERUSER_ID
 from odoo.exceptions import ValidationError
 import requests
 import json
@@ -50,25 +50,23 @@ class CrmLead(models.Model):
                     "[INIT] Converted %d existing AAJJO leads to opportunities.",
                     self.env.cr.rowcount,
                 )
-            # Move records assigned to OdooBot (id=1) onto a real admin user so
-            # they show up under the current user's "My Pipeline".
-            admin = self.env.ref('base.user_admin', raise_if_not_found=False)
-            if admin and admin.id != 1:
-                self.env.cr.execute(
-                    """
-                    UPDATE crm_lead
-                    SET user_id = %s
-                    WHERE is_aajjo = TRUE
-                      AND type = 'opportunity'
-                      AND user_id = 1
-                    """,
-                    (admin.id,),
+            # AAJJO leads should be owned by OdooBot (id=1) by default. Revert
+            # any that were previously reassigned to another user so their
+            # salesperson matches the source policy.
+            self.env.cr.execute(
+                """
+                UPDATE crm_lead
+                SET user_id = 1
+                WHERE is_aajjo = TRUE
+                  AND type = 'opportunity'
+                  AND (user_id IS NULL OR user_id <> 1)
+                """
+            )
+            if self.env.cr.rowcount:
+                _logger.info(
+                    "[INIT] Assigned %d AAJJO opportunities to OdooBot (default salesperson).",
+                    self.env.cr.rowcount,
                 )
-                if self.env.cr.rowcount:
-                    _logger.info(
-                        "[INIT] Reassigned %d AAJJO opportunities from OdooBot to admin.",
-                        self.env.cr.rowcount,
-                    )
         except Exception as e:
             _logger.warning("[INIT] AAJJO lead→opportunity migration failed: %s", e)
 
@@ -217,6 +215,8 @@ class CrmLead(models.Model):
             'description': lead_details,
             'city': city,
             'type': 'opportunity',
+            # Default salesperson for AAJJO leads = OdooBot (id=1).
+            'user_id': SUPERUSER_ID,
         }
         if new_stage:
             vals['stage_id'] = new_stage.id
