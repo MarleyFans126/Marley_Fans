@@ -113,11 +113,7 @@ class CrmLead(models.Model):
             if rec.partner_id:
                 rec.business_state_id = rec.partner_id.state_id
                 rec.business_city = rec.partner_id.city
-                # Prefer the partner's dedicated Business Area; fall back to
-                # the partner's street so legacy data still populates.
-                # rec.business_area = (
-                #     rec.partner_id.business_area or rec.partner_id.street or ''
-                # )
+                rec.business_area = rec.partner_id.street or ''
                 rec.business_pincode = rec.partner_id.zip
 
 
@@ -339,11 +335,7 @@ class CrmLead(models.Model):
             if lead.partner_id:
                 lead.business_state_id = lead.partner_id.state_id.id
                 lead.business_city = lead.partner_id.city
-                lead.business_area = (
-                    lead.partner_id.business_area
-                    or lead.partner_id.street
-                    or ''
-                )
+                lead.business_area = lead.partner_id.street or ''
                 lead.business_pincode = lead.partner_id.zip
 
         return leads
