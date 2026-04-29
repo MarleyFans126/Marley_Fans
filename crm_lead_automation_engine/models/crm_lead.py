@@ -113,7 +113,11 @@ class CrmLead(models.Model):
             if rec.partner_id:
                 rec.business_state_id = rec.partner_id.state_id
                 rec.business_city = rec.partner_id.city
-                rec.business_area = rec.partner_id.street
+                # Prefer the partner's dedicated Business Area; fall back to
+                # the partner's street so legacy data still populates.
+                rec.business_area = (
+                    rec.partner_id.business_area or rec.partner_id.street or ''
+                )
                 rec.business_pincode = rec.partner_id.zip
 
 
@@ -335,7 +339,11 @@ class CrmLead(models.Model):
             if lead.partner_id:
                 lead.business_state_id = lead.partner_id.state_id.id
                 lead.business_city = lead.partner_id.city
-                lead.business_area = lead.partner_id.street
+                lead.business_area = (
+                    lead.partner_id.business_area
+                    or lead.partner_id.street
+                    or ''
+                )
                 lead.business_pincode = lead.partner_id.zip
 
         return leads
@@ -354,6 +362,26 @@ class CrmLead(models.Model):
             for lead in self:
                 if lead.partner_id:
                     lead._onchange_partner_location()
+
+        # Propagate salesperson / second-salesperson changes to linked
+        # quotations and sale orders so the lead and its quotations stay
+        # aligned. Skip cancelled SOs.
+        propagate_vals = {}
+        so_fields = self.env['sale.order']._fields
+        if 'user_id' in vals:
+            propagate_vals['user_id'] = vals['user_id']
+        # Lead's second_salesperson_id maps to SO's second_user_id (Marley
+        # custom field for "Additional Salesperson" on the proforma tab).
+        if 'second_salesperson_id' in vals and 'second_user_id' in so_fields:
+            propagate_vals['second_user_id'] = vals['second_salesperson_id']
+        if propagate_vals:
+            for lead in self:
+                orders = self.env['sale.order'].sudo().search([
+                    ('opportunity_id', '=', lead.id),
+                    ('state', '!=', 'cancel'),
+                ])
+                if orders:
+                    orders.write(propagate_vals)
 
         return res
 

@@ -19,6 +19,7 @@
         'data/stage_email_automation.xml',
         'data/debug_actions.xml',
         'views/business_location_views.xml',
+        'views/res_partner_views.xml',
         'views/crm_lead_views.xml',
         'views/crm_email_log_views.xml',
         'views/whatsapp_bulk_wizard_views.xml',

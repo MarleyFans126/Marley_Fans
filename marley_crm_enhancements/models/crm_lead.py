@@ -393,8 +393,10 @@ class CrmLead(models.Model):
     # ------------------------------------------------------------------
 
     def action_create_project(self):
-        """Open a new installation task form pre-filled from this lead.
-        The task is added to the shared singleton 'Installation' project.
+        """Create a new installation task in the shared 'Installation' project,
+        pre-filled from this lead, then open it. Creating (instead of just
+        opening a form with defaults) ensures the compute that fetches
+        Company Name / Address / GSTIN / Sales Rep runs immediately.
         """
         self.ensure_one()
 
@@ -409,45 +411,66 @@ class CrmLead(models.Model):
             raise_if_not_found=False,
         )
 
+        vals = {
+            'name': self.name or '',
+            'project_id': project.id,
+            'partner_id': partner.id if partner else False,
+            'lead_id': self.id,
+            'is_installation': True,
+        }
+        if install_stage:
+            vals['stage_id'] = install_stage.id
+
+        task = self.env['project.task'].create(vals)
+
         return {
             'type': 'ir.actions.act_window',
-            'name': _('New Installation Task'),
+            'name': _('Installation Task'),
             'res_model': 'project.task',
+            'res_id': task.id,
             'view_mode': 'form',
-            'context': {
-                'default_name': self.name or '',
-                'default_project_id': project.id,
-                'default_partner_id': partner.id if partner else False,
-                'default_lead_id': self.id,
-                'default_stage_id': install_stage.id if install_stage else False,
-                'default_is_installation': True,
-                'default_inst_site_contact': self.contact_name or '',
-                'default_inst_site_phone': self.phone or '',
-            },
             'target': 'current',
         }
 
     def action_create_quotation(self):
-        """Open a new sale.order form pre-filled from this lead."""
+        """Create a draft quotation pre-filled from this lead and open it.
+
+        The SO is *created* (not just defaulted via context) so that Odoo's
+        ``_compute_user_id`` can't overwrite the lead's salesperson with
+        the current user.
+        """
         self.ensure_one()
 
-        # Find or create partner for the quotation
         partner = self.partner_id
         if not partner:
             partner = self._find_or_create_customer()
             self.partner_id = partner
 
+        SaleOrder = self.env['sale.order']
+        so_fields = SaleOrder._fields
+
+        vals = {
+            'partner_id': partner.id if partner else False,
+            'opportunity_id': self.id,
+            'origin': self.name,
+            'campaign_id': self.campaign_id.id if self.campaign_id else False,
+            'source_id': self.source_id.id if self.source_id else False,
+            # Salesperson + team mirrored from the lead
+            'user_id': self.user_id.id if self.user_id else False,
+            'team_id': self.team_id.id if self.team_id else False,
+        }
+        # Lead's "Second Sales" → SO's "Additional Salesperson" (second_user_id)
+        second = getattr(self, 'second_salesperson_id', False)
+        if second and 'second_user_id' in so_fields:
+            vals['second_user_id'] = second.id
+
+        order = SaleOrder.create(vals)
+
         return {
             'type': 'ir.actions.act_window',
-            'name': _('New Quotation'),
+            'name': _('Quotation'),
             'res_model': 'sale.order',
+            'res_id': order.id,
             'view_mode': 'form',
-            'context': {
-                'default_partner_id': partner.id if partner else False,
-                'default_opportunity_id': self.id,
-                'default_origin': self.name,
-                'default_campaign_id': self.campaign_id.id if self.campaign_id else False,
-                'default_source_id': self.source_id.id if self.source_id else False,
-            },
             'target': 'current',
         }

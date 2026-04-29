@@ -46,16 +46,10 @@
             <xpath expr="//notebook" position="inside">
                 <page string="Installation" name="installation_tab">
 
-                    <!-- Toggle + Refresh -->
+                    <!-- Installation toggle (refresh is automatic) -->
                     <div class="d-flex align-items-center gap-3 mb-3">
                         <field name="is_installation" widget="boolean_toggle"/>
                         <label for="is_installation" string="This is an Installation Task"/>
-                        <button name="action_refresh_installation"
-                                string="Refresh from Invoice/SO"
-                                type="object"
-                                class="btn-sm btn-outline-primary ms-auto"
-                                icon="fa-refresh"
-                                invisible="not is_installation"/>
                     </div>
 
                     <div invisible="not is_installation">

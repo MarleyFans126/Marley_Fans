@@ -1,6 +1,7 @@
 from . import business_city
 from . import business_area
 from . import automation_service
+from . import res_partner
 from . import crm_lead
 from . import whatsapp_bulk_wizard
 from . import auto_email

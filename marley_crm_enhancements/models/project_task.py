@@ -70,9 +70,9 @@ class ProjectTask(models.Model):
     # Auto-fetched from Sale Order / Invoice / Partner
     inst_sales_rep = fields.Char(string='Sales Representative', compute='_compute_installation_details', store=True, readonly=True)
     inst_installation_date = fields.Date(string='Scheduled Installation Date')
-    inst_company_name = fields.Char(string='Company Name', compute='_compute_installation_details', store=True, readonly=False)
-    inst_company_address = fields.Text(string='Company Address', compute='_compute_installation_details', store=True, readonly=False)
-    inst_gstin = fields.Char(string='GSTIN', compute='_compute_installation_details', store=True, readonly=False)
+    inst_company_name = fields.Char(string='Company Name', compute='_compute_installation_details', store=True, readonly=True)
+    inst_company_address = fields.Text(string='Company Address', compute='_compute_installation_details', store=True, readonly=True)
+    inst_gstin = fields.Char(string='GSTIN', compute='_compute_installation_details', store=True, readonly=True)
     inst_site_contact = fields.Char(string='Site Contact Person', compute='_compute_installation_details', store=True, readonly=False)
     inst_site_phone = fields.Char(string='Contact Number', compute='_compute_installation_details', store=True, readonly=False)
 
@@ -173,24 +173,20 @@ class ProjectTask(models.Model):
     # ------------------------------------------------------------------
     # Auto-fetch: Company Details from Sale Order → Partner / Lead
     # ------------------------------------------------------------------
-    @api.depends('sale_order_id', 'sale_order_id.user_id',
+    @api.depends('is_installation',
+                 'sale_order_id', 'sale_order_id.user_id',
                  'sale_order_id.partner_id',
-                 'partner_id', 'project_id.lead_id', 'lead_id',
+                 'partner_id', 'project_id', 'project_id.partner_id',
+                 'project_id.lead_id', 'lead_id',
                  'lead_id.partner_id', 'project_id.lead_id.partner_id',
                  'partner_id.name', 'partner_id.street', 'partner_id.street2',
                  'partner_id.city', 'partner_id.state_id', 'partner_id.zip',
-                 'partner_id.vat')
+                 'partner_id.vat',
+                 'lead_id.partner_name', 'lead_id.contact_name',
+                 'lead_id.street', 'lead_id.street2', 'lead_id.city',
+                 'lead_id.state_id', 'lead_id.country_id', 'lead_id.zip')
     def _compute_installation_details(self):
         for task in self:
-            if not task.is_installation:
-                task.inst_sales_rep = task.inst_sales_rep or ''
-                task.inst_company_name = task.inst_company_name or ''
-                task.inst_company_address = task.inst_company_address or ''
-                task.inst_gstin = task.inst_gstin or ''
-                task.inst_site_contact = task.inst_site_contact or ''
-                task.inst_site_phone = task.inst_site_phone or ''
-                continue
-
             # Sales Representative — SO salesperson first, then lead's salesperson
             so = task._get_related_sale_order()
             if so and so.user_id:
@@ -216,35 +212,54 @@ class ProjectTask(models.Model):
                 or (lead.partner_id if lead else False)
                 or (task.project_id.partner_id if task.project_id else False)
             )
+            # Helper: build a multi-line address from a partner or a lead
+            def _build_address(rec):
+                if not rec:
+                    return ''
+                parts = []
+                if getattr(rec, 'street', False):
+                    parts.append(rec.street)
+                if getattr(rec, 'street2', False):
+                    parts.append(rec.street2)
+                city_line = ''
+                if getattr(rec, 'city', False):
+                    city_line += rec.city
+                state = getattr(rec, 'state_id', False)
+                if state:
+                    city_line += ' ' + state.name if city_line else state.name
+                country = getattr(rec, 'country_id', False)
+                if country:
+                    city_line += ' (%s)' % country.code if city_line else country.code
+                if getattr(rec, 'zip', False):
+                    city_line += ' ' + rec.zip if city_line else rec.zip
+                if city_line:
+                    parts.append(city_line)
+                return '\n'.join(parts)
+
             if partner:
                 task.inst_company_name = partner.name or ''
-                # Build address
-                addr_parts = []
-                if partner.street:
-                    addr_parts.append(partner.street)
-                if partner.street2:
-                    addr_parts.append(partner.street2)
-                city_line = ''
-                if partner.city:
-                    city_line += partner.city
-                if partner.state_id:
-                    city_line += ' ' + partner.state_id.name if city_line else partner.state_id.name
-                if partner.country_id:
-                    city_line += ' (%s)' % partner.country_id.code if city_line else partner.country_id.code
-                if partner.zip:
-                    city_line += ' ' + partner.zip if city_line else partner.zip
-                if city_line:
-                    addr_parts.append(city_line)
-                task.inst_company_address = '\n'.join(addr_parts) if addr_parts else ''
+                task.inst_company_address = _build_address(partner)
                 task.inst_gstin = partner.vat or ''
+            elif lead:
+                # Lead is at New / Qualify stage with no partner yet — fetch
+                # the address details directly from the lead fields.
+                task.inst_company_name = (
+                    lead.partner_name or lead.contact_name or lead.name or ''
+                )
+                task.inst_company_address = _build_address(lead)
+                task.inst_gstin = (
+                    getattr(lead, 'x_gstin', False)
+                    or getattr(lead, 'vat', False)
+                    or ''
+                )
             else:
                 task.inst_company_name = task.inst_company_name or ''
                 task.inst_company_address = task.inst_company_address or ''
                 task.inst_gstin = task.inst_gstin or ''
 
-            # Site Contact — from lead contact or partner
+            # Site Contact — from lead contact or partner. Reuses the `lead`
+            # already resolved above (task.lead_id, then project.lead_id).
             if not task.inst_site_contact:
-                lead = task.project_id.lead_id if task.project_id and hasattr(task.project_id, 'lead_id') else False
                 if lead:
                     task.inst_site_contact = lead.contact_name or (partner.name if partner else '')
                     task.inst_site_phone = lead.phone or (partner.phone if partner else '')
