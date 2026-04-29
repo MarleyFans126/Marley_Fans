@@ -14,9 +14,9 @@
             <!-- Anchor on the address block's zip field. Use contains() so
                  the xpath works in every Odoo build and only matches the
                  form's address block (where class="o_address_zip"). -->
-            <xpath expr="//field[@name='zip'][contains(@class, 'o_address_zip')]" position="after">
+            <!-- <xpath expr="//field[@name='zip'][contains(@class, 'o_address_zip')]" position="after">
                 <field name="business_area" placeholder="e.g. IDA Jeedimetla, Phase IV"/>
-            </xpath>
+            </xpath> -->
         </field>
     </record>
 

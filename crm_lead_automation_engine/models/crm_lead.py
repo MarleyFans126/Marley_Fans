@@ -115,9 +115,9 @@ class CrmLead(models.Model):
                 rec.business_city = rec.partner_id.city
                 # Prefer the partner's dedicated Business Area; fall back to
                 # the partner's street so legacy data still populates.
-                rec.business_area = (
-                    rec.partner_id.business_area or rec.partner_id.street or ''
-                )
+                # rec.business_area = (
+                #     rec.partner_id.business_area or rec.partner_id.street or ''
+                # )
                 rec.business_pincode = rec.partner_id.zip
 
 
