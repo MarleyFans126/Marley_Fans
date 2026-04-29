@@ -11,7 +11,10 @@
         <field name="model">res.partner</field>
         <field name="inherit_id" ref="base.view_partner_form"/>
         <field name="arch" type="xml">
-            <xpath expr="//field[@name='city']" position="after">
+            <!-- Anchor on the address block's zip field (class o_address_zip).
+                 That class only exists on the FORM's city/zip pair, so this
+                 xpath cannot accidentally match the tree-view city. -->
+            <xpath expr="//field[@name='zip'][hasclass('o_address_zip')]" position="after">
                 <field name="business_area" placeholder="e.g. IDA Jeedimetla, Phase IV"/>
             </xpath>
         </field>
