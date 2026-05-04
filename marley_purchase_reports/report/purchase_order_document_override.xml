@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!--
+        Hide Odoo's default Purchase Order print menu so that only the
+        Marley Purchase Order layout shows up under the Print menu.
+        We set binding_model_id to NULL via SQL-equivalent: clearing the
+        binding by overriding the original action.
+    -->
+    <record id="purchase.action_report_purchase_order" model="ir.actions.report">
+        <field name="binding_model_id" eval="False"/>
+        <field name="binding_type">report</field>
+    </record>
+
+</odoo>

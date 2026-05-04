@@ -69,6 +69,9 @@ class CrmLead(models.Model):
         'res.country.state',
         string='Business State',
         domain="[('country_id.code', '=', 'IN')]",
+        compute='_compute_business_location_from_partner',
+        store=True,
+        readonly=False,
         tracking=True,
     )
     business_city_id = fields.Many2one(
@@ -85,13 +88,41 @@ class CrmLead(models.Model):
     )
     business_city = fields.Char(
         string='Business City',
+        compute='_compute_business_location_from_partner',
+        store=True,
+        readonly=False,
         tracking=True,
     )
     business_area = fields.Char(
         string='Business Area',
         tracking=True,
     )
-    business_pincode = fields.Char(string='Pincode', size=6, tracking=True)
+    business_pincode = fields.Char(
+        string='Pincode',
+        size=6,
+        compute='_compute_business_location_from_partner',
+        store=True,
+        readonly=False,
+        tracking=True,
+    )
+
+    @api.depends('partner_id', 'partner_id.state_id', 'partner_id.city', 'partner_id.zip')
+    def _compute_business_location_from_partner(self):
+        """Auto-fill Business State / City / Pincode from the customer.
+        Business Area is intentionally NOT computed — it stays a manual entry.
+        Fields are readonly=False so users can still type over them.
+        """
+        for rec in self:
+            partner = rec.partner_id
+            if partner:
+                # Only overwrite when the partner has a value, otherwise keep
+                # whatever the user typed in.
+                if partner.state_id:
+                    rec.business_state_id = partner.state_id
+                if partner.city:
+                    rec.business_city = partner.city
+                if partner.zip:
+                    rec.business_pincode = partner.zip
 
     # @api.onchange('business_state_id')
     # def _onchange_business_state_id(self):
@@ -109,12 +140,10 @@ class CrmLead(models.Model):
 
     @api.onchange('partner_id')
     def _onchange_partner_location(self):
-        for rec in self:
-            if rec.partner_id:
-                rec.business_state_id = rec.partner_id.state_id
-                rec.business_city = rec.partner_id.city
-                rec.business_area = rec.partner_id.street or ''
-                rec.business_pincode = rec.partner_id.zip
+        # State / City / Pincode are now handled by the stored compute
+        # `_compute_business_location_from_partner`.
+        # business_area remains a manual entry — no auto-fetch from partner.
+        return
 
 
     # -------------------------------------------------------------------------
@@ -332,11 +361,9 @@ class CrmLead(models.Model):
             except Exception as e:
                 _logger.error(f"Lead Creation Duplicate Check Error for {lead.id}: {e}")
 
-            if lead.partner_id:
-                lead.business_state_id = lead.partner_id.state_id.id
-                lead.business_city = lead.partner_id.city
-                lead.business_area = lead.partner_id.street or ''
-                lead.business_pincode = lead.partner_id.zip
+            # business_state_id / business_city / business_pincode are
+            # populated by the stored compute on partner_id change.
+            # business_area remains a manual entry.
 
         return leads
 

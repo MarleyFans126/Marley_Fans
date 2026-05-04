@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Prefix the PO number with the financial year on the form -->
+    <record id="purchase_order_view_form_inherit_marley" model="ir.ui.view">
+        <field name="name">purchase.order.view.form.inherit.marley</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_form"/>
+        <field name="arch" type="xml">
+
+            <!-- Show "<FY>/" right before the order name in the title -->
+            <xpath expr="//h1/field[@name='name']" position="before">
+                <field name="financial_year_label"
+                       readonly="1"
+                       class="oe_inline"
+                       invisible="not financial_year_label"/><span invisible="not financial_year_label">/</span>
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>
