@@ -44,9 +44,23 @@
                 <field name="lead_query_type" readonly="1" invisible="not is_indiamart"/>
             </xpath>
 
-            <!-- Insert under Salesperson in RIGHT column only -->
+            <!-- Insert under Salesperson in RIGHT column only.
+                 Order requested: Address -> Business Area -> Business State
+                 -> Business City -> Pincode. -->
             <xpath expr="//field[@name='user_id']" position="after">
                 <field name="second_salesperson_id"/>
+
+                <!-- ===== Address (auto-fetched from Customer; shown on main
+                     form, not buried in the Contacts tab). Only street lines
+                     — City / State / ZIP / Country are shown below as the
+                     dedicated Business fields. ===== -->
+                <label for="street" string="Address"/>
+                <div class="o_address_format" name="lead_address_block">
+                    <field name="street" placeholder="Street..." class="o_address_street"/>
+                    <field name="street2" placeholder="Street 2..." class="o_address_street"/>
+                </div>
+
+                <field name="business_area"/>
                 <field name="business_state_id"
                         options="{'no_create': False}"/>
                 <!-- <field name="business_city_id"
@@ -55,19 +69,8 @@
                 <field name="business_area_id"
                         options="{'no_create': False, 'quick_create': True}"
                         context="{'default_city_id': business_city_id}"/> -->
-                <field name="business_area"/>
                 <field name="business_city"/>
                 <field name="business_pincode" placeholder="Pincode"/>
-
-                <!-- ===== Address (auto-fetched from Customer; shown on main form,
-                     not buried in the Contacts tab). Only street lines — City /
-                     State / ZIP / Country are already shown above as the
-                     dedicated Business fields. ===== -->
-                <label for="street" string="Address"/>
-                <div class="o_address_format" name="lead_address_block">
-                    <field name="street" placeholder="Street..." class="o_address_street"/>
-                    <field name="street2" placeholder="Street 2..." class="o_address_street"/>
-                </div>
 
             </xpath>
 
