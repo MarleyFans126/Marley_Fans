@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Read(//c/Users/ruthi/OneDrive/Desktop/Odoo 19/odoo19/**)",
-      "Bash(\"/c/Users/ruthi/OneDrive/Desktop/Odoo 19/sandbox/venv/Scripts/python.exe\" odoo-bin -c odoo.conf -d marley_may_04 --logfile=\"C:/Users/ruthi/OneDrive/Desktop/Odoo 19/odoo.log\")"
+      "Bash(\"/c/Users/ruthi/OneDrive/Desktop/Odoo 19/sandbox/venv/Scripts/python.exe\" odoo-bin -c odoo.conf -d marley_may_04 --logfile=\"C:/Users/ruthi/OneDrive/Desktop/Odoo 19/odoo.log\")",
+      "Bash(\"/c/Users/ruthi/OneDrive/Desktop/Odoo 19/sandbox/venv/Scripts/python.exe\" odoo-bin -c odoo.conf -d marley_may_04 -u crm_lead_automation_engine --stop-after-init --no-http)"
     ]
   }
 }

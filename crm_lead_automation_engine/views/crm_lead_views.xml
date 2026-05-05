@@ -103,12 +103,32 @@
         <field name="model">crm.lead</field>
         <field name="inherit_id" ref="crm.view_crm_case_leads_filter"/>
         <field name="arch" type="xml">
+
+            <!-- Inject extra searchable fields BEFORE the first existing
+                 <field>, so they show up at the top of the search dropdown.
+                 "Search Anywhere" uses filter_domain to OR-match across many
+                 columns from a single typed term. -->
+            <xpath expr="//search/field[1]" position="before">
+                <field name="contact_name" string="Search Anywhere"
+                       filter_domain="['|','|','|','|','|','|',
+                           ('name','ilike',self),
+                           ('partner_name','ilike',self),
+                           ('contact_name','ilike',self),
+                           ('email_from','ilike',self),
+                           ('phone','ilike',self),
+                           ('lead_source','ilike',self),
+                           ('description','ilike',self)]"/>
+                <field name="lead_source" string="Lead Source"/>
+            </xpath>
+
             <filter name="salesperson" position="after">
                 <separator/>
                 <filter string="Is Duplicate" name="duplicate" domain="[('duplicate_flag', '=', True)]"/>
                 <separator/>
                 <filter string="IndiaMART" name="source_indiamart" domain="[('lead_source_type', '=', 'indiamart')]"/>
                 <filter string="AAJJO" name="source_aajjo" domain="[('lead_source_type', '=', 'aajjo')]"/>
+                <filter string="Manual" name="source_manual"
+                        domain="[('is_aajjo', '=', False), ('is_indiamart', '=', False)]"/>
             </filter>
 
             <!-- Widen "My Leads" to include records where user is second_salesperson -->
@@ -127,8 +147,32 @@
         <field name="model">crm.lead</field>
         <field name="inherit_id" ref="crm.view_crm_case_opportunities_filter"/>
         <field name="arch" type="xml">
+
+            <!-- "Search Anywhere" + Lead Source on the Pipeline view -->
+            <xpath expr="//search/field[1]" position="before">
+                <field name="contact_name" string="Search Anywhere"
+                       filter_domain="['|','|','|','|','|','|',
+                           ('name','ilike',self),
+                           ('partner_name','ilike',self),
+                           ('contact_name','ilike',self),
+                           ('email_from','ilike',self),
+                           ('phone','ilike',self),
+                           ('lead_source','ilike',self),
+                           ('description','ilike',self)]"/>
+                <field name="lead_source" string="Lead Source"/>
+            </xpath>
+
             <filter name="assigned_to_me" position="attributes">
                 <attribute name="domain">['|', ('user_id', '=', uid), ('second_salesperson_id', '=', uid)]</attribute>
+            </filter>
+
+            <!-- Lead source filters on the Pipeline / opportunities search view -->
+            <filter name="salesperson" position="after">
+                <separator/>
+                <filter string="IndiaMART" name="source_indiamart" domain="[('lead_source_type', '=', 'indiamart')]"/>
+                <filter string="AAJJO" name="source_aajjo" domain="[('lead_source_type', '=', 'aajjo')]"/>
+                <filter string="Manual" name="source_manual"
+                        domain="[('is_aajjo', '=', False), ('is_indiamart', '=', False)]"/>
             </filter>
         </field>
     </record>
