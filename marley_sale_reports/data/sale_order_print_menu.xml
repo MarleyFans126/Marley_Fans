@@ -4,8 +4,8 @@
         Restrict the sale.order Print menu to two options:
           - Marley Quotation
           - Marley Proforma Invoice
-        We unbind the two standard Odoo reports from the Print menu and rename
-        the standard Pro-Forma action to match our branding.
+        We unbind the standard Odoo quotation / order / proforma reports
+        so only the two Marley reports appear under Print and Preview.
     -->
 
     <!-- Hide "PDF Quote" from sale.order Print menu -->
@@ -21,6 +21,12 @@
     <!-- Hide the standard Pro-Forma action — replaced by our Marley sale.order proforma -->
     <record id="sale.action_report_pro_forma_invoice" model="ir.actions.report">
         <field name="binding_model_id" eval="False"/>
+    </record>
+
+    <!-- Make sure the Marley Proforma stays visible in the Print menu -->
+    <record id="marley_sale_reports.action_report_marley_sale_proforma" model="ir.actions.report">
+        <field name="binding_model_id" ref="sale.model_sale_order"/>
+        <field name="binding_type">report</field>
     </record>
 
 </odoo>
