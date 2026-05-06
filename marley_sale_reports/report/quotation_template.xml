@@ -54,7 +54,7 @@
                             </tr>
                             <tr>
                                 <td colspan="3" style="padding: 4px 0 0 0; font-size: 9px; white-space: nowrap; border: none;">
-                                    <strong style="color: #e30613;">Address:</strong> Second Floor, Swapna Nilayam, H.NO.5-5-81/7/A, Plot No.20, High Tension Rd, Prakash Nagar, Kukatpally, Hyderabad, Telangana 500072, India
+                                    <strong style="color: #e30613;">Corporate Address:</strong> Second Floor, Swapna Nilayam, H.NO.5-5-81/7/A, Plot No.20, High Tension Rd, Prakash Nagar, Kukatpally, Hyderabad, Telangana 500072, India
                                 </td>
                             </tr>
                         </table>
@@ -132,15 +132,26 @@
                         </tr>
                     </table>
 
-                    <!-- ===== PRODUCT LINES TABLE ===== -->
-                    <table style="width: 100%; border-collapse: collapse; margin-bottom: 0; border: 1px solid #f5a9ac;">
+                    <!-- ===== PRODUCT LINES + TOTALS in ONE TABLE =====
+                         Totals are appended as additional rows inside the
+                         same tbody. The whole table is kept on a single
+                         page so the header doesn't re-render mid-flow. -->
+                    <t t-set="tax_totals" t-value="doc.tax_totals"/>
+                    <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; page-break-inside: avoid;">
+                        <colgroup>
+                            <col style="width: 42%;"/>
+                            <col style="width: 13%;"/>
+                            <col style="width: 15%;"/>
+                            <col style="width: 14%;"/>
+                            <col style="width: 16%;"/>
+                        </colgroup>
                         <thead>
                             <tr style="background-color: #f0f0f0; font-weight: bold;">
-                                <th style="border: 1px solid #f5a9ac; padding: 10px 8px; text-align: left; font-size: 13px; width: 42%;">DESCRIPTION</th>
-                                <th style="border: 1px solid #f5a9ac; padding: 10px 8px; text-align: center; font-size: 13px; width: 13%;">QUANTITY</th>
-                                <th style="border: 1px solid #f5a9ac; padding: 10px 8px; text-align: right; font-size: 13px; width: 15%;">UNIT PRICE</th>
-                                <th style="border: 1px solid #f5a9ac; padding: 10px 8px; text-align: center; font-size: 13px; width: 14%;">TAXES</th>
-                                <th style="border: 1px solid #f5a9ac; padding: 10px 8px; text-align: right; font-size: 13px; width: 16%;">AMOUNT</th>
+                                <th style="border: 1px solid #f5a9ac; padding: 10px 8px; text-align: left; font-size: 13px;">DESCRIPTION</th>
+                                <th style="border: 1px solid #f5a9ac; padding: 10px 8px; text-align: center; font-size: 13px;">QUANTITY</th>
+                                <th style="border: 1px solid #f5a9ac; padding: 10px 8px; text-align: right; font-size: 13px;">UNIT PRICE</th>
+                                <th style="border: 1px solid #f5a9ac; padding: 10px 8px; text-align: center; font-size: 13px;">TAXES</th>
+                                <th style="border: 1px solid #f5a9ac; padding: 10px 8px; text-align: right; font-size: 13px;">AMOUNT</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -171,38 +182,37 @@
                                     </td>
                                 </tr>
                             </t>
-                        </tbody>
-                    </table>
-
-                    <!-- ===== TOTALS ===== -->
-                    <t t-set="tax_totals" t-value="doc.tax_totals"/>
-                    <table style="width: 50%; margin-left: auto; border-collapse: collapse; margin-bottom: 20px;">
-                        <t t-foreach="tax_totals.get('subtotals', [])" t-as="subtotal">
-                            <tr>
-                                <td style="padding: 8px 12px; text-align: right; font-size: 13px; border: 1px solid #f5a9ac;">
-                                    <t t-esc="subtotal.get('name', 'Untaxed Amount')"/>
-                                </td>
-                                <td style="padding: 8px 12px; text-align: right; font-size: 13px; font-weight: bold; border: 1px solid #f5a9ac; width: 35%;">
-                                    &#8377; <t t-esc="'{:,.2f}'.format(subtotal.get('base_amount_currency', 0))"/>
-                                </td>
-                            </tr>
-                            <t t-foreach="subtotal.get('tax_groups', [])" t-as="tax_group">
-                                <tr>
+                            <!-- ===== TOTALS rows (same column layout) ===== -->
+                            <t t-foreach="tax_totals.get('subtotals', [])" t-as="subtotal">
+                                <tr style="page-break-inside: avoid;">
+                                    <td colspan="3" style="border: none; background: transparent;"/>
                                     <td style="padding: 8px 12px; text-align: right; font-size: 13px; border: 1px solid #f5a9ac;">
-                                        <t t-esc="tax_group.get('group_name', 'Tax')"/>
+                                        <t t-esc="subtotal.get('name', 'Untaxed Amount')"/>
                                     </td>
                                     <td style="padding: 8px 12px; text-align: right; font-size: 13px; font-weight: bold; border: 1px solid #f5a9ac;">
-                                        &#8377; <t t-esc="'{:,.2f}'.format(tax_group.get('tax_amount_currency', 0))"/>
+                                        &#8377; <t t-esc="'{:,.2f}'.format(subtotal.get('base_amount_currency', 0))"/>
                                     </td>
                                 </tr>
+                                <t t-foreach="subtotal.get('tax_groups', [])" t-as="tax_group">
+                                    <tr style="page-break-inside: avoid;">
+                                        <td colspan="3" style="border: none; background: transparent;"/>
+                                        <td style="padding: 8px 12px; text-align: right; font-size: 13px; border: 1px solid #f5a9ac;">
+                                            <t t-esc="tax_group.get('group_name', 'Tax')"/>
+                                        </td>
+                                        <td style="padding: 8px 12px; text-align: right; font-size: 13px; font-weight: bold; border: 1px solid #f5a9ac;">
+                                            &#8377; <t t-esc="'{:,.2f}'.format(tax_group.get('tax_amount_currency', 0))"/>
+                                        </td>
+                                    </tr>
+                                </t>
                             </t>
-                        </t>
-                        <tr style="background-color: #f0f0f0;">
-                            <td style="padding: 10px 12px; text-align: right; font-size: 14px; font-weight: bold; border: 2px solid #f5a9ac;">Total</td>
-                            <td style="padding: 10px 12px; text-align: right; font-size: 14px; font-weight: bold; border: 2px solid #f5a9ac;">
-                                &#8377; <t t-esc="'{:,.2f}'.format(tax_totals.get('total_amount_currency', doc.amount_total))"/>
-                            </td>
-                        </tr>
+                            <tr style="page-break-inside: avoid;">
+                                <td colspan="3" style="border: none; background: transparent;"/>
+                                <td style="padding: 10px 12px; text-align: right; font-size: 14px; font-weight: bold; border: 2px solid #f5a9ac; background-color: #f0f0f0;">Total</td>
+                                <td style="padding: 10px 12px; text-align: right; font-size: 14px; font-weight: bold; border: 2px solid #f5a9ac; background-color: #f0f0f0;">
+                                    &#8377; <t t-esc="'{:,.2f}'.format(tax_totals.get('total_amount_currency', doc.amount_total))"/>
+                                </td>
+                            </tr>
+                        </tbody>
                     </table>
 
                     <!-- ===== TAXES &amp; DUTIES ===== -->

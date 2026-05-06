@@ -1,5 +1,6 @@
 from . import models
 from . import wizard
+from . import controllers
 
 
 def _post_init_swap_quotation_report(env):

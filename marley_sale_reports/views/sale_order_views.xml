@@ -18,6 +18,15 @@
                         invisible="not partner_id"/>
             </xpath>
 
+            <!-- Make the header "Print" button (state != 'sale') trigger the
+                 Marley Quotation report directly instead of Odoo's default
+                 sale.action_report_saleorder. The Print menu (cog dropdown)
+                 with multiple report bindings is unaffected. -->
+            <xpath expr="//header//button[@name='sale.action_report_saleorder']"
+                   position="attributes">
+                <attribute name="name">marley_sale_reports.action_report_marley_quotation</attribute>
+            </xpath>
+
             <!-- Prefix the quotation number with the financial year -->
             <xpath expr="//h1/field[@name='name']" position="before">
                 <field name="financial_year_label"

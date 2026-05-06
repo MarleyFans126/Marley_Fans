@@ -46,7 +46,7 @@
                             </tr>
                             <tr>
                                 <td colspan="3" style="padding: 4px 0 0 0; font-size: 9px; white-space: nowrap; border: none;">
-                                    <strong style="color: #e30613;">Address:</strong> Second Floor, Swapna Nilayam, H.NO.5-5-81/7/A, Plot No.20, High Tension Rd, Prakash Nagar, Kukatpally, Hyderabad, Telangana 500072, India
+                                    <strong style="color: #e30613;">Corporate Address:</strong> Second Floor, Swapna Nilayam, H.NO.5-5-81/7/A, Plot No.20, High Tension Rd, Prakash Nagar, Kukatpally, Hyderabad, Telangana 500072, India
                                 </td>
                             </tr>
                         </table>
@@ -164,28 +164,40 @@
                             </tbody>
                         </table>
 
-                        <!-- TOTALS with taxes -->
-                        <table style="width: 50%; margin-left: auto; border-collapse: collapse; margin-bottom: 20px;">
+                        <!-- TOTALS with taxes — aligned to product cols
+                             (40/12/15/15/18); coloured backgrounds on cells. -->
+                        <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; page-break-inside: avoid;">
+                            <colgroup>
+                                <col style="width: 40%;"/>
+                                <col style="width: 12%;"/>
+                                <col style="width: 15%;"/>
+                                <col style="width: 15%;"/>
+                                <col style="width: 18%;"/>
+                            </colgroup>
                             <tr>
+                                <td colspan="3" style="border: none; background: transparent;"/>
                                 <td style="padding: 8px 12px; text-align: right; font-size: 13px; border: 1px solid #f5a9ac;">Untaxed Amount</td>
-                                <td style="padding: 8px 12px; text-align: right; font-size: 13px; font-weight: bold; border: 1px solid #f5a9ac; width: 35%;">
+                                <td style="padding: 8px 12px; text-align: right; font-size: 13px; font-weight: bold; border: 1px solid #f5a9ac;">
                                     &#8377; <t t-esc="'{:,.2f}'.format(doc.amount_untaxed)"/>
                                 </td>
                             </tr>
                             <tr>
+                                <td colspan="3" style="border: none; background: transparent;"/>
                                 <td style="padding: 8px 12px; text-align: right; font-size: 13px; border: 1px solid #f5a9ac;">GST / Tax</td>
                                 <td style="padding: 8px 12px; text-align: right; font-size: 13px; font-weight: bold; border: 1px solid #f5a9ac;">
                                     &#8377; <t t-esc="'{:,.2f}'.format(doc.amount_tax)"/>
                                 </td>
                             </tr>
-                            <tr style="background-color: #f0f0f0;">
-                                <td style="padding: 10px 12px; text-align: right; font-size: 14px; font-weight: bold; border: 2px solid #f5a9ac;">Total</td>
-                                <td style="padding: 10px 12px; text-align: right; font-size: 14px; font-weight: bold; border: 2px solid #f5a9ac;">
+                            <tr>
+                                <td colspan="3" style="border: none; background: transparent;"/>
+                                <td style="padding: 10px 12px; text-align: right; font-size: 14px; font-weight: bold; border: 2px solid #f5a9ac; background-color: #f0f0f0;">Total</td>
+                                <td style="padding: 10px 12px; text-align: right; font-size: 14px; font-weight: bold; border: 2px solid #f5a9ac; background-color: #f0f0f0;">
                                     &#8377; <t t-esc="'{:,.2f}'.format(doc.amount_total)"/>
                                 </td>
                             </tr>
                             <t t-if="doc.advance_payment_percentage > 0">
                                 <tr>
+                                    <td colspan="3" style="border: none; background: transparent;"/>
                                     <td style="padding: 8px 12px; text-align: right; font-size: 13px; border: 1px solid #f5a9ac;">
                                         Advance To Be Paid (<t t-esc="'%.0f' % doc.advance_payment_percentage"/>%)
                                     </td>
@@ -196,6 +208,7 @@
                             </t>
                             <t t-if="doc.advance_received > 0">
                                 <tr>
+                                    <td colspan="3" style="border: none; background: transparent;"/>
                                     <td style="padding: 8px 12px; text-align: right; font-size: 13px; border: 1px solid #f5a9ac;">
                                         Advance Received
                                     </td>
@@ -203,9 +216,10 @@
                                         &#8377; <t t-esc="'{:,.2f}'.format(doc.advance_received)"/>
                                     </td>
                                 </tr>
-                                <tr style="background-color: #fff6e6;">
-                                    <td style="padding: 10px 12px; text-align: right; font-size: 14px; font-weight: bold; border: 2px solid #f5a9ac;">Balance Due</td>
-                                    <td style="padding: 10px 12px; text-align: right; font-size: 14px; font-weight: bold; border: 2px solid #f5a9ac;">
+                                <tr>
+                                    <td colspan="3" style="border: none; background: transparent;"/>
+                                    <td style="padding: 10px 12px; text-align: right; font-size: 14px; font-weight: bold; border: 2px solid #f5a9ac; background-color: #fff6e6;">Balance Due</td>
+                                    <td style="padding: 10px 12px; text-align: right; font-size: 14px; font-weight: bold; border: 2px solid #f5a9ac; background-color: #fff6e6;">
                                         &#8377; <t t-esc="'{:,.2f}'.format(doc.balance_due)"/>
                                     </td>
                                 </tr>
@@ -251,16 +265,25 @@
                             </tbody>
                         </table>
 
-                        <!-- TOTALS without taxes -->
-                        <table style="width: 50%; margin-left: auto; border-collapse: collapse; margin-bottom: 20px;">
-                            <tr style="background-color: #f0f0f0;">
-                                <td style="padding: 10px 12px; text-align: right; font-size: 14px; font-weight: bold; border: 2px solid #f5a9ac;">Total</td>
-                                <td style="padding: 10px 12px; text-align: right; font-size: 14px; font-weight: bold; border: 2px solid #f5a9ac; width: 35%;">
+                        <!-- TOTALS without taxes — aligned to product cols
+                             (45/15/20/20); coloured backgrounds on cells. -->
+                        <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; page-break-inside: avoid;">
+                            <colgroup>
+                                <col style="width: 45%;"/>
+                                <col style="width: 15%;"/>
+                                <col style="width: 20%;"/>
+                                <col style="width: 20%;"/>
+                            </colgroup>
+                            <tr>
+                                <td colspan="2" style="border: none; background: transparent;"/>
+                                <td style="padding: 10px 12px; text-align: right; font-size: 14px; font-weight: bold; border: 2px solid #f5a9ac; background-color: #f0f0f0;">Total</td>
+                                <td style="padding: 10px 12px; text-align: right; font-size: 14px; font-weight: bold; border: 2px solid #f5a9ac; background-color: #f0f0f0;">
                                     &#8377; <t t-esc="'{:,.2f}'.format(doc.amount_untaxed)"/>
                                 </td>
                             </tr>
                             <t t-if="doc.advance_payment_percentage > 0">
                                 <tr>
+                                    <td colspan="2" style="border: none; background: transparent;"/>
                                     <td style="padding: 8px 12px; text-align: right; font-size: 13px; border: 1px solid #f5a9ac;">
                                         Advance To Be Paid (<t t-esc="'%.0f' % doc.advance_payment_percentage"/>%)
                                     </td>
@@ -271,6 +294,7 @@
                             </t>
                             <t t-if="doc.advance_received > 0">
                                 <tr>
+                                    <td colspan="2" style="border: none; background: transparent;"/>
                                     <td style="padding: 8px 12px; text-align: right; font-size: 13px; border: 1px solid #f5a9ac;">
                                         Advance Received
                                     </td>
@@ -278,9 +302,10 @@
                                         &#8377; <t t-esc="'{:,.2f}'.format(doc.advance_received)"/>
                                     </td>
                                 </tr>
-                                <tr style="background-color: #fff6e6;">
-                                    <td style="padding: 10px 12px; text-align: right; font-size: 14px; font-weight: bold; border: 2px solid #f5a9ac;">Balance Due</td>
-                                    <td style="padding: 10px 12px; text-align: right; font-size: 14px; font-weight: bold; border: 2px solid #f5a9ac;">
+                                <tr>
+                                    <td colspan="2" style="border: none; background: transparent;"/>
+                                    <td style="padding: 10px 12px; text-align: right; font-size: 14px; font-weight: bold; border: 2px solid #f5a9ac; background-color: #fff6e6;">Balance Due</td>
+                                    <td style="padding: 10px 12px; text-align: right; font-size: 14px; font-weight: bold; border: 2px solid #f5a9ac; background-color: #fff6e6;">
                                         &#8377; <t t-esc="'{:,.2f}'.format(doc.balance_due)"/>
                                     </td>
                                 </tr>
