@@ -10,6 +10,64 @@ class SaleOrder(models.Model):
     _inherit = 'sale.order'
 
     # ------------------------------------------------------------------
+    # INIT: widen "Personal Orders" + "Personal Order Lines" record rules
+    # so a salesperson with "Own Documents Only" access can also see SOs
+    # (and their lines) where they are the Second Salesperson.
+    # The originals ship with noupdate=1, so we patch them in place here.
+    # ------------------------------------------------------------------
+    def init(self):
+        if 'second_user_id' not in self._fields:
+            return
+        # 1) sale.order
+        try:
+            rule = self.env.ref('sale.sale_order_personal_rule', raise_if_not_found=False)
+            if rule:
+                new_domain = (
+                    "['|', '|', ('user_id', '=', user.id), "
+                    "('user_id', '=', False), "
+                    "('second_user_id', '=', user.id)]"
+                )
+                if rule.domain_force != new_domain:
+                    rule.sudo().write({
+                        'domain_force': new_domain,
+                        'name': 'Personal Orders (incl. Second Salesperson)',
+                    })
+                    _logger.info(
+                        "[INIT] Patched sale.sale_order_personal_rule to "
+                        "include second_user_id."
+                    )
+        except Exception as e:
+            _logger.warning("[INIT] Could not patch Personal Orders rule: %s", e)
+
+        # 2) sale.order.line — line-level visibility must mirror the parent
+        # SO rule, otherwise opening the SO triggers an Access Error on the
+        # line cache. salesman_id is related to order_id.user_id, so we
+        # match on order_id.user_id / order_id.second_user_id directly.
+        try:
+            line_rule = self.env.ref(
+                'sale.sale_order_line_personal_rule', raise_if_not_found=False
+            )
+            if line_rule:
+                new_line_domain = (
+                    "['|', '|', ('salesman_id', '=', user.id), "
+                    "('salesman_id', '=', False), "
+                    "('order_id.second_user_id', '=', user.id)]"
+                )
+                if line_rule.domain_force != new_line_domain:
+                    line_rule.sudo().write({
+                        'domain_force': new_line_domain,
+                        'name': 'Personal Order Lines (incl. Second Salesperson)',
+                    })
+                    _logger.info(
+                        "[INIT] Patched sale.sale_order_line_personal_rule "
+                        "to include second_user_id."
+                    )
+        except Exception as e:
+            _logger.warning(
+                "[INIT] Could not patch Personal Order Lines rule: %s", e
+            )
+
+    # ------------------------------------------------------------------
     # WhatsApp: Share quotation with client
     # ------------------------------------------------------------------
 

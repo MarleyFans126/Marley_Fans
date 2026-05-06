@@ -121,12 +121,13 @@
                                 </t>
                             </td>
                             <td style="border: 1px solid #f5a9ac; padding: 8px 10px; font-size: 13px;">
-                                <t t-esc="doc.user_id.name or ''"/>
+                                <t t-set="rep" t-value="doc.purchase_representative_id or doc.user_id"/>
+                                <t t-esc="rep.name or ''"/>
                             </td>
                             <td style="border: 1px solid #f5a9ac; padding: 8px 10px; font-size: 13px;">
-                                <t t-set="rep_phone" t-value="(doc.user_id.phone or doc.user_id.partner_id.phone or '') if doc.user_id else ''"/>
+                                <t t-set="rep_phone" t-value="(rep.phone or rep.partner_id.phone or '') if rep else ''"/>
                                 <t t-if="rep_phone"><t t-esc="rep_phone"/><br/></t>
-                                <t t-if="doc.user_id.email"><t t-esc="doc.user_id.email"/></t>
+                                <t t-if="rep and rep.email"><t t-esc="rep.email"/></t>
                             </td>
                         </tr>
                     </table>
@@ -181,10 +182,43 @@
                                     </td>
                                 </tr>
                             </t>
+<<<<<<< HEAD
                             <!-- ===== TOTALS rows ===== -->
                             <t t-foreach="tax_totals.get('subtotals', [])" t-as="subtotal">
                                 <tr style="page-break-inside: avoid;">
                                     <td colspan="3" style="border: none; background: transparent;"/>
+=======
+                        </tbody>
+                    </table>
+
+                    <!-- ===== TOTALS =====
+                         Use the SAME column widths as the product table above
+                         (42% / 13% / 15% / 14% / 16%) so the boxes line up
+                         vertically. The first 3 columns are empty spacers; the
+                         label sits in the TAXES column and the value in AMOUNT. -->
+                    <t t-set="tax_totals" t-value="doc.tax_totals"/>
+                    <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+                        <colgroup>
+                            <col style="width: 42%;"/>
+                            <col style="width: 13%;"/>
+                            <col style="width: 15%;"/>
+                            <col style="width: 14%;"/>
+                            <col style="width: 16%;"/>
+                        </colgroup>
+                        <t t-foreach="tax_totals.get('subtotals', [])" t-as="subtotal">
+                            <tr>
+                                <td colspan="3" style="border: none;"/>
+                                <td style="padding: 8px 12px; text-align: right; font-size: 13px; border: 1px solid #f5a9ac;">
+                                    <t t-esc="subtotal.get('name', 'Untaxed Amount')"/>
+                                </td>
+                                <td style="padding: 8px 12px; text-align: right; font-size: 13px; font-weight: bold; border: 1px solid #f5a9ac;">
+                                    &#8377; <t t-esc="'{:,.2f}'.format(subtotal.get('base_amount_currency', 0))"/>
+                                </td>
+                            </tr>
+                            <t t-foreach="subtotal.get('tax_groups', [])" t-as="tax_group">
+                                <tr>
+                                    <td colspan="3" style="border: none;"/>
+>>>>>>> 31b8d54e3301afe43232c05d0686c24017eccd5a
                                     <td style="padding: 8px 12px; text-align: right; font-size: 13px; border: 1px solid #f5a9ac;">
                                         <t t-esc="subtotal.get('name', 'Untaxed Amount')"/>
                                     </td>
@@ -204,6 +238,7 @@
                                     </tr>
                                 </t>
                             </t>
+<<<<<<< HEAD
                             <tr style="page-break-inside: avoid;">
                                 <td colspan="3" style="border: none; background: transparent;"/>
                                 <td style="padding: 10px 12px; text-align: right; font-size: 14px; font-weight: bold; border: 2px solid #f5a9ac; background-color: #f0f0f0;">Total</td>
@@ -212,32 +247,57 @@
                                 </td>
                             </tr>
                         </tbody>
+=======
+                        </t>
+                        <tr style="background-color: #f0f0f0;">
+                            <td colspan="3" style="border: none;"/>
+                            <td style="padding: 10px 12px; text-align: right; font-size: 14px; font-weight: bold; border: 2px solid #f5a9ac;">Total</td>
+                            <td style="padding: 10px 12px; text-align: right; font-size: 14px; font-weight: bold; border: 2px solid #f5a9ac;">
+                                &#8377; <t t-esc="'{:,.2f}'.format(tax_totals.get('total_amount_currency', doc.amount_total))"/>
+                            </td>
+                        </tr>
+>>>>>>> 31b8d54e3301afe43232c05d0686c24017eccd5a
                     </table>
 
-                    <!-- ===== TAXES &amp; DUTIES ===== -->
+                    <!-- ===== TAXES &amp; DUTIES (editable per PO) ===== -->
                     <div style="margin-bottom: 14px;">
                         <div class="section-heading">TAXES &amp; DUTIES:</div>
-                        <p class="section-text">GST shall be applicable on above quoted price. Any change in tax structure or any statutory levies introduced by the appropriate Government at the time of shipment will be borne as per actual.</p>
+                        <t t-if="doc.marley_taxes_text">
+                            <div class="section-text"><t t-out="doc.marley_taxes_text"/></div>
+                        </t>
+                        <t t-else="">
+                            <p class="section-text">GST shall be applicable on above quoted price. Any change in tax structure or any statutory levies introduced by the appropriate Government at the time of shipment will be borne as per actual.</p>
+                        </t>
                     </div>
 
-                    <!-- ===== PAYMENT TERMS ===== -->
+                    <!-- ===== PAYMENT TERMS (editable per PO) ===== -->
                     <div style="margin-bottom: 14px;">
                         <div class="section-heading">PAYMENT TERMS:</div>
-                        <p class="section-text">
-                            <t t-if="doc.payment_term_id"><t t-esc="doc.payment_term_id.name"/></t>
-                            <t t-else="">As per agreed terms.</t>
-                        </p>
+                        <t t-if="doc.marley_payment_text">
+                            <div class="section-text"><t t-out="doc.marley_payment_text"/></div>
+                        </t>
+                        <t t-elif="doc.payment_term_id">
+                            <p class="section-text"><t t-esc="doc.payment_term_id.name"/></p>
+                        </t>
+                        <t t-else="">
+                            <p class="section-text">As per agreed terms.</p>
+                        </t>
                     </div>
 
-                    <!-- ===== DELIVERY TERMS ===== -->
+                    <!-- ===== DELIVERY TERMS (editable per PO) ===== -->
                     <div style="margin-bottom: 14px;">
                         <div class="section-heading">DELIVERY TERMS:</div>
-                        <p class="section-text">
-                            <t t-if="doc.incoterm_id"><strong>Incoterm:</strong> <t t-esc="doc.incoterm_id.name"/><br/></t>
-                            <t t-if="doc.date_planned"><strong>Expected Arrival:</strong>
-                                <t t-esc="doc.date_planned" t-options='{"widget": "date", "format": "dd-MMM-yyyy"}'/>
-                            </t>
-                        </p>
+                        <t t-if="doc.marley_delivery_text">
+                            <div class="section-text"><t t-out="doc.marley_delivery_text"/></div>
+                        </t>
+                        <t t-else="">
+                            <p class="section-text">
+                                <t t-if="doc.incoterm_id"><strong>Incoterm:</strong> <t t-esc="doc.incoterm_id.name"/><br/></t>
+                                <t t-if="doc.date_planned"><strong>Expected Arrival:</strong>
+                                    <t t-esc="doc.date_planned" t-options='{"widget": "date", "format": "dd-MMM-yyyy"}'/>
+                                </t>
+                            </p>
+                        </t>
                     </div>
 
                     <!-- ===== TERMS &amp; CONDITIONS / NOTES ===== -->
