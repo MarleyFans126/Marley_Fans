@@ -1,10 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
 
-        <!-- Main Report -->
+        <!-- Main Report — Purchase Order. Forces PO title even when the
+             record is still draft/sent (so the user sees the PO layout
+             when they explicitly pick "Marley Purchase Order"). -->
         <template id="report_marley_purchase_order">
             <t t-call="web.html_container">
                 <t t-foreach="docs" t-as="doc">
+                    <t t-set="_pdf_mode" t-value="'po'"/>
+                    <t t-call="marley_purchase_reports.report_marley_purchase_order_document" t-lang="doc.partner_id.lang"/>
+                </t>
+            </t>
+        </template>
+
+        <!-- Main Report — Request for Quotation. Forces RFQ title even
+             after the order is confirmed (so the user can re-print the
+             original RFQ flavor). -->
+        <template id="report_marley_rfq">
+            <t t-call="web.html_container">
+                <t t-foreach="docs" t-as="doc">
+                    <t t-set="_pdf_mode" t-value="'rfq'"/>
                     <t t-call="marley_purchase_reports.report_marley_purchase_order_document" t-lang="doc.partner_id.lang"/>
                 </t>
             </t>
@@ -63,18 +78,25 @@
                 <!-- ============ BODY CONTENT ============ -->
                 <div class="marley-q-body">
 
-                    <!-- ===== CENTERED TITLE ===== -->
+                    <!-- ===== CENTERED TITLE — switches between RFQ and PO =====
+                         _pdf_mode is set by the wrapper template:
+                           - 'rfq' → Request for Quotation
+                           - 'po'  → Purchase Order
+                         Falls back to record state when unset. -->
+                    <t t-set="_is_rfq" t-value="(_pdf_mode == 'rfq') if _pdf_mode else (doc.state in ('draft', 'sent'))"/>
                     <div style="text-align: center; margin: 4px 0 14px 0;">
                         <span style="font-size: 20px; font-weight: bold; color: #e30613; text-decoration: underline; letter-spacing: 2px;">
-                            PURCHASE ORDER
+                            <t t-if="_is_rfq">REQUEST FOR QUOTATION</t>
+                            <t t-else="">PURCHASE ORDER</t>
                         </span>
                     </div>
 
-                    <!-- ===== KIND ATTENTION + PO # ===== -->
+                    <!-- ===== KIND ATTENTION + RFQ/PO # ===== -->
                     <div style="margin-bottom: 8px; font-size: 15px;">
                         <strong>Kind Attention:</strong>
                         <span style="float: right; font-weight: bold; text-align: right;">
-                            P.O. #
+                            <t t-if="_is_rfq">RFQ #</t>
+                            <t t-else="">P.O. #</t>
                             <t t-if="doc.financial_year_label"><t t-esc="doc.financial_year_label"/>/</t>
                             <t t-esc="doc.name"/>
                             <t t-if="doc.partner_ref">
@@ -182,43 +204,10 @@
                                     </td>
                                 </tr>
                             </t>
-<<<<<<< HEAD
                             <!-- ===== TOTALS rows ===== -->
                             <t t-foreach="tax_totals.get('subtotals', [])" t-as="subtotal">
                                 <tr style="page-break-inside: avoid;">
                                     <td colspan="3" style="border: none; background: transparent;"/>
-=======
-                        </tbody>
-                    </table>
-
-                    <!-- ===== TOTALS =====
-                         Use the SAME column widths as the product table above
-                         (42% / 13% / 15% / 14% / 16%) so the boxes line up
-                         vertically. The first 3 columns are empty spacers; the
-                         label sits in the TAXES column and the value in AMOUNT. -->
-                    <t t-set="tax_totals" t-value="doc.tax_totals"/>
-                    <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
-                        <colgroup>
-                            <col style="width: 42%;"/>
-                            <col style="width: 13%;"/>
-                            <col style="width: 15%;"/>
-                            <col style="width: 14%;"/>
-                            <col style="width: 16%;"/>
-                        </colgroup>
-                        <t t-foreach="tax_totals.get('subtotals', [])" t-as="subtotal">
-                            <tr>
-                                <td colspan="3" style="border: none;"/>
-                                <td style="padding: 8px 12px; text-align: right; font-size: 13px; border: 1px solid #f5a9ac;">
-                                    <t t-esc="subtotal.get('name', 'Untaxed Amount')"/>
-                                </td>
-                                <td style="padding: 8px 12px; text-align: right; font-size: 13px; font-weight: bold; border: 1px solid #f5a9ac;">
-                                    &#8377; <t t-esc="'{:,.2f}'.format(subtotal.get('base_amount_currency', 0))"/>
-                                </td>
-                            </tr>
-                            <t t-foreach="subtotal.get('tax_groups', [])" t-as="tax_group">
-                                <tr>
-                                    <td colspan="3" style="border: none;"/>
->>>>>>> 31b8d54e3301afe43232c05d0686c24017eccd5a
                                     <td style="padding: 8px 12px; text-align: right; font-size: 13px; border: 1px solid #f5a9ac;">
                                         <t t-esc="subtotal.get('name', 'Untaxed Amount')"/>
                                     </td>
@@ -238,7 +227,6 @@
                                     </tr>
                                 </t>
                             </t>
-<<<<<<< HEAD
                             <tr style="page-break-inside: avoid;">
                                 <td colspan="3" style="border: none; background: transparent;"/>
                                 <td style="padding: 10px 12px; text-align: right; font-size: 14px; font-weight: bold; border: 2px solid #f5a9ac; background-color: #f0f0f0;">Total</td>
@@ -247,16 +235,6 @@
                                 </td>
                             </tr>
                         </tbody>
-=======
-                        </t>
-                        <tr style="background-color: #f0f0f0;">
-                            <td colspan="3" style="border: none;"/>
-                            <td style="padding: 10px 12px; text-align: right; font-size: 14px; font-weight: bold; border: 2px solid #f5a9ac;">Total</td>
-                            <td style="padding: 10px 12px; text-align: right; font-size: 14px; font-weight: bold; border: 2px solid #f5a9ac;">
-                                &#8377; <t t-esc="'{:,.2f}'.format(tax_totals.get('total_amount_currency', doc.amount_total))"/>
-                            </td>
-                        </tr>
->>>>>>> 31b8d54e3301afe43232c05d0686c24017eccd5a
                     </table>
 
                     <!-- ===== TAXES &amp; DUTIES (editable per PO) ===== -->

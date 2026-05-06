@@ -16,6 +16,19 @@
                        invisible="not financial_year_label"/><span invisible="not financial_year_label">/</span>
             </xpath>
 
+            <!-- Header Print buttons:
+                 - When the order is still draft/sent the "Print" button
+                   should print the Marley Request for Quotation.
+                 - When confirmed, "Print" prints the Marley Purchase Order. -->
+            <xpath expr="//header//button[@name='print_quotation']" position="attributes">
+                <attribute name="name">%(marley_purchase_reports.action_report_marley_rfq)d</attribute>
+                <attribute name="type">action</attribute>
+            </xpath>
+            <xpath expr="//header//button[@name='%(purchase.action_report_purchase_order)d']"
+                   position="attributes">
+                <attribute name="name">%(marley_purchase_reports.action_report_marley_purchase_order)d</attribute>
+            </xpath>
+
             <!-- Purchase Representative (shown on the printed PO) -->
             <xpath expr="//field[@name='user_id']" position="after">
                 <field name="purchase_representative_id"
