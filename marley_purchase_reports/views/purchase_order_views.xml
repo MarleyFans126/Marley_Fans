@@ -16,6 +16,32 @@
                        invisible="not financial_year_label"/><span invisible="not financial_year_label">/</span>
             </xpath>
 
+            <!-- Purchase Representative (shown on the printed PO) -->
+            <xpath expr="//field[@name='user_id']" position="after">
+                <field name="purchase_representative_id"
+                       options="{'no_create': True, 'no_quick_create': True}"/>
+            </xpath>
+
+            <!-- Editable PDF sections — "Print Settings" tab -->
+            <xpath expr="//notebook" position="inside">
+                <page string="PO Print" name="marley_po_print">
+                    <group>
+                        <group string="Taxes &amp; Duties">
+                            <field name="marley_taxes_text" nolabel="1"/>
+                        </group>
+                        <group string="Payment Terms">
+                            <field name="marley_payment_text" nolabel="1"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Delivery Terms">
+                            <field name="marley_delivery_text" nolabel="1"
+                                   placeholder="Leave blank to use Incoterm + Expected Arrival"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+
         </field>
     </record>
 
