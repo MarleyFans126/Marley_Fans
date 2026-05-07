@@ -24,20 +24,20 @@
                 <!-- ============ RUNNING FOOTER (repeats on every page) ============ -->
                 <div class="footer" style="margin: 0; padding: 0; font-family: Arial, sans-serif;">
                     <div style="border-top: 3px solid #e30613; padding-top: 8px;">
-                        <table style="width: 100%; border-collapse: collapse; font-size: 9px; color: #333; border: none; letter-spacing: 0.2px; table-layout: fixed;">
+                        <table style="width: 100%; border-collapse: collapse; font-size: 9px; color: #333; border: none; letter-spacing: 0.2px; table-layout: fixed; table-layout: fixed;">
                             <tr>
-                                <td style="width: 28%; vertical-align: top; border: none; padding: 0 14px 0 0; overflow: hidden;">
+                                <td style="width: 28%; vertical-align: top; border: none; padding: 0 8px 0 0; overflow: hidden; word-break: keep-all;">
                                     <strong style="color: #e30613;">Website:</strong> www.marleyfans.in
                                 </td>
-                                <td style="width: 40%; vertical-align: top; border: none; padding: 0 14px; text-align: center; overflow: hidden;">
+                                <td style="width: 40%; vertical-align: top; border: none; padding: 0 8px; text-align: center; overflow: hidden;">
                                     <strong style="color: #e30613;">CIN:</strong> U29308TG2021PTC156778
                                 </td>
-                                <td style="width: 32%; vertical-align: top; border: none; padding: 0 0 0 14px; text-align: right; overflow: hidden;">
+                                <td style="width: 32%; vertical-align: top; border: none; padding: 0 0 0 8px; text-align: right; overflow: hidden;">
                                     <strong style="color: #e30613;">GSTIN:</strong> 36AAPCM1629P1ZS
                                 </td>
                             </tr>
                             <tr>
-                                <td colspan="3" style="padding: 4px 4px 0 0; font-size: 9px; border: none; white-space: nowrap;">
+                                <td colspan="3" style="padding: 4px 0 0 0; font-size: 9px; border: none;">
                                     <strong style="color: #e30613;">Corporate Address:</strong> Second Floor, Swapna Nilayam, H.NO.5-5-81/7/A, Plot No.20, High Tension Rd, Prakash Nagar, Kukatpally, Hyderabad, Telangana 500072, India
                                 </td>
                             </tr>
