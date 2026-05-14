@@ -72,9 +72,11 @@
         <field name="code">action = model.action_fetch_aajjo_leads()</field>
     </record>
 
+    <!-- "Fetch AAJJO Leads" moved from the top-bar (crm_menu_root) into
+         the Configuration submenu, right below AAJJO API Logs. -->
     <menuitem id="menu_crm_lead_fetch_aajjo"
               name="Fetch AAJJO Leads"
-              parent="crm.crm_menu_root"
+              parent="crm.crm_menu_config"
               action="action_crm_lead_fetch_aajjo"
-              sequence="20"/>
+              sequence="60"/>
 </odoo>
