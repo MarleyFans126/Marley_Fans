@@ -468,26 +468,53 @@ class CrmLead(models.Model):
                     except Exception as e:
                         _logger.warning("Failed to generate SO PDF for %s: %s", so.name, e)
 
-            # Send via message_post_with_source — appears in chatter
+            # Render the template body and subject manually, then send via
+            # a plain mail.mail so the customer receives EXACTLY the
+            # template body — no Odoo "Your Lead <name>" header, no logo
+            # wrapping, no chatter signature. The chatter still gets a
+            # log entry so the salesperson can see what was sent.
             try:
-                # Collect template attachments + extra attachments
                 all_attachment_ids = list(tmpl.attachment_ids.ids) + extra_attachment_ids
 
-                record.message_post_with_source(
-                    source_ref=tmpl,
-                    subtype_xmlid='mail.mt_comment',
-                    email_layout_xmlid='mail.mail_notification_light',
-                    attachment_ids=all_attachment_ids if all_attachment_ids else None,
+                rendered = tmpl._generate_template(
+                    record.ids,
+                    ('subject', 'body_html', 'email_to', 'email_from',
+                     'reply_to'),
+                )[record.id]
+
+                mail_vals = {
+                    'subject':   rendered.get('subject') or tmpl.subject or '',
+                    'body_html': rendered.get('body_html') or '',
+                    'email_from': rendered.get('email_from') or tmpl.email_from
+                                  or self.env.company.email,
+                    'email_to':  rendered.get('email_to') or record.email_from,
+                    'reply_to':  rendered.get('reply_to') or tmpl.reply_to,
+                    'auto_delete': False,
+                    'model':     'crm.lead',
+                    'res_id':    record.id,
+                }
+                mail = self.env['mail.mail'].sudo().create(mail_vals)
+                if all_attachment_ids:
+                    mail.write({
+                        'attachment_ids':
+                            [(4, aid) for aid in all_attachment_ids]
+                    })
+                mail.send()
+
+                # Log a note in the chatter so the team can see the email
+                # was sent (no recipients, just an internal record).
+                record.message_post(
+                    body=("Stage email <i>%s</i> sent to "
+                          "<b>%s</b>." % (template_name,
+                                          rendered.get('email_to'))),
+                    subtype_xmlid='mail.mt_note',
                 )
-            except AttributeError:
-                # Fallback for older API: use send_mail with force_send
-                _logger.info("message_post_with_source not available, using send_mail fallback.")
-                mail_id = tmpl.send_mail(record.id, force_send=True)
-                if mail_id and extra_attachment_ids:
-                    mail = self.env['mail.mail'].browse(mail_id)
-                    if mail.exists():
-                        mail.write({'attachment_ids': [(4, aid) for aid in extra_attachment_ids]})
-                        mail.send()
+            except Exception as e:
+                _logger.warning(
+                    "Failed to send stage email '%s' for Lead %d: %s",
+                    template_name, record.id, e,
+                )
+                continue
 
             record.write({flag_field: True})
             _logger.info(
