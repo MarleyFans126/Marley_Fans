@@ -503,25 +503,32 @@ class CrmLead(models.Model):
                     'model':      'crm.lead',
                     'res_id':     record.id,
                 }
-                mail = self.env['mail.mail'].sudo().create(mail_vals)
-                if all_attachment_ids:
-                    mail.write({
-                        'attachment_ids':
-                            [(4, aid) for aid in all_attachment_ids]
-                    })
-                mail.send()
-
-                # 2) Mirror the body into the chatter as a normal message
-                #    (mt_comment so it shows up in the "Send message" tab).
-                #    No partner_ids → message_post won't try to send
-                #    another email, avoiding duplicates.
-                record.message_post(
+                # 1) Post to chatter FIRST so it shows immediately,
+                #    using mt_comment to land in the "Send message" tab.
+                #    No partner_ids → message_post does not generate a
+                #    separate email of its own.
+                chatter_msg = record.message_post(
                     subject=subject_v,
                     body=body_v,
                     subtype_xmlid='mail.mt_comment',
                     attachment_ids=all_attachment_ids or None,
                     message_type='comment',
                 )
+
+                # 2) Create mail.mail linked to the same chatter message
+                #    (mail_message_id) so mail.send() does NOT auto-create
+                #    a duplicate chatter entry — attachments appear once.
+                #    DO NOT call .send() inline: SMTP with ~5 MB of PDFs
+                #    blocks the web request for ~50 s and freezes the
+                #    lead-save UI. The "Mail: Email Queue Manager" cron
+                #    (every 60 s) flushes the queue asynchronously.
+                mail_vals['mail_message_id'] = chatter_msg.id
+                mail = self.env['mail.mail'].sudo().create(mail_vals)
+                if all_attachment_ids:
+                    mail.write({
+                        'attachment_ids':
+                            [(4, aid) for aid in all_attachment_ids]
+                    })
             except Exception as e:
                 _logger.warning(
                     "Failed to send stage email '%s' for Lead %d: %s",

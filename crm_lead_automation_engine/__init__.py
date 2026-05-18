@@ -14,7 +14,12 @@ def _post_init_update_acknowledgment_template(env):
 
 
 def _attach_pdfs_to_new_template(env):
-    """Attach brochure and client-list PDFs to the 'New stage mail' template."""
+    """Attach brochure and client-list PDFs to the 'New stage mail' template only.
+
+    Per product decision: brochure + client list go out only with the first
+    (New stage) introduction email — later stage emails (Qualify, Proposition,
+    Won) do not include these PDFs.
+    """
     template = env.ref(
         'crm_lead_automation_engine.email_template_new_stage',
         raise_if_not_found=False,
