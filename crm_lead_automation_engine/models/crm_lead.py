@@ -468,11 +468,13 @@ class CrmLead(models.Model):
                     except Exception as e:
                         _logger.warning("Failed to generate SO PDF for %s: %s", so.name, e)
 
-            # Render the template body and subject manually, then send via
-            # a plain mail.mail so the customer receives EXACTLY the
-            # template body — no Odoo "Your Lead <name>" header, no logo
-            # wrapping, no chatter signature. The chatter still gets a
-            # log entry so the salesperson can see what was sent.
+            # Two-step send so the customer gets a plain email AND the
+            # chatter shows the full body:
+            #   1. Render the template (subject, body, recipients).
+            #   2. Send a raw mail.mail to the customer (no Odoo
+            #      "Your Lead <name>" wrapper, no logo header).
+            #   3. Post the same body to the lead chatter as a comment
+            #      so the team can see exactly what went out.
             try:
                 all_attachment_ids = list(tmpl.attachment_ids.ids) + extra_attachment_ids
 
@@ -482,16 +484,24 @@ class CrmLead(models.Model):
                      'reply_to'),
                 )[record.id]
 
+                subject_v   = rendered.get('subject') or tmpl.subject or ''
+                body_v      = rendered.get('body_html') or ''
+                email_from_v = (rendered.get('email_from') or
+                                tmpl.email_from or self.env.company.email)
+                email_to_v  = (rendered.get('email_to') or
+                               record.email_from)
+                reply_to_v  = rendered.get('reply_to') or tmpl.reply_to
+
+                # 1) Plain mail to the customer (no email_layout wrapper)
                 mail_vals = {
-                    'subject':   rendered.get('subject') or tmpl.subject or '',
-                    'body_html': rendered.get('body_html') or '',
-                    'email_from': rendered.get('email_from') or tmpl.email_from
-                                  or self.env.company.email,
-                    'email_to':  rendered.get('email_to') or record.email_from,
-                    'reply_to':  rendered.get('reply_to') or tmpl.reply_to,
+                    'subject':    subject_v,
+                    'body_html':  body_v,
+                    'email_from': email_from_v,
+                    'email_to':   email_to_v,
+                    'reply_to':   reply_to_v,
                     'auto_delete': False,
-                    'model':     'crm.lead',
-                    'res_id':    record.id,
+                    'model':      'crm.lead',
+                    'res_id':     record.id,
                 }
                 mail = self.env['mail.mail'].sudo().create(mail_vals)
                 if all_attachment_ids:
@@ -501,13 +511,16 @@ class CrmLead(models.Model):
                     })
                 mail.send()
 
-                # Log a note in the chatter so the team can see the email
-                # was sent (no recipients, just an internal record).
+                # 2) Mirror the body into the chatter as a normal message
+                #    (mt_comment so it shows up in the "Send message" tab).
+                #    No partner_ids → message_post won't try to send
+                #    another email, avoiding duplicates.
                 record.message_post(
-                    body=("Stage email <i>%s</i> sent to "
-                          "<b>%s</b>." % (template_name,
-                                          rendered.get('email_to'))),
-                    subtype_xmlid='mail.mt_note',
+                    subject=subject_v,
+                    body=body_v,
+                    subtype_xmlid='mail.mt_comment',
+                    attachment_ids=all_attachment_ids or None,
+                    message_type='comment',
                 )
             except Exception as e:
                 _logger.warning(
