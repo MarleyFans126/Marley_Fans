@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+        Seed drafts shipped with the module. `noupdate="1"` so admin
+        edits in production survive module upgrades.
+
+        Bodies are HTML so the WYSIWYG editor in the template form and
+        on the sale order's Terms tab renders them with formatting
+        (bold headings, underline, bullet lists). Warranty is omitted
+        intentionally — it's auto-fetched from products and rendered
+        as its own section in the PDF.
+    -->
+    <data noupdate="1">
+
+        <record id="terms_template_standard" model="sale.terms.template">
+            <field name="name">Standard — Marley Default</field>
+            <field name="sequence">10</field>
+            <field name="body"><![CDATA[
+<p><strong><u>DELIVERY TERMS</u></strong><br/>
+1-2 Weeks from the date of receipt of your technically and commercially clear purchase order.</p>
+
+<p><strong><u>OFFER VALIDITY</u></strong><br/>
+30 days from the date of this quotation.</p>
+
+<p><strong><u>PAYMENT TERMS</u></strong></p>
+<ul>
+    <li>Supply: 100% Advance with Purchase Order.</li>
+    <li>Installation: 100% immediately after Installation.</li>
+</ul>
+
+<p><strong><u>BANK DETAILS</u></strong></p>
+<ul>
+    <li>Bank Name: HDFC Bank</li>
+    <li>Account Number: 50200092737354</li>
+    <li>Account Type: Current Account</li>
+    <li>IFSC Code: HDFC0000364</li>
+    <li>Branch: Kukatpally, Hyderabad</li>
+</ul>
+
+<p><strong><u>CUSTOMER SCOPE</u></strong><br/>
+Facilities and responsibilities to be provided by the customer at site (power, scaffolding, safe working area, etc.).</p>
+]]></field>
+        </record>
+
+        <record id="terms_template_express" model="sale.terms.template">
+            <field name="name">Express — Faster Delivery</field>
+            <field name="sequence">20</field>
+            <field name="body"><![CDATA[
+<p><strong><u>DELIVERY TERMS</u></strong><br/>
+3-5 working days from the date of receipt of your technically and commercially clear purchase order. <em>Express delivery surcharge applies.</em></p>
+
+<p><strong><u>OFFER VALIDITY</u></strong><br/>
+15 days from the date of this quotation.</p>
+
+<p><strong><u>PAYMENT TERMS</u></strong></p>
+<ul>
+    <li>Supply: 100% Advance with Purchase Order.</li>
+    <li>Installation: 100% immediately after Installation.</li>
+</ul>
+
+<p><strong><u>BANK DETAILS</u></strong></p>
+<ul>
+    <li>Bank Name: HDFC Bank</li>
+    <li>Account Number: 50200092737354</li>
+    <li>Account Type: Current Account</li>
+    <li>IFSC Code: HDFC0000364</li>
+    <li>Branch: Kukatpally, Hyderabad</li>
+</ul>
+
+<p><strong><u>CUSTOMER SCOPE</u></strong><br/>
+Facilities and responsibilities to be provided by the customer at site (power, scaffolding, safe working area, etc.).</p>
+]]></field>
+        </record>
+
+        <record id="terms_template_oem" model="sale.terms.template">
+            <field name="name">OEM — Repeat Customer</field>
+            <field name="sequence">30</field>
+            <field name="body"><![CDATA[
+<p><strong><u>DELIVERY TERMS</u></strong><br/>
+1-2 Weeks from the date of receipt of your technically and commercially clear purchase order.</p>
+
+<p><strong><u>OFFER VALIDITY</u></strong><br/>
+45 days from the date of this quotation.</p>
+
+<p><strong><u>PAYMENT TERMS</u></strong></p>
+<ul>
+    <li>Supply: 50% Advance with Purchase Order; balance 50% against pro-forma at the time of dispatch.</li>
+    <li>Installation: 100% immediately after Installation.</li>
+</ul>
+
+<p><strong><u>BANK DETAILS</u></strong></p>
+<ul>
+    <li>Bank Name: HDFC Bank</li>
+    <li>Account Number: 50200092737354</li>
+    <li>Account Type: Current Account</li>
+    <li>IFSC Code: HDFC0000364</li>
+    <li>Branch: Kukatpally, Hyderabad</li>
+</ul>
+
+<p><strong><u>CUSTOMER SCOPE</u></strong><br/>
+Facilities and responsibilities to be provided by the customer at site (power, scaffolding, safe working area, etc.).</p>
+]]></field>
+        </record>
+
+    </data>
+</odoo>

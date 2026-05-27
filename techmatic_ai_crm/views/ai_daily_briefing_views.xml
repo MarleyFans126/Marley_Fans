@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="ai_daily_briefing_view_tree" model="ir.ui.view">
+        <field name="name">techmatic.ai.daily.briefing.list</field>
+        <field name="model">techmatic.ai.daily.briefing</field>
+        <field name="arch" type="xml">
+            <list string="My AI Briefings"
+                  decoration-success="state == 'generated'"
+                  decoration-danger="state == 'failed'"
+                  decoration-muted="state == 'draft'">
+                <field name="briefing_date"/>
+                <field name="title"/>
+                <field name="user_id"/>
+                <field name="lead_count"/>
+                <field name="state" widget="badge"/>
+                <field name="generated_at"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="ai_daily_briefing_view_form" model="ir.ui.view">
+        <field name="name">techmatic.ai.daily.briefing.form</field>
+        <field name="model">techmatic.ai.daily.briefing</field>
+        <field name="arch" type="xml">
+            <form string="AI Briefing">
+                <header>
+                    <button name="action_regenerate"
+                            string="Regenerate"
+                            type="object"
+                            class="btn-primary"
+                            icon="fa-refresh"
+                            invisible="state == 'draft'"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,generated"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="title" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="user_id" readonly="1"/>
+                            <field name="briefing_date" readonly="1"/>
+                            <field name="lead_count" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="generated_at" readonly="1"/>
+                            <field name="error_message" readonly="1"
+                                   invisible="state != 'failed'"/>
+                        </group>
+                    </group>
+                    <group string="Briefing">
+                        <field name="body_html" nolabel="1" readonly="1"/>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- Default action: my briefings only -->
+    <record id="action_ai_daily_briefing_mine" model="ir.actions.act_window">
+        <field name="name">My AI Briefings</field>
+        <field name="res_model">techmatic.ai.daily.briefing</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('user_id', '=', uid)]</field>
+        <field name="context">{'search_default_my_briefings': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No briefings yet</p>
+            <p>
+                Click <b>Generate My Briefing Now</b> below to create
+                your first AI-powered morning briefing. The daily cron
+                will produce one every morning automatically (once
+                enabled by an administrator).
+            </p>
+        </field>
+    </record>
+
+    <!-- Admin view: all briefings across users -->
+    <record id="action_ai_daily_briefing_all" model="ir.actions.act_window">
+        <field name="name">All AI Briefings</field>
+        <field name="res_model">techmatic.ai.daily.briefing</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- One-shot menu action: generate-and-open today's briefing -->
+    <record id="action_generate_my_briefing_now" model="ir.actions.server">
+        <field name="name">Generate My Briefing Now</field>
+        <field name="model_id" ref="model_techmatic_ai_daily_briefing"/>
+        <field name="state">code</field>
+        <field name="code">
+action = model.action_generate_my_briefing()
+        </field>
+    </record>
+
+</odoo>

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="ai_auto_followup_log_view_tree" model="ir.ui.view">
+        <field name="name">techmatic.ai.auto.followup.log.list</field>
+        <field name="model">techmatic.ai.auto.followup.log</field>
+        <field name="arch" type="xml">
+            <list string="Auto Follow-Up Log"
+                  decoration-success="success == True"
+                  decoration-danger="success == False"
+                  create="false">
+                <field name="sent_at"/>
+                <field name="lead_id"/>
+                <field name="user_id"/>
+                <field name="email_to"/>
+                <field name="subject"/>
+                <field name="score_at_send"/>
+                <field name="days_inactive_at_send"/>
+                <field name="success" widget="boolean_toggle" readonly="1"/>
+                <field name="error_message" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="ai_auto_followup_log_view_form" model="ir.ui.view">
+        <field name="name">techmatic.ai.auto.followup.log.form</field>
+        <field name="model">techmatic.ai.auto.followup.log</field>
+        <field name="arch" type="xml">
+            <form string="Auto Follow-Up" create="false" edit="false">
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="subject" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="lead_id"/>
+                            <field name="user_id"/>
+                            <field name="partner_id"/>
+                            <field name="email_to"/>
+                        </group>
+                        <group>
+                            <field name="sent_at"/>
+                            <field name="success" widget="boolean_toggle"/>
+                            <field name="score_at_send"/>
+                            <field name="days_inactive_at_send"/>
+                        </group>
+                    </group>
+                    <group invisible="success == True">
+                        <field name="error_message"/>
+                    </group>
+                    <group string="Email Body">
+                        <field name="body_html" nolabel="1" readonly="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_ai_auto_followup_log" model="ir.actions.act_window">
+        <field name="name">Auto Follow-Up Log</field>
+        <field name="res_model">techmatic.ai.auto.followup.log</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No auto follow-ups yet</p>
+            <p>
+                Every email sent by the auto-followup cron lands here.
+                Successful sends are <b>green</b>, failures <b>red</b>.
+                Filter by salesperson, date, or success state to debug
+                or audit what the bot has done on behalf of your team.
+            </p>
+        </field>
+    </record>
+
+</odoo>

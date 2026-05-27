@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <!--
+        Defaults. We do NOT seed an API key here — admins enter that
+        in the settings UI. ``noupdate="1"`` ensures admins can change
+        these without later upgrades clobbering them.
+    -->
+    <record id="param_provider" model="ir.config_parameter">
+        <field name="key">techmatic_ai_crm.provider</field>
+        <field name="value">openai</field>
+    </record>
+    <record id="param_model" model="ir.config_parameter">
+        <field name="key">techmatic_ai_crm.model</field>
+        <field name="value">gpt-4o-mini</field>
+    </record>
+    <record id="param_temperature" model="ir.config_parameter">
+        <field name="key">techmatic_ai_crm.temperature</field>
+        <field name="value">0.4</field>
+    </record>
+    <record id="param_max_tokens" model="ir.config_parameter">
+        <field name="key">techmatic_ai_crm.max_tokens</field>
+        <field name="value">800</field>
+    </record>
+    <record id="param_timeout" model="ir.config_parameter">
+        <field name="key">techmatic_ai_crm.timeout</field>
+        <field name="value">30</field>
+    </record>
+    <record id="param_rate_limit" model="ir.config_parameter">
+        <field name="key">techmatic_ai_crm.rate_limit</field>
+        <field name="value">30</field>
+    </record>
+    <record id="param_enabled" model="ir.config_parameter">
+        <field name="key">techmatic_ai_crm.enabled</field>
+        <field name="value">True</field>
+    </record>
+</odoo>

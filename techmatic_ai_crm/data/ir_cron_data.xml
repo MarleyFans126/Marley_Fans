@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+        Nightly batch rescoring of active leads.
+        Disabled by default — flip ``active`` to True after the admin
+        has entered the API key, otherwise every run no-ops with a
+        misconfiguration error.
+    -->
+    <!--
+        AI Orchestrator cron — the full agent loop.
+        Runs after the auto-process cron has scored leads. Walks every
+        active lead and, if guardrails permit, does the next step in
+        the agent loop: send initial outreach, watch for customer
+        replies, respond, and hand off after max exchanges.
+        Active=False by default — admin must explicitly enable.
+    -->
+    <record id="cron_ai_orchestrator" model="ir.cron">
+        <field name="name">AI CRM: Orchestrator (Outreach + Reply Loop)</field>
+        <field name="model_id" ref="crm.model_crm_lead"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_run_ai_orchestrator()</field>
+        <field name="user_id" ref="base.user_root"/>
+        <field name="interval_number">5</field>
+        <field name="interval_type">minutes</field>
+        <field name="active" eval="False"/>
+    </record>
+
+    <!--
+        Auto-process cron — picks up every lead with
+        ``ai_auto_processed=False`` and runs summary + score + activity
+        suggestions in one batch. Runs every 5 minutes by default so
+        new leads get AI insights within minutes of entering the
+        pipeline, without any salesperson having to click a button.
+
+        Enabled by default — the master switch lives in
+        ``ir.config_parameter`` (``auto_process_enabled``), so admins
+        can disable globally without touching the cron schedule.
+    -->
+    <record id="cron_auto_process_leads" model="ir.cron">
+        <field name="name">AI CRM: Auto-Process Pending Leads</field>
+        <field name="model_id" ref="crm.model_crm_lead"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_process_pending_ai_leads()</field>
+        <field name="user_id" ref="base.user_root"/>
+        <!--
+            1-minute interval + ``cron._trigger()`` from
+            ``crm.lead.create()`` means new leads typically get
+            processed within ~60 seconds of entering the pipeline.
+            The cron's own body double-checks the master switch in
+            CRM Settings and the AI provider config — so a fire on
+            a misconfigured box is a no-op, not an error.
+        -->
+        <field name="interval_number">1</field>
+        <field name="interval_type">minutes</field>
+        <field name="active" eval="True"/>
+    </record>
+
+    <record id="cron_score_active_leads" model="ir.cron">
+        <field name="name">AI CRM: Score Active Leads</field>
+        <field name="model_id" ref="crm.model_crm_lead"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_score_active_leads(limit=50)</field>
+        <field name="user_id" ref="base.user_root"/>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="active" eval="False"/>
+    </record>
+
+    <!--
+        Daily pipeline briefing — runs once a day. Disabled by default;
+        admin flips ``active`` to True after the AI provider is set up.
+        The cron itself is idempotent: ``_cron_generate_daily_briefings``
+        skips users who already have a generated briefing for today.
+    -->
+    <record id="cron_daily_briefing" model="ir.cron">
+        <field name="name">AI CRM: Daily Pipeline Briefing</field>
+        <field name="model_id" ref="model_techmatic_ai_daily_briefing"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_generate_daily_briefings()</field>
+        <field name="user_id" ref="base.user_root"/>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="active" eval="False"/>
+    </record>
+
+    <!--
+        Auto follow-up cron — Flavor 3 (high-risk, full auto-send).
+        Disabled by default. **Two gates** are required to actually
+        send anything:
+          1. ``active`` here flipped to True by the admin.
+          2. ``techmatic_ai_crm.auto_followup_enabled`` master switch ON.
+          3. Per-user opt-in toggled on individual salespeople.
+        That's three gates total, on purpose — auto-sending to real
+        customers needs friction.
+    -->
+    <record id="cron_auto_followup" model="ir.cron">
+        <field name="name">AI CRM: Auto Follow-Up Emails (HIGH RISK)</field>
+        <field name="model_id" ref="crm.model_crm_lead"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_auto_send_followups()</field>
+        <field name="user_id" ref="base.user_root"/>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="active" eval="False"/>
+    </record>
+</odoo>

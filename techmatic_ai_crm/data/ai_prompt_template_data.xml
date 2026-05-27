@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <record id="prompt_assistant_system" model="techmatic.ai.prompt.template">
+        <field name="name">Assistant Persona</field>
+        <field name="key">assistant.system</field>
+        <field name="category">assistant</field>
+        <field name="system_prompt">You are an AI assistant embedded in Odoo CRM. You help the salesperson with lead analysis, summaries, follow-up drafting, and prioritization. Be concise, business-grade, and stay strictly within the CRM context. When unsure, ask one clarifying question rather than guessing. Never invent fields or data not present in the lead.</field>
+        <field name="note">Default persona used by the floating assistant panel.</field>
+    </record>
+
+    <record id="prompt_lead_summary" model="techmatic.ai.prompt.template">
+        <field name="name">Lead Summary</field>
+        <field name="key">lead.summary</field>
+        <field name="category">lead</field>
+        <field name="system_prompt">You produce concise CRM lead summaries. Output sections: Summary, Customer Intent, Urgency (Low/Medium/High), Risk Level (Low/Medium/High), Recommended Next Action. Keep each section to 1-2 lines.</field>
+    </record>
+
+    <record id="prompt_lead_followup" model="techmatic.ai.prompt.template">
+        <field name="name">Lead Follow-Up Email</field>
+        <field name="key">lead.followup</field>
+        <field name="category">email</field>
+        <field name="system_prompt">You draft polished sales follow-up emails. Return ONLY the email body — no preamble, no markdown fences. Tone: professional.</field>
+    </record>
+
+    <record id="prompt_lead_score" model="techmatic.ai.prompt.template">
+        <field name="name">Lead Scoring</field>
+        <field name="key">lead.score</field>
+        <field name="category">lead</field>
+        <field name="system_prompt">You score CRM leads. Respond with STRICT JSON only — no commentary, no markdown. Schema: {"score": &lt;int 0-100&gt;, "priority": "Low|Medium|High", "status": "Hot|Warm|Cold", "reason": "&lt;short sentence&gt;"}</field>
+    </record>
+
+    <record id="prompt_query_translator" model="techmatic.ai.prompt.template">
+        <field name="name">NL Query Translator</field>
+        <field name="key">assistant.query_translator</field>
+        <field name="category">query</field>
+        <field name="system_prompt">You translate sales questions into STRICT JSON Odoo crm.lead query specs. Output JSON only.</field>
+    </record>
+
+    <!--
+        Example sample prompts shown in the assistant sidebar as starter
+        chips. Pure data — feel free to edit / extend / translate.
+    -->
+    <record id="prompt_sample_summarize" model="techmatic.ai.prompt.template">
+        <field name="name">Sample: Summarize this lead</field>
+        <field name="key">sample.summarize_lead</field>
+        <field name="category">assistant</field>
+        <field name="user_prompt_template">Summarize this lead in 5 bullet points and recommend the next action.</field>
+    </record>
+    <record id="prompt_sample_followup" model="techmatic.ai.prompt.template">
+        <field name="name">Sample: Generate follow-up email</field>
+        <field name="key">sample.followup_email</field>
+        <field name="category">assistant</field>
+        <field name="user_prompt_template">Draft a professional follow-up email for this lead based on the latest stage and conversation history.</field>
+    </record>
+    <record id="prompt_sample_inactive" model="techmatic.ai.prompt.template">
+        <field name="name">Sample: Inactive opportunities</field>
+        <field name="key">sample.inactive_opportunities</field>
+        <field name="category">assistant</field>
+        <field name="user_prompt_template">Which of my opportunities have been inactive for more than 10 days?</field>
+    </record>
+    <record id="prompt_sample_next" model="techmatic.ai.prompt.template">
+        <field name="name">Sample: Suggest next action</field>
+        <field name="key">sample.next_action</field>
+        <field name="category">assistant</field>
+        <field name="user_prompt_template">What is the best next action for this lead and why?</field>
+    </record>
+</odoo>

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!--
+        Expose the AI auto follow-up opt-in on the user's Preferences
+        page so they discover it without admin help. Only AI-CRM Users
+        see the field — irrelevant for other Odoo users.
+    -->
+    <record id="view_users_form_ai_optin" model="ir.ui.view">
+        <field name="name">res.users.form.ai.optin</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="base.view_users_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="AI Assistant"
+                      groups="techmatic_ai_crm.group_techmatic_ai_crm_user"
+                      name="ai_assistant_prefs">
+                    <group string="Auto Follow-Up">
+                        <field name="techmatic_ai_auto_followup_optin"/>
+                        <div colspan="2" class="text-muted small">
+                            <p>
+                                When opted in, the AI cron may
+                                automatically send follow-up emails to
+                                <b>your</b> cold leads on your behalf.
+                                Defaults to <b>off</b> — you must
+                                explicitly opt in.
+                            </p>
+                            <p>
+                                Even when opted in, the admin's
+                                guardrails still apply: only cold
+                                leads (low AI score), only after N
+                                days of inactivity, with a daily cap,
+                                and never against tagged leads
+                                (<i>vip</i>, <i>manual-only</i>, etc.).
+                            </p>
+                            <p>
+                                Every email sent on your behalf is
+                                logged under
+                                <i>CRM ▸ Configuration ▸ AI Assistant ▸ Auto Follow-Up Log</i>
+                                and posted to the lead's chatter so
+                                you can see what was said.
+                            </p>
+                        </div>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

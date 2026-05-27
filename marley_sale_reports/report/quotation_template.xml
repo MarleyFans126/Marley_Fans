@@ -215,23 +215,16 @@
                         </tbody>
                     </table>
 
-                    <!-- ===== TAXES &amp; DUTIES ===== -->
-                    <div style="margin-bottom: 14px;">
-                        <div class="section-heading">TAXES &amp; DUTIES:</div>
-                        <p class="section-text">GST at the rate of 18% shall be applicable on above quoted price. If there is any change in Tax structure or any statutory levies are introduced by the appropriate Government at the time of shipment additional charges will have to be borne by the BUYER as per actual.</p>
-                    </div>
-
-                    <!-- ===== EXCLUSION ===== -->
-                    <t t-if="doc.customer_scope">
-                        <div style="margin-bottom: 14px;">
-                            <div class="section-heading">EXCLUSION:</div>
-                            <p class="section-text" style="white-space: pre-line;"><t t-esc="doc.customer_scope"/></p>
-                        </div>
-                    </t>
-
-                    <!-- ===== TERMS &amp; CONDITIONS ===== -->
+                    <!-- ===== TERMS &amp; CONDITIONS =====
+                         Warranty stays as its own subsection (auto-fetched
+                         from product). Everything else (delivery, payment,
+                         bank, customer scope, validity, taxes) is rendered
+                         from the single `note` field which the salesperson
+                         populates via the Terms Template selector. -->
                     <div style="margin-bottom: 14px;">
                         <div class="section-heading">TERMS &amp; CONDITIONS:</div>
+
+                        <!-- Warranty — auto-aggregated from product.warranty_terms -->
                         <p class="section-text" style="margin-bottom: 4px;">
                             <strong>Quality assurance &amp; Warranty:</strong>
                         </p>
@@ -246,36 +239,13 @@
                         <t t-if="not _seen_w">
                             <p class="section-text" style="margin: 2px 0 2px 14px;">&#8226; 5 Years warranty on Mechanical items &amp; 1 year OEM warranty on Motors &amp; VFD Drive.</p>
                         </t>
-                    </div>
 
-                    <!-- ===== PAYMENT SCHEDULE ===== -->
-                    <div style="margin-bottom: 14px;">
-                        <div class="section-heading">PAYMENT SCHEDULE:</div>
-                        <div class="section-text" style="white-space: pre-line;"><t t-if="doc.payment_terms_text"><t t-esc="doc.payment_terms_text"/></t><t t-else="">100% advance along with your confirmed order.
-Purchase Order should be on the name of Marley Enterprises Private Limited.
-Payments to be issued to us by way of Pay-order/DD/at par Cheque. All payments received by us will be forfeited in case of cancellation of order.</t></div>
-                    </div>
-
-                    <!-- ===== BANK DETAILS ===== -->
-                    <div style="margin-bottom: 14px;">
-                        <strong style="font-size: 15px;">Bank Details :</strong>
-                        <div style="margin-top: 6px; font-size: 13px; line-height: 1.7;">
-                                <div><span style="display: inline-block; width: 120px;">Account Name</span>: Marley Enterprises Private Limited</div>
-                                <div><span style="display: inline-block; width: 120px;">Account No.</span>: <t t-esc="doc.bank_account_number or '50200092737354'"/></div>
-                                <div><span style="display: inline-block; width: 120px;">Bank Name</span>: <t t-esc="doc.bank_name or 'HDFC Bank'"/></div>
-                                <div><span style="display: inline-block; width: 120px;">Bank Branch</span>: <t t-esc="doc.bank_branch or 'Kukatpally, Hyderabad'"/></div>
-                                <div><span style="display: inline-block; width: 120px;">IFSC Code</span>: <t t-esc="doc.bank_ifsc or 'HDFC0000364'"/></div>
-                            </div>
-                    </div>
-
-                    <!-- ===== DELIVERY SCHEDULE ===== -->
-                    <div style="margin-bottom: 14px;">
-                        <div class="section-heading">DELIVERY SCHEDULE:</div>
-                        <p class="section-text">
-                            <t t-if="doc.delivery_terms"><t t-esc="doc.delivery_terms"/></t>
-                            <t t-else="">Marley FAN will be delivered to your site within 15 to 20 Days from date we receive your techno-commercially clear
-                            purchase-order, subject to your adherence to the agreed payment schedule and availability of material.</t>
-                        </p>
+                        <!-- Everything else — rich-text block from `note`,
+                             rendered as HTML so bold/underline/bullets
+                             from the Terms Template appear properly. -->
+                        <t t-if="doc.note">
+                            <div class="section-text" style="margin-top: 10px;"><t t-out="doc.note"/></div>
+                        </t>
                     </div>
 
                     <!-- ===== CLOSING ===== -->

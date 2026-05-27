@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="res_config_settings_view_form_techmatic_ai" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.techmatic.ai</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="crm.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <!--
+                Append our block at the end of the CRM ``app`` section.
+                Avoids depending on the exact block id of an upstream
+                section, which can shift across point releases.
+            -->
+            <xpath expr="//app[@name='crm']" position="inside">
+                <block title="AI Assistant" name="techmatic_ai_block"
+                       groups="techmatic_ai_crm.group_techmatic_ai_crm_admin">
+                    <setting id="techmatic_ai_enable"
+                             string="Enable AI CRM Assistant"
+                             help="Master switch. When disabled, all AI buttons and the assistant panel are hidden.">
+                        <field name="techmatic_ai_enabled"/>
+                    </setting>
+                    <setting id="techmatic_ai_provider_setting"
+                             string="AI Provider"
+                             help="Choose the LLM backend. Switching providers does not reset other settings.">
+                        <field name="techmatic_ai_provider"/>
+                    </setting>
+                    <setting id="techmatic_ai_model_setting"
+                             string="Model"
+                             help="Provider-specific model identifier.">
+                        <field name="techmatic_ai_model" placeholder="gpt-4o-mini / gemini-1.5-flash / claude-opus-4-7"/>
+                    </setting>
+                    <setting id="techmatic_ai_apikey_setting"
+                             string="API Key"
+                             help="Stored as ir.config_parameter. Treat as a secret. Only admins see this field.">
+                        <field name="techmatic_ai_api_key" password="True"
+                               placeholder="sk-... (OpenAI) / AIza... (Gemini) / sk-ant-... (Claude)"/>
+                    </setting>
+                    <setting id="techmatic_ai_endpoint_setting"
+                             string="Custom Endpoint"
+                             help="Optional. Leave empty to use the provider default.">
+                        <field name="techmatic_ai_endpoint" placeholder="https://api.openai.com/v1/chat/completions"/>
+                    </setting>
+                    <setting id="techmatic_ai_temperature_setting"
+                             string="Temperature"
+                             help="0 = deterministic, 1 = creative. Recommended 0.3-0.6 for CRM workflows.">
+                        <field name="techmatic_ai_temperature"/>
+                    </setting>
+                    <setting id="techmatic_ai_maxtokens_setting"
+                             string="Max Tokens"
+                             help="Upper bound on the model's response length.">
+                        <field name="techmatic_ai_max_tokens"/>
+                    </setting>
+                    <setting id="techmatic_ai_timeout_setting"
+                             string="Timeout (s)"
+                             help="Per-request HTTP timeout.">
+                        <field name="techmatic_ai_timeout"/>
+                    </setting>
+                    <setting id="techmatic_ai_ratelimit_setting"
+                             string="Rate Limit (calls/min/user)"
+                             help="Soft cap to prevent runaway costs.">
+                        <field name="techmatic_ai_rate_limit"/>
+                    </setting>
+                    <setting id="techmatic_ai_test_setting"
+                             string="Test Connection"
+                             help="Sends a tiny round-trip request to validate the API key and model.">
+                        <button name="action_test_ai_connection"
+                                string="Test Connection"
+                                type="object"
+                                class="btn-primary"
+                                icon="fa-plug"/>
+                    </setting>
+                    <setting id="techmatic_ai_auto_process_setting"
+                             string="Auto-Process New Leads"
+                             help="When ON, every new lead is automatically scored, summarized, and given next-action suggestions by the background cron — no button clicks required. Manual buttons remain available for re-runs.">
+                        <field name="techmatic_ai_auto_process_enabled"/>
+                    </setting>
+                    <setting id="techmatic_ai_auto_process_batch_setting"
+                             string="Auto-Process Batch Size"
+                             help="Max leads the cron processes per tick. Tune for cost / API rate limits.">
+                        <field name="techmatic_ai_auto_process_batch_size"/>
+                    </setting>
+                </block>
+
+                <!--
+                    AI Orchestrator — the full agent loop:
+                    score → outreach → reply → repeat → handoff.
+                -->
+                <block title="🤖 AI Orchestrator (HIGH RISK)"
+                       name="techmatic_ai_orchestrator_block"
+                       groups="techmatic_ai_crm.group_techmatic_ai_crm_admin">
+                    <setting id="techmatic_ai_orchestrator_enable"
+                             string="Enable AI Orchestrator"
+                             help="Master switch for the autonomous agent loop. When ON: scored leads above the threshold automatically get an initial outreach email, the AI watches the lead's chatter for customer replies, and responds — with a hard cap on round-trips before handing off to the salesperson. Per-user opt-in is still required.">
+                        <field name="techmatic_ai_orchestrator_enabled"/>
+                    </setting>
+                    <setting id="techmatic_ai_orchestrator_score"
+                             string="Min Score for Initial Outreach"
+                             help="Only leads scored at or above this get auto-contacted. Default 50.">
+                        <field name="techmatic_ai_orchestrator_min_score"/>
+                    </setting>
+                    <setting id="techmatic_ai_orchestrator_exchanges"
+                             string="Max Exchanges per Lead"
+                             help="After this many AI ↔ customer round-trips, hand the conversation off. Default 3.">
+                        <field name="techmatic_ai_orchestrator_max_exchanges"/>
+                    </setting>
+                    <setting id="techmatic_ai_orchestrator_skip"
+                             string="Skip Keywords"
+                             help="Comma-separated. Any inbound containing these triggers immediate handoff.">
+                        <field name="techmatic_ai_orchestrator_skip_keywords"
+                               placeholder="out of office,unsubscribe,no-reply"/>
+                    </setting>
+                </block>
+
+                <!--
+                    Auto Follow-Up settings — visually segregated and
+                    flagged so admins read the warning before flipping
+                    the switch. Triple-gate: master switch + per-user
+                    opt-in + cron active.
+                -->
+                <block title="⚠ Auto Follow-Up (HIGH RISK)"
+                       name="techmatic_ai_auto_followup_block"
+                       groups="techmatic_ai_crm.group_techmatic_ai_crm_admin">
+                    <setting id="techmatic_ai_auto_followup_enable"
+                             string="Enable Auto Follow-Up Emails"
+                             help="Master switch. Even when ON, the cron only sends to leads where (a) the salesperson has opted in, (b) the AI score is below the threshold, (c) the lead has been inactive long enough, and (d) the daily cap hasn't been hit. Every send is logged. Read each guardrail below carefully.">
+                        <field name="techmatic_ai_auto_followup_enabled"/>
+                    </setting>
+                    <setting id="techmatic_ai_auto_followup_score"
+                             string="Max AI Score"
+                             help="Leads with AI score above this are SKIPPED. Default 30. Hard ceiling 80.">
+                        <field name="techmatic_ai_auto_followup_max_score"/>
+                    </setting>
+                    <setting id="techmatic_ai_auto_followup_inactive"
+                             string="Inactivity Threshold (days)"
+                             help="Skip leads modified in the last N days — they're being worked.">
+                        <field name="techmatic_ai_auto_followup_inactive_days"/>
+                    </setting>
+                    <setting id="techmatic_ai_auto_followup_cap"
+                             string="Max Emails / User / Day"
+                             help="Hard cap per salesperson. Hard ceiling 100.">
+                        <field name="techmatic_ai_auto_followup_per_user_cap"/>
+                    </setting>
+                    <setting id="techmatic_ai_auto_followup_skip"
+                             string="Skip Tags"
+                             help="Comma-separated tag names. Leads with any of these tags are never auto-emailed.">
+                        <field name="techmatic_ai_auto_followup_skip_tags"
+                               placeholder="vip,manual-only,do-not-contact"/>
+                    </setting>
+                </block>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

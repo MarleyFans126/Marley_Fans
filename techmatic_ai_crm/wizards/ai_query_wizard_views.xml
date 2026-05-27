@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="ai_query_wizard_view_form" model="ir.ui.view">
+        <field name="name">techmatic.ai.query.wizard.form</field>
+        <field name="model">techmatic.ai.query.wizard</field>
+        <field name="arch" type="xml">
+            <form string="AI CRM Query Assistant">
+                <sheet>
+                    <group>
+                        <field name="question" nolabel="1"
+                               placeholder="Ask in plain English: e.g. show leads inactive for 10 days"/>
+                    </group>
+                    <group invisible="state == 'draft'">
+                        <field name="state" invisible="1"/>
+                        <field name="result_count"/>
+                        <field name="explanation" readonly="1"/>
+                        <field name="spec_json" readonly="1"/>
+                        <field name="error_message" readonly="1"
+                               invisible="state != 'error'"/>
+                    </group>
+                </sheet>
+                <footer>
+                    <button name="action_run" string="Ask AI"
+                            type="object" class="btn-primary"
+                            icon="fa-paper-plane"/>
+                    <button string="Close" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_ai_query_wizard" model="ir.actions.act_window">
+        <field name="name">Ask AI About CRM</field>
+        <field name="res_model">techmatic.ai.query.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

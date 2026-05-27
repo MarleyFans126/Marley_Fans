@@ -23,6 +23,8 @@
         'data/gst_fiscal_positions.xml',
         'data/mail_template_override.xml',
         'data/sale_order_print_menu.xml',
+        'data/sale_terms_template_data.xml',
+        'views/sale_terms_template_views.xml',
         'views/sale_order_views.xml',
         'views/account_move_views.xml',
         'views/product_template_views.xml',

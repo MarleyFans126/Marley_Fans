@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="ai_followup_wizard_view_form" model="ir.ui.view">
+        <field name="name">techmatic.ai.followup.wizard.form</field>
+        <field name="model">techmatic.ai.followup.wizard</field>
+        <field name="arch" type="xml">
+            <form string="AI Follow-Up Email">
+                <sheet>
+                    <group>
+                        <field name="lead_id" readonly="1"/>
+                        <field name="state" invisible="1"/>
+                    </group>
+                    <group string="Steering (optional)">
+                        <field name="instructions" nolabel="1"
+                               placeholder="e.g. polite nudge — they haven't replied in 2 weeks"/>
+                    </group>
+                    <group>
+                        <field name="subject_template"/>
+                        <field name="subject"
+                               string="Custom subject"
+                               placeholder="Type your own subject line"
+                               invisible="subject_template != 'custom'"
+                               required="subject_template == 'custom'"/>
+                        <field name="send_email"/>
+                    </group>
+                    <group string="Draft">
+                        <field name="body" nolabel="1" widget="html"/>
+                    </group>
+                </sheet>
+                <footer>
+                    <button name="action_regenerate" string="Regenerate"
+                            type="object" class="btn-secondary"
+                            icon="fa-refresh"/>
+                    <button name="action_send" string="Save / Send"
+                            type="object" class="btn-primary"/>
+                    <button string="Discard" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Root under CRM → Configuration → AI Assistant -->
+    <menuitem id="menu_techmatic_ai_root"
+              name="AI Assistant"
+              parent="crm.crm_menu_config"
+              sequence="50"
+              groups="techmatic_ai_crm.group_techmatic_ai_crm_user"/>
+
+    <menuitem id="menu_techmatic_ai_query"
+              name="Ask AI About CRM"
+              parent="menu_techmatic_ai_root"
+              action="action_ai_query_wizard"
+              sequence="10"
+              groups="techmatic_ai_crm.group_techmatic_ai_crm_user"/>
+
+    <menuitem id="menu_techmatic_ai_sessions"
+              name="AI Sessions"
+              parent="menu_techmatic_ai_root"
+              action="action_ai_chat_session"
+              sequence="20"
+              groups="techmatic_ai_crm.group_techmatic_ai_crm_user"/>
+
+    <menuitem id="menu_techmatic_ai_my_briefings"
+              name="My Daily Briefings"
+              parent="menu_techmatic_ai_root"
+              action="action_ai_daily_briefing_mine"
+              sequence="15"
+              groups="techmatic_ai_crm.group_techmatic_ai_crm_user"/>
+
+    <menuitem id="menu_techmatic_ai_generate_briefing"
+              name="Generate My Briefing Now"
+              parent="menu_techmatic_ai_root"
+              action="action_generate_my_briefing_now"
+              sequence="16"
+              groups="techmatic_ai_crm.group_techmatic_ai_crm_user"/>
+
+    <menuitem id="menu_techmatic_ai_all_briefings"
+              name="All Briefings (Admin)"
+              parent="menu_techmatic_ai_root"
+              action="action_ai_daily_briefing_all"
+              sequence="17"
+              groups="techmatic_ai_crm.group_techmatic_ai_crm_admin"/>
+
+    <menuitem id="menu_techmatic_ai_auto_followup_log"
+              name="Auto Follow-Up Log"
+              parent="menu_techmatic_ai_root"
+              action="action_ai_auto_followup_log"
+              sequence="45"
+              groups="techmatic_ai_crm.group_techmatic_ai_crm_admin"/>
+
+    <menuitem id="menu_techmatic_ai_prompts"
+              name="Prompt Templates"
+              parent="menu_techmatic_ai_root"
+              action="action_ai_prompt_template"
+              sequence="30"
+              groups="techmatic_ai_crm.group_techmatic_ai_crm_admin"/>
+
+</odoo>

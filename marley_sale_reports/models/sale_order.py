@@ -209,6 +209,31 @@ class SaleOrder(models.Model):
     bank_ifsc = fields.Char(string='IFSC Code', default='HDFC0000364')
     bank_branch = fields.Char(string='Bank Branch', default='Kukatpally, Hyderabad')
 
+    # ------------------------------------------------------------------
+    # Terms & Conditions — single text block populated from a chosen draft
+    # ------------------------------------------------------------------
+    # Replaces the previous per-field structure (warranty / delivery /
+    # payment / customer-scope / bank). The salesperson picks a draft
+    # from `sale.terms.template` and its body is poured into the standard
+    # `note` field (Odoo's "Terms and Conditions"). The legacy structured
+    # fields above are retained so existing orders and PDF reports keep
+    # rendering — they're just no longer surfaced on the form.
+    terms_template_id = fields.Many2one(
+        comodel_name='sale.terms.template',
+        string='Terms Template',
+        domain=[('active', '=', True)],
+        help='Pick one of the saved draft templates to insert its full '
+             'Terms & Conditions text into the Terms tab below. '
+             'Manage drafts under Sales → Configuration → Terms Templates.',
+    )
+
+    @api.onchange('terms_template_id')
+    def _onchange_terms_template_id(self):
+        """Pour the chosen draft's body into the standard `note` field."""
+        for order in self:
+            if order.terms_template_id:
+                order.note = order.terms_template_id.body
+
     # ── Financial Year label (Indian FY: April 1 → March 31) ────
     financial_year_label = fields.Char(
         string='Financial Year',

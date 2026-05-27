@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="techmatic_ai_crm.AIAssistantPanel">
+        <div class="o_techmatic_ai_systray">
+            <!-- Trigger button in the systray -->
+            <button class="btn btn-link o_techmatic_ai_trigger"
+                    t-on-click="togglePanel"
+                    t-att-title="state.enabled ? 'AI CRM Assistant' : 'AI Assistant disabled in settings'"
+                    t-att-disabled="!state.enabled">
+                <i class="fa fa-magic"/>
+                <span class="d-none d-md-inline ms-1">AI</span>
+            </button>
+
+            <!-- Floating drawer -->
+            <div t-att-class="state.open ? 'o_techmatic_ai_panel open' : 'o_techmatic_ai_panel'"
+                 t-if="state.enabled">
+                <div class="o_techmatic_ai_header">
+                    <span class="o_techmatic_ai_title">
+                        <i class="fa fa-magic me-1"/>
+                        AI CRM Assistant
+                    </span>
+                    <div class="o_techmatic_ai_header_actions">
+                        <button class="btn btn-sm btn-light"
+                                t-on-click="newSession"
+                                title="New session">
+                            <i class="fa fa-plus"/>
+                        </button>
+                        <button class="btn btn-sm btn-light"
+                                t-on-click="togglePanel"
+                                title="Close">
+                            <i class="fa fa-times"/>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Quick actions -->
+                <div class="o_techmatic_ai_quick_actions">
+                    <button class="btn btn-sm btn-outline-primary"
+                            t-on-click="() => this.quickAction('summarize')"
+                            t-att-disabled="state.loading || !currentLeadId">
+                        <i class="fa fa-file-text-o"/> Summarize
+                    </button>
+                    <button class="btn btn-sm btn-outline-primary"
+                            t-on-click="() => this.quickAction('score')"
+                            t-att-disabled="state.loading || !currentLeadId">
+                        <i class="fa fa-star"/> Score
+                    </button>
+                    <button class="btn btn-sm btn-outline-primary"
+                            t-on-click="() => this.quickAction('suggest_activities')"
+                            t-att-disabled="state.loading || !currentLeadId">
+                        <i class="fa fa-lightbulb-o"/> Next Actions
+                    </button>
+                </div>
+
+                <!-- Sample chips -->
+                <div class="o_techmatic_ai_samples" t-if="!state.messages.length">
+                    <small class="text-muted d-block mb-1">Try one of these:</small>
+                    <t t-foreach="state.samples" t-as="s" t-key="s">
+                        <button class="btn btn-sm btn-light o_techmatic_ai_chip"
+                                t-on-click="() => this.useSample(s)">
+                            <t t-esc="s"/>
+                        </button>
+                    </t>
+                </div>
+
+                <!-- Scrollable message list -->
+                <div class="o_techmatic_ai_messages" t-ref="scroll">
+                    <t t-foreach="state.messages" t-as="m" t-key="m.id">
+                        <div t-att-class="'o_techmatic_ai_msg ' + m.role">
+                            <div class="o_techmatic_ai_bubble">
+                                <t t-esc="m.body"/>
+                            </div>
+                        </div>
+                    </t>
+                    <div class="o_techmatic_ai_loading" t-if="state.loading">
+                        <span class="dot"/><span class="dot"/><span class="dot"/>
+                    </div>
+                </div>
+
+                <!-- Input -->
+                <div class="o_techmatic_ai_input">
+                    <textarea t-model="state.input"
+                              t-on-keydown="onInputKeydown"
+                              rows="2"
+                              placeholder="Ask the AI… (Enter to send, Shift+Enter for newline)"/>
+                    <button class="btn btn-primary"
+                            t-on-click="sendMessage"
+                            t-att-disabled="state.loading || !state.input.trim()">
+                        <i class="fa fa-paper-plane"/>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </t>
+
+</templates>

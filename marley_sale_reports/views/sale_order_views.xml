@@ -47,6 +47,19 @@
                 <field name="last_print_date" readonly="1" invisible="not last_print_date"/>
             </xpath>
 
+            <!-- Inject the Terms Template selector right above the
+                 standard `note` field (Odoo's Terms & Conditions) at the
+                 bottom of the Order Lines tab. Salespeople pick a draft
+                 from the dropdown; its body is poured into `note`. The
+                 dropdown allows inline creation so a salesperson can
+                 save a new draft on the fly. -->
+            <xpath expr="//group[@name='note_group']//field[@name='note']" position="before">
+                <field name="terms_template_id"
+                       colspan="2"
+                       options="{'no_open': True}"
+                       placeholder="Pick a draft to fill Terms &amp; Conditions below…"/>
+            </xpath>
+
             <!-- Add commercial terms tab -->
             <xpath expr="//notebook" position="inside">
                 <page string="Quotation Print" name="marley_quotation_details">
@@ -96,28 +109,15 @@
                         </group>
                     </group>
                 </page>
+                <!-- Commercial Terms — only Warranty Terms here.
+                     Warranty is auto-computed from products on the
+                     order. The single Terms & Conditions text block
+                     and the Terms Template selector live in the
+                     Order Lines tab (right below the line list),
+                     wired in via a separate xpath further down. -->
                 <page string="Commercial Terms" name="marley_commercial_terms">
-                    <group>
-                        <group string="Terms &amp; Conditions">
-                            <field name="warranty_terms"/>
-                            <field name="delivery_terms"/>
-                            <field name="offer_validity_days"/>
-                        </group>
-                        <group string="Bank Details">
-                            <field name="bank_name"/>
-                            <field name="bank_account_number"/>
-                            <field name="bank_account_type"/>
-                            <field name="bank_ifsc"/>
-                            <field name="bank_branch"/>
-                        </group>
-                    </group>
-                    <group>
-                        <group string="Payment Terms">
-                            <field name="payment_terms_text" nolabel="1" colspan="2"/>
-                        </group>
-                        <group string="Customer Scope">
-                            <field name="customer_scope" nolabel="1" colspan="2" placeholder="Facilities/responsibilities to be provided by the customer"/>
-                        </group>
+                    <group string="Warranty (auto-fetched from products)">
+                        <field name="warranty_terms" nolabel="1" colspan="2"/>
                     </group>
                 </page>
             </xpath>

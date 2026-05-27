@@ -1,0 +1,289 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!--
+        Lead form extension: AI action buttons on the header + a dedicated
+        ``AI Insights`` tab inside the notebook for the produced fields.
+    -->
+    <record id="crm_lead_view_form_inherit_techmatic_ai" model="ir.ui.view">
+        <field name="name">crm.lead.form.inherit.techmatic.ai</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_lead_view_form"/>
+        <field name="arch" type="xml">
+
+            <!--
+                Header buttons. Every new lead gets summary / score /
+                suggestions / legitimacy / web-research automatically
+                within ~60 seconds of creation (via the auto-process
+                cron, kicked off by ``crm.lead.create()`` post-commit).
+                These buttons exist only to FORCE a fresh regeneration
+                — useful after editing the lead description, changing
+                the assigned salesperson, or simply if you want to
+                re-run with a different model.
+            -->
+            <xpath expr="//header" position="inside">
+                <button name="action_generate_ai_summary"
+                        string="🔄 Regenerate Summary"
+                        type="object"
+                        class="btn-secondary"
+                        icon="fa-magic"
+                        groups="techmatic_ai_crm.group_techmatic_ai_crm_user"/>
+                <button name="action_generate_ai_score"
+                        string="🔄 Rescore"
+                        type="object"
+                        class="btn-secondary"
+                        icon="fa-star"
+                        groups="techmatic_ai_crm.group_techmatic_ai_crm_user"/>
+                <button name="action_generate_ai_activities"
+                        string="🔄 Refresh Suggestions"
+                        type="object"
+                        class="btn-secondary"
+                        icon="fa-lightbulb-o"
+                        groups="techmatic_ai_crm.group_techmatic_ai_crm_user"/>
+                <button name="action_open_followup_wizard"
+                        string="✉ Compose Follow-Up Email"
+                        type="object"
+                        class="btn-secondary"
+                        icon="fa-envelope"
+                        groups="techmatic_ai_crm.group_techmatic_ai_crm_user"
+                        help="Manually compose a follow-up email. The orchestrator can also send these automatically if enabled."/>
+            </xpath>
+
+            <!-- AI status badge next to the lead name -->
+            <xpath expr="//div[hasclass('oe_title')]" position="inside">
+                <div class="o_row" invisible="not ai_status"
+                     groups="techmatic_ai_crm.group_techmatic_ai_crm_user">
+                    <span class="badge text-bg-danger"
+                          invisible="ai_status != 'Hot'">🔥 Hot</span>
+                    <span class="badge text-bg-warning"
+                          invisible="ai_status != 'Warm'">☀ Warm</span>
+                    <span class="badge text-bg-info"
+                          invisible="ai_status != 'Cold'">❄ Cold</span>
+                    <span class="ms-2 text-muted">
+                        AI Score: <field name="ai_score" readonly="1" class="oe_inline"/>
+                        / 100 — <field name="ai_priority" readonly="1" class="oe_inline"/>
+                    </span>
+                </div>
+                <!--
+                    Legitimacy / anti-spam badge. Hidden until the
+                    cron has assigned a verdict.
+                -->
+                <div class="o_row" invisible="not ai_legitimacy_verdict"
+                     groups="techmatic_ai_crm.group_techmatic_ai_crm_user">
+                    <span class="badge text-bg-success"
+                          invisible="ai_legitimacy_verdict != 'trusted'">
+                        🟢 Trusted
+                    </span>
+                    <span class="badge text-bg-primary"
+                          invisible="ai_legitimacy_verdict != 'verified'">
+                        🔵 Verified
+                    </span>
+                    <span class="badge text-bg-warning"
+                          invisible="ai_legitimacy_verdict != 'suspicious'">
+                        🟡 Suspicious
+                    </span>
+                    <span class="badge text-bg-danger"
+                          invisible="ai_legitimacy_verdict != 'spam'">
+                        🔴 Likely Spam
+                    </span>
+                    <span class="ms-2 text-muted"
+                          title="Legitimacy score 0-100">
+                        (<field name="ai_legitimacy_score" readonly="1" class="oe_inline"/>)
+                    </span>
+                </div>
+                <!--
+                    "AI processing" pill — visible while the background
+                    cron hasn't run yet. Once the cron processes the
+                    lead, ``ai_auto_processed`` flips True and this
+                    disappears, replaced by the Hot/Warm/Cold badge
+                    above.
+                -->
+                <div class="o_row"
+                     invisible="ai_auto_processed or ai_status"
+                     groups="techmatic_ai_crm.group_techmatic_ai_crm_user">
+                    <span class="badge text-bg-secondary">
+                        🤖 AI processing — results in ~5 min
+                    </span>
+                </div>
+                <!--
+                    AI orchestrator status — shows the current step in
+                    the agent loop so the salesperson can see what the
+                    bot is doing on their behalf.
+                -->
+                <div class="o_row"
+                     invisible="ai_handed_off or not ai_outreach_initialized"
+                     groups="techmatic_ai_crm.group_techmatic_ai_crm_user">
+                    <span class="badge text-bg-primary">
+                        🤖 AI active — <field name="ai_outreach_count" readonly="1" class="oe_inline"/> sent · <field name="ai_inbound_count" readonly="1" class="oe_inline"/> received
+                    </span>
+                </div>
+                <div class="o_row" invisible="not ai_handed_off"
+                     groups="techmatic_ai_crm.group_techmatic_ai_crm_user">
+                    <span class="badge text-bg-warning">
+                        ⚠ AI handed off: <field name="ai_handoff_reason" readonly="1" class="oe_inline"/>
+                    </span>
+                </div>
+                <field name="ai_auto_processed" invisible="1"/>
+                <field name="ai_outreach_initialized" invisible="1"/>
+                <field name="ai_handed_off" invisible="1"/>
+            </xpath>
+
+            <!-- AI Insights tab -->
+            <xpath expr="//notebook" position="inside">
+                <page string="AI Insights"
+                      name="ai_insights"
+                      groups="techmatic_ai_crm.group_techmatic_ai_crm_user">
+
+                    <!-- ===== Block 1: Lead Score ====================== -->
+                    <group string="Lead Score" col="2">
+                        <group>
+                            <field name="ai_score"/>
+                            <field name="ai_status" widget="badge"
+                                   decoration-danger="ai_status == 'Hot'"
+                                   decoration-warning="ai_status == 'Warm'"
+                                   decoration-info="ai_status == 'Cold'"/>
+                            <field name="ai_priority" widget="badge"
+                                   decoration-danger="ai_priority == 'High'"
+                                   decoration-warning="ai_priority == 'Medium'"
+                                   decoration-muted="ai_priority == 'Low'"/>
+                        </group>
+                        <group>
+                            <field name="ai_summary_date"
+                                   string="Last Refreshed"/>
+                            <field name="ai_score_reason"
+                                   string="Score Rationale"
+                                   nolabel="0"/>
+                        </group>
+                    </group>
+
+                    <!-- ===== Block 2: Lead Legitimacy ================= -->
+                    <group string="Lead Legitimacy"
+                           invisible="not ai_legitimacy_verdict">
+                        <group>
+                            <field name="ai_legitimacy_verdict" widget="badge"
+                                   decoration-success="ai_legitimacy_verdict == 'trusted'"
+                                   decoration-info="ai_legitimacy_verdict == 'verified'"
+                                   decoration-warning="ai_legitimacy_verdict == 'suspicious'"
+                                   decoration-danger="ai_legitimacy_verdict == 'spam'"
+                                   string="Verdict"/>
+                            <field name="ai_legitimacy_score"
+                                   string="Confidence"/>
+                        </group>
+                        <group>
+                            <field name="ai_legitimacy_checked_at"
+                                   string="Checked At"/>
+                        </group>
+                        <separator string="Reasoning" colspan="2"/>
+                        <field name="ai_legitimacy_notes" nolabel="1"
+                               readonly="1" colspan="2"/>
+                        <separator string="Signals" colspan="2"
+                                   invisible="not ai_legitimacy_signals_html"/>
+                        <field name="ai_legitimacy_signals_html" nolabel="1"
+                               readonly="1" colspan="2"
+                               invisible="not ai_legitimacy_signals_html"/>
+                    </group>
+
+                    <!-- ===== Block 3: Company Web Research =========== -->
+                    <group string="Company Web Research"
+                           invisible="not ai_company_research_status">
+                        <group>
+                            <field name="ai_company_research_status"
+                                   widget="badge"
+                                   decoration-success="ai_company_research_status == 'completed'"
+                                   decoration-info="ai_company_research_status == 'skipped'"
+                                   decoration-warning="ai_company_research_status == 'failed'"
+                                   string="Status"/>
+                            <field name="ai_company_website"
+                                   widget="url"
+                                   readonly="1"
+                                   string="Source URL"/>
+                        </group>
+                        <group>
+                            <field name="ai_company_research_date"
+                                   readonly="1"
+                                   string="Researched At"/>
+                            <field name="ai_company_research_reason"
+                                   readonly="1"
+                                   string="Note"
+                                   invisible="ai_company_research_status == 'completed'"/>
+                        </group>
+                        <separator string="Company Brief" colspan="2"
+                                   invisible="not ai_company_summary"/>
+                        <field name="ai_company_summary" nolabel="1"
+                               readonly="1" colspan="2"
+                               invisible="not ai_company_summary"/>
+                    </group>
+
+                    <!-- ===== Block 4: AI Summary ===================== -->
+                    <group string="AI Lead Summary"
+                           invisible="not ai_summary">
+                        <field name="ai_summary" nolabel="1"
+                               readonly="1" colspan="2"/>
+                    </group>
+
+                    <!-- ===== Block 5: Suggested Actions ============== -->
+                    <group string="Suggested Next Actions"
+                           invisible="not ai_suggested_actions_html">
+                        <field name="ai_suggested_actions_html" nolabel="1"
+                               readonly="1" colspan="2"/>
+                    </group>
+
+                    <!-- Raw legitimacy signals hidden by default — open
+                         the "Developer Mode" filter or check the chatter
+                         if you need the raw red/yellow/green flag JSON. -->
+                    <field name="ai_legitimacy_signals" invisible="1"/>
+                    <field name="ai_suggested_actions" invisible="1"/>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Tree view: show AI score + status columns. -->
+    <record id="crm_lead_view_tree_inherit_techmatic_ai" model="ir.ui.view">
+        <field name="name">crm.lead.list.inherit.techmatic.ai</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_case_tree_view_oppor"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='expected_revenue']" position="after">
+                <field name="ai_score" optional="show"/>
+                <field name="ai_status" optional="show" widget="badge"
+                       decoration-danger="ai_status == 'Hot'"
+                       decoration-warning="ai_status == 'Warm'"
+                       decoration-info="ai_status == 'Cold'"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Search view: filter by AI status. -->
+    <record id="crm_lead_view_search_inherit_techmatic_ai" model="ir.ui.view">
+        <field name="name">crm.lead.search.inherit.techmatic.ai</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.view_crm_case_opportunities_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//search" position="inside">
+                <separator/>
+                <filter name="ai_hot" string="🔥 AI Hot"
+                        domain="[('ai_status', '=', 'Hot')]"/>
+                <filter name="ai_warm" string="☀ AI Warm"
+                        domain="[('ai_status', '=', 'Warm')]"/>
+                <filter name="ai_cold" string="❄ AI Cold"
+                        domain="[('ai_status', '=', 'Cold')]"/>
+                <filter name="ai_high_priority" string="AI High Priority"
+                        domain="[('ai_priority', '=', 'High')]"/>
+                <separator/>
+                <filter name="ai_unscored" string="Not Yet Scored"
+                        domain="[('ai_score', '=', 0)]"/>
+                <separator/>
+                <filter name="ai_legit_trusted" string="🟢 Trusted"
+                        domain="[('ai_legitimacy_verdict', '=', 'trusted')]"/>
+                <filter name="ai_legit_verified" string="🔵 Verified"
+                        domain="[('ai_legitimacy_verdict', '=', 'verified')]"/>
+                <filter name="ai_legit_suspicious" string="🟡 Suspicious"
+                        domain="[('ai_legitimacy_verdict', '=', 'suspicious')]"/>
+                <filter name="ai_legit_spam" string="🔴 Likely Spam"
+                        domain="[('ai_legitimacy_verdict', '=', 'spam')]"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
