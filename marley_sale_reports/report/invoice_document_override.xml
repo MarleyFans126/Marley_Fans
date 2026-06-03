@@ -212,7 +212,7 @@
                 <div style="margin-bottom: 14px;">
                     <div class="section-heading">TERMS &amp; CONDITIONS:</div>
                     <p class="section-text" style="margin-bottom: 4px;">
-                        <strong>Quality assurance &amp; Warranty:</strong>
+                        <strong>QUALITY ASSURANCE &amp; WARRANTY:</strong>
                     </p>
                     <t t-set="_seen_w" t-value="[]"/>
                     <t t-if="linked_so">

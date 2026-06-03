@@ -78,6 +78,22 @@ class ProjectProject(models.Model):
     required_electrical_wire = fields.Char(string='Required Electrical Wire')
     mounting_structure = fields.Char(string='Mounting Structure')
     crane_rafter_distance = fields.Char(string='Distance Between Crane Top and Rafter Bottom')
+    height_arrangement_scope = fields.Selection(
+        selection=[
+            ('our_scope', 'Our Scope'),
+            ('client_scope', 'Client Scope'),
+        ],
+        string='Height Arrangement Scope',
+        help='Who arranges the height access (scaffolding/lift/JCB).',
+    )
+    stay_arrangement_scope = fields.Selection(
+        selection=[
+            ('our_scope', 'Our Scope'),
+            ('client_scope', 'Client Scope'),
+        ],
+        string='Stay Arrangement Scope',
+        help='Who arranges stay / accommodation for the installation crew.',
+    )
 
     # Other
     other_important_info = fields.Text(string='Other Important Information')

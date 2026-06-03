@@ -334,7 +334,7 @@
                             <div style="margin-bottom: 14px;">
                                 <div class="section-heading">TERMS &amp; CONDITIONS:</div>
                                 <p class="section-text" style="margin-bottom: 4px;">
-                                    <strong>Quality assurance &amp; Warranty:</strong>
+                                    <strong>QUALITY ASSURANCE &amp; WARRANTY:</strong>
                                 </p>
                                 <t t-foreach="_seen_w" t-as="_wt">
                                     <p class="section-text" style="margin: 2px 0 2px 14px; white-space: pre-line;">&#8226; <t t-esc="_wt"/></p>

@@ -64,10 +64,12 @@
                             <field name="ext_rod_length" placeholder="e.g. 500 mm"/>
                             <field name="field_height" placeholder="e.g. 6 MTR"/>
                             <field name="required_electrical_wire" placeholder="e.g. 150 Meter"/>
+                            <field name="height_arrangement_scope"/>
                         </group>
                         <group>
                             <field name="mounting_structure" placeholder="e.g. PEB, RCC"/>
                             <field name="crane_rafter_distance" placeholder="e.g. 200 mm"/>
+                            <field name="stay_arrangement_scope"/>
                         </group>
                     </group>
 

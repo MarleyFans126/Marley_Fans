@@ -83,7 +83,6 @@
                         <!-- Row 2: Transport / Invoice -->
                         <group string="Product Model / Quantity / Weight / Terms">
                             <group>
-                                <field name="inst_models_to_transport"/>
                                 <field name="inst_transportation_terms"/>
                             </group>
                             <group>
@@ -137,10 +136,12 @@
                                 <field name="inst_ext_rod_length" placeholder="e.g. 500 mm"/>
                                 <field name="inst_field_height" placeholder="e.g. 6 MTR Meter"/>
                                 <field name="inst_electrical_wire" placeholder="e.g. 150 Meter"/>
+                                <field name="inst_height_arrangement_scope"/>
                             </group>
                             <group>
                                 <field name="inst_mounting_structure" placeholder="e.g. PEB"/>
                                 <field name="inst_crane_rafter_distance" placeholder="e.g. 200 mm"/>
+                                <field name="inst_stay_arrangement_scope"/>
                             </group>
                         </group>
 

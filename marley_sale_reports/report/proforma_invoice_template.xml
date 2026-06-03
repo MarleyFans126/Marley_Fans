@@ -281,7 +281,7 @@
                             <div style="margin-bottom: 14px;">
                                 <div class="section-heading">TERMS &amp; CONDITIONS:</div>
                                 <p class="section-text">
-                                    <strong>Quality assurance &amp; Warranty:</strong> - <t t-esc="doc.proforma_warranty"/>
+                                    <strong>QUALITY ASSURANCE &amp; WARRANTY:</strong> - <t t-esc="doc.proforma_warranty"/>
                                 </p>
                             </div>
                         </t>

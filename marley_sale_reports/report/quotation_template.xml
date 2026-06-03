@@ -226,7 +226,7 @@
 
                         <!-- Warranty — auto-aggregated from product.warranty_terms -->
                         <p class="section-text" style="margin-bottom: 4px;">
-                            <strong>Quality assurance &amp; Warranty:</strong>
+                            <strong>QUALITY ASSURANCE &amp; WARRANTY:</strong>
                         </p>
                         <t t-set="_seen_w" t-value="[]"/>
                         <t t-foreach="doc.order_line.filtered(lambda l: l.product_id and (l.product_id.warranty_terms or '').strip())" t-as="_wline">

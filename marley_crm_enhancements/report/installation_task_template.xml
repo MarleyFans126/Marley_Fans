@@ -334,6 +334,24 @@
                             </td>
                         </tr>
                         <tr>
+                            <td style="border-bottom: 1px solid #f5a9ac; border-left: 1px solid #f5a9ac; padding: 16px 24px; font-weight: bold; font-size: 14px; vertical-align: middle;">
+                                Height arrangement scope
+                            </td>
+                            <td style="border-bottom: 1px solid #f5a9ac; border-right: 1px solid #f5a9ac; padding: 16px 24px; font-size: 14px; vertical-align: middle;">
+                                <t t-if="doc.inst_height_arrangement_scope == 'our_scope'">Our Scope</t>
+                                <t t-if="doc.inst_height_arrangement_scope == 'client_scope'">Client Scope</t>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="border-bottom: 1px solid #f5a9ac; border-left: 1px solid #f5a9ac; padding: 16px 24px; font-weight: bold; font-size: 14px; vertical-align: middle;">
+                                Stay arrangement scope
+                            </td>
+                            <td style="border-bottom: 1px solid #f5a9ac; border-right: 1px solid #f5a9ac; padding: 16px 24px; font-size: 14px; vertical-align: middle;">
+                                <t t-if="doc.inst_stay_arrangement_scope == 'our_scope'">Our Scope</t>
+                                <t t-if="doc.inst_stay_arrangement_scope == 'client_scope'">Client Scope</t>
+                            </td>
+                        </tr>
+                        <tr>
                             <td style="border-bottom: 1px solid #f5a9ac; border-left: 1px solid #f5a9ac; padding: 16px 24px; font-weight: bold; font-size: 14px; vertical-align: top;">
                                 Other important Information
                             </td>

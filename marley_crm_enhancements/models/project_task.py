@@ -103,6 +103,22 @@ class ProjectTask(models.Model):
     inst_electrical_wire = fields.Char(string='Required Electrical Wire', help='e.g. 150 Meter')
     inst_mounting_structure = fields.Char(string='Mounting Structure', help='e.g. PEB, RCC')
     inst_crane_rafter_distance = fields.Char(string='Distance Between Crane Top and Rafter Bottom', help='in mm')
+    inst_height_arrangement_scope = fields.Selection(
+        selection=[
+            ('our_scope', 'Our Scope'),
+            ('client_scope', 'Client Scope'),
+        ],
+        string='Height Arrangement Scope',
+        help='Who arranges the height access (scaffolding/lift/JCB).',
+    )
+    inst_stay_arrangement_scope = fields.Selection(
+        selection=[
+            ('our_scope', 'Our Scope'),
+            ('client_scope', 'Client Scope'),
+        ],
+        string='Stay Arrangement Scope',
+        help='Who arranges stay / accommodation for the installation crew.',
+    )
 
     # Other
     inst_other_info = fields.Text(string='Other Important Information')
