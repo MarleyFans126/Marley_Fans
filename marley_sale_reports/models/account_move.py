@@ -59,6 +59,40 @@ class AccountMove(models.Model):
         default=False,
         help='If checked, taxes will be shown in the Proforma Invoice PDF.',
     )
+    proforma_tax_percentage = fields.Float(
+        string='Tax Percentage (%)',
+        default=18.0,
+        help='Flat tax/GST rate applied to the untaxed amount on the '
+             'Proforma Invoice PDF (e.g. 18 for 18%). Used only when '
+             '"Print With Taxes" is enabled.',
+    )
+    proforma_tax_amount = fields.Monetary(
+        string='Proforma Tax Amount',
+        compute='_compute_proforma_totals',
+        store=True,
+        currency_field='currency_id',
+        help='Untaxed Amount × Tax Percentage. Shown on the Proforma PDF '
+             'when "Print With Taxes" is on; zero otherwise.',
+    )
+    proforma_amount_total = fields.Monetary(
+        string='Proforma Total',
+        compute='_compute_proforma_totals',
+        store=True,
+        currency_field='currency_id',
+        help='Untaxed Amount + Proforma Tax Amount. This is the grand '
+             'total printed on the Proforma Invoice PDF.',
+    )
+
+    @api.depends('amount_untaxed', 'proforma_tax_percentage', 'proforma_with_taxes')
+    def _compute_proforma_totals(self):
+        for move in self:
+            base = move.amount_untaxed or 0.0
+            if move.proforma_with_taxes:
+                tax = round(base * (move.proforma_tax_percentage or 0.0) / 100.0, 2)
+            else:
+                tax = 0.0
+            move.proforma_tax_amount = tax
+            move.proforma_amount_total = base + tax
     proforma_print_terms = fields.Boolean(
         string='Print Terms & Conditions',
         default=True,
@@ -81,11 +115,13 @@ class AccountMove(models.Model):
         currency_field='currency_id',
     )
 
-    @api.depends('advance_payment_percentage', 'amount_total', 'amount_untaxed', 'advance_include_taxes')
+    @api.depends('advance_payment_percentage', 'proforma_amount_total', 'amount_untaxed', 'advance_include_taxes')
     def _compute_advance_amount_due(self):
         for move in self:
             pct = move.advance_payment_percentage or 0.0
-            base = move.amount_total if move.advance_include_taxes else move.amount_untaxed
+            # Base on the proforma total (untaxed + manual % tax) when the
+            # user wants taxes included, else on the untaxed amount.
+            base = move.proforma_amount_total if move.advance_include_taxes else move.amount_untaxed
             move.advance_amount_due = round(base * pct / 100.0, 2)
 
     # ------------------------------------------------------------------

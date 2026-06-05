@@ -279,6 +279,40 @@ class SaleOrder(models.Model):
         default=False,
         help='If checked, taxes will be shown in the Proforma Invoice PDF.',
     )
+    proforma_tax_percentage = fields.Float(
+        string='Tax Percentage (%)',
+        default=18.0,
+        help='Flat tax/GST rate applied to the untaxed amount on the '
+             'Proforma Invoice PDF (e.g. 18 for 18%). Used only when '
+             '"Print With Taxes" is enabled.',
+    )
+    proforma_tax_amount = fields.Monetary(
+        string='Proforma Tax Amount',
+        compute='_compute_proforma_totals',
+        store=True,
+        currency_field='currency_id',
+        help='Untaxed Amount × Tax Percentage. Shown on the Proforma PDF '
+             'when "Print With Taxes" is on; zero otherwise.',
+    )
+    proforma_amount_total = fields.Monetary(
+        string='Proforma Total',
+        compute='_compute_proforma_totals',
+        store=True,
+        currency_field='currency_id',
+        help='Untaxed Amount + Proforma Tax Amount. This is the grand '
+             'total printed on the Proforma Invoice PDF.',
+    )
+
+    @api.depends('amount_untaxed', 'proforma_tax_percentage', 'proforma_with_taxes')
+    def _compute_proforma_totals(self):
+        for order in self:
+            base = order.amount_untaxed or 0.0
+            if order.proforma_with_taxes:
+                tax = round(base * (order.proforma_tax_percentage or 0.0) / 100.0, 2)
+            else:
+                tax = 0.0
+            order.proforma_tax_amount = tax
+            order.proforma_amount_total = base + tax
     proforma_print_terms = fields.Boolean(
         string='Print Terms & Conditions',
         default=True,
@@ -314,17 +348,19 @@ class SaleOrder(models.Model):
         help='Total amount minus advance received.',
     )
 
-    @api.depends('advance_payment_percentage', 'amount_total', 'amount_untaxed', 'advance_include_taxes')
+    @api.depends('advance_payment_percentage', 'proforma_amount_total', 'amount_untaxed', 'advance_include_taxes')
     def _compute_advance_amount_due(self):
         for order in self:
             pct = order.advance_payment_percentage or 0.0
-            base = order.amount_total if order.advance_include_taxes else order.amount_untaxed
+            # Base on the proforma total (untaxed + manual % tax) when the
+            # user wants taxes included, else on the untaxed amount.
+            base = order.proforma_amount_total if order.advance_include_taxes else order.amount_untaxed
             order.advance_amount_due = round(base * pct / 100.0, 2)
 
-    @api.depends('amount_total', 'advance_received')
+    @api.depends('proforma_amount_total', 'advance_received')
     def _compute_balance_due(self):
         for order in self:
-            order.balance_due = (order.amount_total or 0.0) - (order.advance_received or 0.0)
+            order.balance_due = (order.proforma_amount_total or 0.0) - (order.advance_received or 0.0)
 
     # ── Installation Cost Fields ─────────────────────────────────
     x_installation_cost = fields.Float(string='Installation Cost (per unit)')
