@@ -98,15 +98,14 @@
                     <group string="Proforma Print Options">
                         <group>
                             <field name="proforma_with_taxes"/>
-                            <field name="proforma_tax_percentage"
-                                   readonly="not proforma_with_taxes"/>
                             <field name="proforma_print_terms"/>
                             <field name="advance_payment_percentage"/>
-                            <field name="advance_include_taxes"/>
+                            <field name="advance_tax_percentage"
+                                   invisible="not proforma_with_taxes"/>
                             <field name="advance_received"/>
                         </group>
                         <group>
-                            <field name="proforma_tax_amount" readonly="1"/>
+                            <field name="proforma_tax_amount" string="GST 18% Amount" readonly="1"/>
                             <field name="proforma_amount_total" readonly="1"/>
                             <field name="advance_amount_due" readonly="1"/>
                             <field name="balance_due" readonly="1"/>

@@ -279,38 +279,31 @@ class SaleOrder(models.Model):
         default=False,
         help='If checked, taxes will be shown in the Proforma Invoice PDF.',
     )
-    proforma_tax_percentage = fields.Float(
-        string='Tax Percentage (%)',
-        default=18.0,
-        help='Flat tax/GST rate applied to the untaxed amount on the '
-             'Proforma Invoice PDF (e.g. 18 for 18%). Used only when '
-             '"Print With Taxes" is enabled.',
-    )
+    # GST is FIXED at 18% on every proforma — never variable.
     proforma_tax_amount = fields.Monetary(
-        string='Proforma Tax Amount',
+        string='GST 18% Amount',
         compute='_compute_proforma_totals',
         store=True,
         currency_field='currency_id',
-        help='Untaxed Amount × Tax Percentage. Shown on the Proforma PDF '
-             'when "Print With Taxes" is on; zero otherwise.',
+        help='Untaxed Amount × 18%. Shown on the Proforma PDF when '
+             '"Print With Taxes" is on; zero otherwise.',
     )
     proforma_amount_total = fields.Monetary(
         string='Proforma Total',
         compute='_compute_proforma_totals',
         store=True,
         currency_field='currency_id',
-        help='Untaxed Amount + Proforma Tax Amount. This is the grand '
-             'total printed on the Proforma Invoice PDF.',
+        help='Untaxed Amount + GST (18%). This is the grand total printed '
+             'on the Proforma Invoice PDF.',
     )
 
-    @api.depends('amount_untaxed', 'proforma_tax_percentage', 'proforma_with_taxes')
+    @api.depends('amount_untaxed', 'proforma_with_taxes')
     def _compute_proforma_totals(self):
+        # Fixed 18% GST — not configurable per order.
+        GST_RATE = 18.0
         for order in self:
             base = order.amount_untaxed or 0.0
-            if order.proforma_with_taxes:
-                tax = round(base * (order.proforma_tax_percentage or 0.0) / 100.0, 2)
-            else:
-                tax = 0.0
+            tax = round(base * GST_RATE / 100.0, 2) if order.proforma_with_taxes else 0.0
             order.proforma_tax_amount = tax
             order.proforma_amount_total = base + tax
     proforma_print_terms = fields.Boolean(
@@ -321,18 +314,23 @@ class SaleOrder(models.Model):
     advance_payment_percentage = fields.Float(
         string='Advance Payment %',
         default=0.0,
-        help='Enter percentage value (e.g. 70 for 70%).',
+        help='Percentage of the untaxed (pre-tax) goods value to collect '
+             'now (e.g. 70 for 70%).',
     )
-    advance_include_taxes = fields.Boolean(
-        string='Include Taxes in Advance',
-        default=False,
-        help='If checked, advance amount is calculated on total (with taxes). Otherwise on untaxed amount.',
+    advance_tax_percentage = fields.Float(
+        string='Tax % in Advance',
+        default=100.0,
+        help='Percentage of the total GST to collect now along with the '
+             'advance (e.g. 50 = collect half the GST now). 100 = collect '
+             'the full GST up-front; 0 = collect no GST in the advance.',
     )
     advance_amount_due = fields.Monetary(
-        string='Advance To Be Paid',
+        string='Advance To Be Paid Now',
         compute='_compute_advance_amount_due',
         store=True,
         currency_field='currency_id',
+        help='Amount the customer pays now = (Advance % × untaxed goods '
+             'value) + (Tax % × total GST).',
     )
     advance_received = fields.Monetary(
         string='Advance Received',
@@ -348,14 +346,18 @@ class SaleOrder(models.Model):
         help='Total amount minus advance received.',
     )
 
-    @api.depends('advance_payment_percentage', 'proforma_amount_total', 'amount_untaxed', 'advance_include_taxes')
+    @api.depends('advance_payment_percentage', 'amount_untaxed',
+                 'advance_tax_percentage', 'proforma_tax_amount')
     def _compute_advance_amount_due(self):
         for order in self:
             pct = order.advance_payment_percentage or 0.0
-            # Base on the proforma total (untaxed + manual % tax) when the
-            # user wants taxes included, else on the untaxed amount.
-            base = order.proforma_amount_total if order.advance_include_taxes else order.amount_untaxed
-            order.advance_amount_due = round(base * pct / 100.0, 2)
+            tax_pct = order.advance_tax_percentage or 0.0
+            # Advance % applies to the pre-tax (untaxed) goods value;
+            # Tax % applies to the total GST. Only that share of the GST
+            # is collected now. The two add up to the amount payable now.
+            advance_on_goods = round((order.amount_untaxed or 0.0) * pct / 100.0, 2)
+            tax_now = round((order.proforma_tax_amount or 0.0) * tax_pct / 100.0, 2)
+            order.advance_amount_due = advance_on_goods + tax_now
 
     @api.depends('proforma_amount_total', 'advance_received')
     def _compute_balance_due(self):

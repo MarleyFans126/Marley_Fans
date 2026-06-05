@@ -152,7 +152,7 @@
                                             &#8377; <t t-esc="'{:,.2f}'.format(line.price_unit)"/>
                                         </td>
                                         <td style="border: 1px solid #f5a9ac; padding: 10px 8px; text-align: center; font-size: 12px; vertical-align: top;">
-                                            GST @ <t t-esc="'%g' % doc.proforma_tax_percentage"/>%
+                                            GST @ 18%
                                         </td>
                                         <td style="border: 1px solid #f5a9ac; padding: 10px 8px; text-align: right; font-size: 13px; vertical-align: top; font-weight: bold;">
                                             &#8377; <t t-esc="'{:,.2f}'.format(line.price_subtotal)"/>
@@ -181,7 +181,7 @@
                             </tr>
                             <tr>
                                 <td colspan="3" style="border: none; background: transparent;"/>
-                                <td style="padding: 8px 12px; text-align: right; font-size: 13px; border: 1px solid #f5a9ac;">GST @ <t t-esc="'%g' % doc.proforma_tax_percentage"/>%</td>
+                                <td style="padding: 8px 12px; text-align: right; font-size: 13px; border: 1px solid #f5a9ac;">GST @ 18%</td>
                                 <td style="padding: 8px 12px; text-align: right; font-size: 13px; font-weight: bold; border: 1px solid #f5a9ac;">
                                     &#8377; <t t-esc="'{:,.2f}'.format(doc.proforma_tax_amount)"/>
                                 </td>
@@ -193,11 +193,22 @@
                                     &#8377; <t t-esc="'{:,.2f}'.format(doc.proforma_amount_total)"/>
                                 </td>
                             </tr>
+                            <t t-if="doc.advance_tax_percentage">
+                                <tr>
+                                    <td colspan="3" style="border: none; background: transparent;"/>
+                                    <td style="padding: 8px 12px; text-align: right; font-size: 13px; border: 1px solid #f5a9ac;">
+                                        GST in Advance (<t t-esc="'%g' % doc.advance_tax_percentage"/>%)
+                                    </td>
+                                    <td style="padding: 8px 12px; text-align: right; font-size: 13px; font-weight: bold; border: 1px solid #f5a9ac;">
+                                        &#8377; <t t-esc="'{:,.2f}'.format(doc.proforma_tax_amount * doc.advance_tax_percentage / 100.0)"/>
+                                    </td>
+                                </tr>
+                            </t>
                             <t t-if="doc.advance_payment_percentage > 0">
                                 <tr>
                                     <td colspan="3" style="border: none; background: transparent;"/>
                                     <td style="padding: 8px 12px; text-align: right; font-size: 13px; border: 1px solid #f5a9ac;">
-                                        Advance To Be Paid (<t t-esc="'%.0f' % doc.advance_payment_percentage"/>%)
+                                        Advance To Be Paid Now
                                     </td>
                                     <td style="padding: 8px 12px; text-align: right; font-size: 14px; font-weight: bold; border: 1px solid #f5a9ac; color: #1b2a4a;">
                                         &#8377; <t t-esc="'{:,.2f}'.format(doc.advance_amount_due)"/>
@@ -283,7 +294,7 @@
                                 <tr>
                                     <td colspan="2" style="border: none; background: transparent;"/>
                                     <td style="padding: 8px 12px; text-align: right; font-size: 13px; border: 1px solid #f5a9ac;">
-                                        Advance To Be Paid (<t t-esc="'%.0f' % doc.advance_payment_percentage"/>%)
+                                        Advance To Be Paid Now
                                     </td>
                                     <td style="padding: 8px 12px; text-align: right; font-size: 14px; font-weight: bold; border: 1px solid #f5a9ac; color: #1b2a4a;">
                                         &#8377; <t t-esc="'{:,.2f}'.format(doc.advance_amount_due)"/>
@@ -317,7 +328,7 @@
                         <!-- TAXES &amp; DUTIES -->
                         <div style="margin-bottom: 14px;">
                             <div class="section-heading">TAXES &amp; DUTIES:</div>
-                            <p class="section-text">GST at the rate of <t t-esc="'%g' % doc.proforma_tax_percentage"/>% shall be applicable on above quoted price.</p>
+                            <p class="section-text">GST at the rate of 18% shall be applicable on above quoted price.</p>
                         </div>
 
                         <!-- WARRANTY -->

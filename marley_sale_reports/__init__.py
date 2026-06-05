@@ -99,3 +99,64 @@ def _post_init_swap_quotation_report(env):
     except Exception as e:
         import logging
         logging.getLogger(__name__).warning("Could not swap quotation report template: %s", e)
+
+    # Consolidate sale taxes down to a single flat "GST 18%"
+    _post_init_setup_single_gst(env)
+
+
+def _post_init_setup_single_gst(env):
+    """Make 'GST 18%' the only sale tax users can pick.
+
+    * Set it as the company default sale tax (new products inherit it).
+    * Archive every OTHER active sale tax (the SGST/CGST/IGST split taxes
+      from this module AND the l10n_in '18% GST S' / '18% IGST S'
+      variants) so the order-line tax dropdown shows only 'GST 18%'.
+    * Disable the auto-apply GST fiscal positions so Odoo stops
+      swapping the single tax for the CGST+SGST / IGST split.
+
+    Archiving (active=False) is reversible and preserves history on
+    existing documents — it only hides the taxes from new dropdowns.
+    NOTE: a single 'GST 18%' line is fine for quotations/proformas but
+    is NOT valid for a legal intra-state tax invoice (which requires a
+    CGST 9% + SGST 9% split). Re-activate the split taxes if a
+    compliant tax invoice is ever needed.
+    """
+    import logging
+    _logger = logging.getLogger(__name__)
+    try:
+        gst18 = env.ref('marley_sale_reports.gst_sale_18', raise_if_not_found=False)
+        if not gst18:
+            _logger.warning("[GST] gst_sale_18 not found, skipping consolidation.")
+            return
+
+        # 1) Default sale tax on every company
+        for company in env['res.company'].search([]):
+            gst18_c = gst18.with_company(company)
+            if company.account_sale_tax_id != gst18_c:
+                company.account_sale_tax_id = gst18_c.id
+
+        # 2) Archive all other active SALE taxes (keep only GST 18%)
+        other_sale_taxes = env['account.tax'].search([
+            ('type_tax_use', '=', 'sale'),
+            ('active', '=', True),
+            ('id', '!=', gst18.id),
+        ])
+        if other_sale_taxes:
+            other_sale_taxes.write({'active': False})
+            _logger.info(
+                "[GST] Archived %d non-GST18 sale tax(es): %s",
+                len(other_sale_taxes), other_sale_taxes.mapped('name'),
+            )
+
+        # 3) Disable the auto-apply GST fiscal positions
+        for xmlid in (
+            'marley_sale_reports.fiscal_position_intra_state',
+            'marley_sale_reports.fiscal_position_inter_state',
+        ):
+            fp = env.ref(xmlid, raise_if_not_found=False)
+            if fp:
+                fp.write({'auto_apply': False, 'active': False})
+
+        _logger.info("[GST] Single 'GST 18%%' sale tax configured as default.")
+    except Exception as e:
+        _logger.warning("[GST] Could not consolidate sale taxes: %s", e)
