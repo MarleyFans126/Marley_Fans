@@ -253,9 +253,14 @@ class ProjectTask(models.Model):
                 return '\n'.join(parts)
 
             if partner:
-                task.inst_company_name = partner.name or ''
-                task.inst_company_address = _build_address(partner)
-                task.inst_gstin = partner.vat or ''
+                # Use the COMMERCIAL entity (parent company) for the company
+                # name, not the contact person. If `partner` is a contact like
+                # "Nithin" under "Anurag Engineering College",
+                # commercial_partner_id resolves to the company.
+                company = partner.commercial_partner_id or partner
+                task.inst_company_name = company.name or ''
+                task.inst_company_address = _build_address(company)
+                task.inst_gstin = company.vat or partner.vat or ''
             elif lead:
                 # Lead is at New / Qualify stage with no partner yet — fetch
                 # the address details directly from the lead fields.

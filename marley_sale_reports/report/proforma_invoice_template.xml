@@ -67,7 +67,8 @@
                     <!-- ===== TO ADDRESS ===== -->
                     <div style="margin-bottom: 14px; line-height: 1.7; font-size: 14px;">
                         <strong>To,</strong><br/>
-                        <strong><t t-esc="doc.partner_id.name"/></strong>
+                        <!-- Company (commercial entity), not the contact person -->
+                        <strong><t t-esc="doc.partner_id.commercial_partner_id.name"/></strong>
                         <t t-if="doc.partner_id.street"><br/><t t-esc="doc.partner_id.street"/></t>
                         <t t-if="doc.partner_id.street2"><br/><t t-esc="doc.partner_id.street2"/></t>
                         <br/>

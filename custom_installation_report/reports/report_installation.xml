@@ -40,7 +40,7 @@
 
             <!-- ============ TITLE ============ -->
             <h2 style="text-align: center; color: #1b2a4a; font-size: 20px; font-weight: bold; margin: 25px 0 20px 0;">
-                Installation for: <t t-esc="o.partner_id.name"/>
+                Installation for: <t t-esc="o.partner_id.commercial_partner_id.name"/>
             </h2>
 
             <!-- ============ DETAILS TABLE ============ -->
@@ -68,7 +68,7 @@
                         Company Details
                     </td>
                     <td style="border: 1px solid #ccc; padding: 10px 15px; vertical-align: top;">
-                        <t t-esc="o.partner_id.name"/><br/>
+                        <t t-esc="o.partner_id.commercial_partner_id.name"/><br/>
                         <t t-if="o.partner_id.street"><t t-esc="o.partner_id.street"/>,<br/></t>
                         <t t-if="o.partner_id.street2"><t t-esc="o.partner_id.street2"/>,<br/></t>
                         <t t-if="o.partner_id.city"><t t-esc="o.partner_id.city"/></t>
