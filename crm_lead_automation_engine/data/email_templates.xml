@@ -112,7 +112,6 @@ sales@marleyfans.in</p>
 
 <p>Best Regards,<br/>
 <b><t t-out="object.user_id.name or 'Sales Team'">Sales Team</t></b><br/>
-Sales Coordinator<br/>
 Marley Enterprises Private Limited<br/>
 <t t-if="object.user_id.phone"><t t-out="object.user_id.phone">+91 93916 27905</t></t>
 <t t-if="not object.user_id.phone">+91 93916 27905</t>
