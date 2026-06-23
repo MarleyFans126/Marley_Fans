@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <!-- Show the chatter "Send message" button only to administrators.
+         marleyCanSendMessage is added on the Chatter prototype. -->
+    <t t-inherit="mail.Chatter" t-inherit-mode="extension">
+        <xpath expr="//button[hasclass('o-mail-Chatter-sendMessage')]" position="attributes">
+            <attribute name="t-if">marleyCanSendMessage</attribute>
+        </xpath>
+    </t>
+
+</templates>

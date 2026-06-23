@@ -89,7 +89,7 @@
                         </tr>
                         <tr>
                             <td style="border-bottom: 1px solid #f5a9ac; border-left: 1px solid #f5a9ac; padding: 16px 24px; font-weight: bold; font-size: 14px; vertical-align: top;">
-                                Company Details
+                                Bill To Details
                             </td>
                             <td style="border-bottom: 1px solid #f5a9ac; border-right: 1px solid #f5a9ac; padding: 16px 24px; font-size: 14px; vertical-align: top; line-height: 1.7;">
                                 <t t-esc="addr_partner.name"/><br/>
@@ -115,10 +115,10 @@
                                 <t t-esc="doc.site_contact_number or ''"/>
                             </td>
                         </tr>
-                        <t t-if="doc.site_address_street or doc.site_address_city">
+                        <t t-if="doc.site_address_street or doc.site_address_city or doc.site_gstin">
                             <tr>
                                 <td style="border-bottom: 1px solid #f5a9ac; border-left: 1px solid #f5a9ac; padding: 16px 24px; font-weight: bold; font-size: 14px; vertical-align: top;">
-                                    Installation Site Address
+                                    Ship To Details
                                 </td>
                                 <td style="border-bottom: 1px solid #f5a9ac; border-right: 1px solid #f5a9ac; padding: 16px 24px; font-size: 14px; vertical-align: top; line-height: 1.7;">
                                     <t t-if="doc.site_address_street"><t t-esc="doc.site_address_street"/>,<br/></t>
@@ -126,6 +126,7 @@
                                     <t t-if="doc.site_address_city"><t t-esc="doc.site_address_city"/></t>
                                     <t t-if="doc.site_address_state_id"> <t t-esc="doc.site_address_state_id.name"/></t>
                                     <t t-if="doc.site_address_zip"> - <t t-esc="doc.site_address_zip"/></t>
+                                    <t t-if="doc.site_gstin"><br/>GSTIN <t t-esc="doc.site_gstin"/></t>
                                 </td>
                             </tr>
                         </t>

@@ -18,6 +18,17 @@
                         invisible="not partner_id"/>
             </xpath>
 
+            <!-- Button at the top of the Order Lines area to choose which
+                 products print on the Proforma Invoice PDF. -->
+            <xpath expr="//field[@name='order_line']" position="before">
+                <button name="action_select_proforma_lines"
+                        type="object"
+                        string="Select Proforma Products"
+                        class="btn-link"
+                        icon="fa-check-square-o"
+                        invisible="not order_line"/>
+            </xpath>
+
             <!-- Make the header "Print" button (state != 'sale') trigger the
                  Marley Quotation report directly instead of Odoo's default
                  sale.action_report_saleorder. The Print menu (cog dropdown)
@@ -151,6 +162,31 @@
                 <field name="list_price" string="List Price" optional="show"/>
                 <field name="special_discount_price" string="Special Discount Price" optional="show"/>
             </xpath>
+        </field>
+    </record>
+
+    <!-- Popup: choose which products print on the Proforma Invoice -->
+    <record id="proforma_line_select_wizard_form" model="ir.ui.view">
+        <field name="name">proforma.line.select.wizard.form</field>
+        <field name="model">proforma.line.select.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Select Products for Proforma">
+                <field name="order_id" invisible="1"/>
+                <p>
+                    Tick the products that should appear on the
+                    <strong>Proforma Invoice</strong> PDF. Unticked products
+                    stay on the order but are hidden from the proforma (and
+                    excluded from its totals).
+                </p>
+                <group>
+                    <field name="line_ids" widget="many2many_checkboxes" nolabel="1"/>
+                </group>
+                <footer>
+                    <button name="action_apply" type="object"
+                            string="Apply" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
         </field>
     </record>
 

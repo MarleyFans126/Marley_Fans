@@ -20,6 +20,7 @@
         'data/crm_stages.xml',
         'data/crm_lost_reasons.xml',
         'data/project_stages.xml',
+        'data/sales_project_access.xml',
         'report/installation_report.xml',
         'report/installation_template.xml',
         'report/installation_task_report.xml',
@@ -31,6 +32,12 @@
         'views/project_task_views.xml',
         'wizard/crm_lead_lost_views.xml',
     ],
+    'assets': {
+        'web.assets_backend': [
+            'marley_crm_enhancements/static/src/js/chatter_send_message_restrict.js',
+            'marley_crm_enhancements/static/src/xml/chatter_send_message_restrict.xml',
+        ],
+    },
     'installable': True,
     'application': False,
     'auto_install': False,

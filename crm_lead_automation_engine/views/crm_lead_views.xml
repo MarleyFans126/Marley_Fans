@@ -110,15 +110,18 @@
                  columns from a single typed term. -->
             <xpath expr="//search/field[1]" position="before">
                 <field name="contact_name" string="Search Anywhere"
-                       filter_domain="['|','|','|','|','|','|',
+                       filter_domain="['|','|','|','|','|','|','|',
                            ('name','ilike',self),
                            ('partner_name','ilike',self),
                            ('contact_name','ilike',self),
                            ('email_from','ilike',self),
                            ('phone','ilike',self),
                            ('lead_source','ilike',self),
+                           ('business_area','ilike',self),
                            ('description','ilike',self)]"/>
                 <field name="lead_source" string="Lead Source"/>
+                <field name="business_area" string="Business Area"
+                       filter_domain="[('business_area','ilike',self)]"/>
             </xpath>
 
             <filter name="salesperson" position="after">
@@ -151,15 +154,18 @@
             <!-- "Search Anywhere" + Lead Source on the Pipeline view -->
             <xpath expr="//search/field[1]" position="before">
                 <field name="contact_name" string="Search Anywhere"
-                       filter_domain="['|','|','|','|','|','|',
+                       filter_domain="['|','|','|','|','|','|','|',
                            ('name','ilike',self),
                            ('partner_name','ilike',self),
                            ('contact_name','ilike',self),
                            ('email_from','ilike',self),
                            ('phone','ilike',self),
                            ('lead_source','ilike',self),
+                           ('business_area','ilike',self),
                            ('description','ilike',self)]"/>
                 <field name="lead_source" string="Lead Source"/>
+                <field name="business_area" string="Business Area"
+                       filter_domain="[('business_area','ilike',self)]"/>
             </xpath>
 
             <filter name="assigned_to_me" position="attributes">

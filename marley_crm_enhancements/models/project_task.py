@@ -92,6 +92,7 @@ class ProjectTask(models.Model):
     inst_site_address_city = fields.Char(string='Site City')
     inst_site_address_state_id = fields.Many2one('res.country.state', string='Site State', domain="[('country_id.code', '=', 'IN')]")
     inst_site_address_zip = fields.Char(string='Site Pincode')
+    inst_site_gstin = fields.Char(string='Site GSTIN')
 
     # Advance Received (auto-fetched from payments against invoices)
     inst_advance_received = fields.Float(string='Advance Received', compute='_compute_advance_received', readonly=True)

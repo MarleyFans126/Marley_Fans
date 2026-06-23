@@ -280,12 +280,21 @@ class SaleOrder(models.Model):
         help='If checked, taxes will be shown in the Proforma Invoice PDF.',
     )
     # GST is FIXED at 18% on every proforma — never variable.
+    proforma_amount_untaxed = fields.Monetary(
+        string='Proforma Untaxed',
+        compute='_compute_proforma_totals',
+        store=True,
+        currency_field='currency_id',
+        help='Sum of the line subtotals that are flagged to print on the '
+             'proforma (print_on_proforma). Equals the order untaxed amount '
+             'when all lines are selected.',
+    )
     proforma_tax_amount = fields.Monetary(
         string='GST 18% Amount',
         compute='_compute_proforma_totals',
         store=True,
         currency_field='currency_id',
-        help='Untaxed Amount × 18%. Shown on the Proforma PDF when '
+        help='Proforma Untaxed × 18%. Shown on the Proforma PDF when '
              '"Print With Taxes" is on; zero otherwise.',
     )
     proforma_amount_total = fields.Monetary(
@@ -293,19 +302,42 @@ class SaleOrder(models.Model):
         compute='_compute_proforma_totals',
         store=True,
         currency_field='currency_id',
-        help='Untaxed Amount + GST (18%). This is the grand total printed '
+        help='Proforma Untaxed + GST (18%). This is the grand total printed '
              'on the Proforma Invoice PDF.',
     )
 
-    @api.depends('amount_untaxed', 'proforma_with_taxes')
+    @api.depends('order_line.price_subtotal', 'order_line.print_on_proforma',
+                 'order_line.display_type', 'proforma_with_taxes')
     def _compute_proforma_totals(self):
-        # Fixed 18% GST — not configurable per order.
+        # Fixed 18% GST — not configurable per order. Totals sum only the
+        # lines selected to print on the proforma.
         GST_RATE = 18.0
         for order in self:
-            base = order.amount_untaxed or 0.0
+            sel = order.order_line.filtered(
+                lambda l: not l.display_type and l.print_on_proforma)
+            base = sum(sel.mapped('price_subtotal'))
             tax = round(base * GST_RATE / 100.0, 2) if order.proforma_with_taxes else 0.0
+            order.proforma_amount_untaxed = base
             order.proforma_tax_amount = tax
             order.proforma_amount_total = base + tax
+
+    def action_select_proforma_lines(self):
+        """Open the popup to choose which product lines print on the proforma."""
+        self.ensure_one()
+        pre = self.order_line.filtered(
+            lambda l: not l.display_type and l.print_on_proforma)
+        wizard = self.env['proforma.line.select.wizard'].create({
+            'order_id': self.id,
+            'line_ids': [(6, 0, pre.ids)],
+        })
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Select Products for Proforma',
+            'res_model': 'proforma.line.select.wizard',
+            'res_id': wizard.id,
+            'view_mode': 'form',
+            'target': 'new',
+        }
     proforma_print_terms = fields.Boolean(
         string='Print Terms & Conditions',
         default=True,
@@ -346,16 +378,17 @@ class SaleOrder(models.Model):
         help='Total amount minus advance received.',
     )
 
-    @api.depends('advance_payment_percentage', 'amount_untaxed',
+    @api.depends('advance_payment_percentage', 'proforma_amount_untaxed',
                  'advance_tax_percentage', 'proforma_tax_amount')
     def _compute_advance_amount_due(self):
         for order in self:
             pct = order.advance_payment_percentage or 0.0
             tax_pct = order.advance_tax_percentage or 0.0
-            # Advance % applies to the pre-tax (untaxed) goods value;
-            # Tax % applies to the total GST. Only that share of the GST
-            # is collected now. The two add up to the amount payable now.
-            advance_on_goods = round((order.amount_untaxed or 0.0) * pct / 100.0, 2)
+            # Advance % applies to the pre-tax (untaxed) goods value of the
+            # lines printed on the proforma; Tax % applies to the proforma
+            # GST. Only that share is collected now. The two add up to the
+            # amount payable now.
+            advance_on_goods = round((order.proforma_amount_untaxed or 0.0) * pct / 100.0, 2)
             tax_now = round((order.proforma_tax_amount or 0.0) * tax_pct / 100.0, 2)
             order.advance_amount_due = advance_on_goods + tax_now
 

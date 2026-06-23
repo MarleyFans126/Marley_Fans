@@ -65,7 +65,7 @@
                 <div class="marley-q-body">
 
                     <!-- ===== CENTERED TITLE ===== -->
-                    <div style="text-align: center; margin: 4px 0 14px 0;">
+                    <div style="text-align: center; margin: 0 0 6px 0;">
                         <span style="font-size: 20px; font-weight: bold; color: #e30613; text-decoration: underline; letter-spacing: 2px;">
                             QUOTATION
                         </span>
@@ -159,8 +159,21 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <t t-foreach="doc.order_line.filtered(lambda l: not l.display_type)" t-as="line">
-                                <tr style="page-break-inside: avoid;">
+                            <t t-foreach="doc.order_line" t-as="line">
+                                <!-- Section heading row (full width, bold) -->
+                                <tr t-if="line.display_type == 'line_section'" style="page-break-inside: avoid;">
+                                    <td colspan="5" style="border: 1px solid #f5a9ac; padding: 8px 10px; font-size: 13px; font-weight: bold; background-color: #fafafa;">
+                                        <t t-esc="line.name"/>
+                                    </td>
+                                </tr>
+                                <!-- Note row (full width, italic) -->
+                                <tr t-elif="line.display_type == 'line_note'" style="page-break-inside: avoid;">
+                                    <td colspan="5" style="border: 1px solid #f5a9ac; padding: 8px 10px; font-size: 12px; font-style: italic; white-space: pre-line;">
+                                        <t t-esc="line.name"/>
+                                    </td>
+                                </tr>
+                                <!-- Product row -->
+                                <tr t-else="" style="page-break-inside: avoid;">
                                     <td style="border: 1px solid #f5a9ac; padding: 10px 8px; font-size: 13px; vertical-align: top; line-height: 1.7;">
                                         <strong><t t-esc="line.product_id.name or line.name"/></strong>
                                             <t t-set="_pname" t-value="(line.product_id.name or '').strip()"/>

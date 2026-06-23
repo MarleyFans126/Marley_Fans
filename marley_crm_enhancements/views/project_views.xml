@@ -46,8 +46,8 @@
                         </group>
                     </group>
 
-                    <!-- Installation Site Address -->
-                    <group string="Installation Site Address">
+                    <!-- Ship To (installation site address + site GSTIN) -->
+                    <group string="Ship To Details">
                         <group>
                             <field name="site_address_street" placeholder="Street address..."/>
                             <field name="site_address_street2" placeholder="Street address line 2..."/>
@@ -56,6 +56,7 @@
                         <group>
                             <field name="site_address_state_id" placeholder="Select State..."/>
                             <field name="site_address_zip" placeholder="Pincode"/>
+                            <field name="site_gstin" placeholder="Site GST Number"/>
                         </group>
                     </group>
 
