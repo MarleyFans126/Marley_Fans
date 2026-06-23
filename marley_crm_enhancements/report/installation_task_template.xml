@@ -323,7 +323,7 @@
                                 Mounting structure
                             </td>
                             <td style="border-bottom: 1px solid #f5a9ac; border-right: 1px solid #f5a9ac; padding: 16px 24px; font-size: 14px; vertical-align: middle;">
-                                <t t-esc="doc.inst_mounting_structure or ''"/>
+                                <span t-field="doc.inst_mounting_structure"/>
                             </td>
                         </tr>
                         <tr>

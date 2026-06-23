@@ -68,7 +68,7 @@
                             <field name="height_arrangement_scope"/>
                         </group>
                         <group>
-                            <field name="mounting_structure" placeholder="e.g. PEB, RCC"/>
+                            <field name="mounting_structure"/>
                             <field name="crane_rafter_distance" placeholder="e.g. 200 mm"/>
                             <field name="stay_arrangement_scope"/>
                         </group>

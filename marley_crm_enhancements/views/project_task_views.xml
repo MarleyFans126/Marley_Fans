@@ -140,7 +140,7 @@
                                 <field name="inst_height_arrangement_scope"/>
                             </group>
                             <group>
-                                <field name="inst_mounting_structure" placeholder="e.g. PEB"/>
+                                <field name="inst_mounting_structure"/>
                                 <field name="inst_crane_rafter_distance" placeholder="e.g. 200 mm"/>
                                 <field name="inst_stay_arrangement_scope"/>
                             </group>

@@ -102,7 +102,15 @@ class ProjectTask(models.Model):
     inst_ext_rod_length = fields.Char(string='Ext Rod Length', help='e.g. 500 mm')
     inst_field_height = fields.Char(string='Field Height', help='e.g. 6 MTR')
     inst_electrical_wire = fields.Char(string='Required Electrical Wire', help='e.g. 150 Meter')
-    inst_mounting_structure = fields.Char(string='Mounting Structure', help='e.g. PEB, RCC')
+    inst_mounting_structure = fields.Selection(
+        selection=[
+            ('rcc_concrete', 'RCC CONCRETE'),
+            ('i_beam', 'I BEAM MOUNTING'),
+            ('sandwich', 'SANDWICH MOUNTING'),
+            ('other', 'OTHER'),
+        ],
+        string='Mounting Structure',
+    )
     inst_crane_rafter_distance = fields.Char(string='Distance Between Crane Top and Rafter Bottom', help='in mm')
     inst_height_arrangement_scope = fields.Selection(
         selection=[

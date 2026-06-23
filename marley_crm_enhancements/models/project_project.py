@@ -77,7 +77,15 @@ class ProjectProject(models.Model):
     ext_rod_length = fields.Char(string='Ext Rod Length')
     field_height = fields.Char(string='Field Height')
     required_electrical_wire = fields.Char(string='Required Electrical Wire')
-    mounting_structure = fields.Char(string='Mounting Structure')
+    mounting_structure = fields.Selection(
+        selection=[
+            ('rcc_concrete', 'RCC CONCRETE'),
+            ('i_beam', 'I BEAM MOUNTING'),
+            ('sandwich', 'SANDWICH MOUNTING'),
+            ('other', 'OTHER'),
+        ],
+        string='Mounting Structure',
+    )
     crane_rafter_distance = fields.Char(string='Distance Between Crane Top and Rafter Bottom')
     height_arrangement_scope = fields.Selection(
         selection=[
