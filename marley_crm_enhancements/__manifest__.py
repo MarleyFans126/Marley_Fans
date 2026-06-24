@@ -36,6 +36,7 @@
         'web.assets_backend': [
             'marley_crm_enhancements/static/src/js/chatter_send_message_restrict.js',
             'marley_crm_enhancements/static/src/xml/chatter_send_message_restrict.xml',
+            'marley_crm_enhancements/static/src/js/message_edit_delete_restrict.js',
         ],
     },
     'installable': True,
