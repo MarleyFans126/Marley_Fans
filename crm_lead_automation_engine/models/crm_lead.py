@@ -440,6 +440,9 @@ class CrmLead(models.Model):
             if not template_name or not flag_field:
                 continue
 
+            # Scope by model so we never pick up a same-named template that
+            # belongs to a different model (e.g. a crm.stage / sale.order
+            # template that happens to share the display name).
             tmpl = self.env['mail.template'].search([
                 ('name', '=', template_name),
                 ('model', '=', 'crm.lead'),
