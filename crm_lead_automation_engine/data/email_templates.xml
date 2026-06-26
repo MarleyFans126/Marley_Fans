@@ -146,10 +146,13 @@ Marley Enterprises Private Limited<br/>
 
 <p>Best Regards,<br/>
 <b><t t-out="object.user_id.name or 'Sales Team'">Sales Team</t></b><br/>
-Sales Team<br/>
 Marley Enterprises Private Limited<br/>
-+91 93916 27905<br/>
-sales@marleyfans.in</p>
+<t t-if="object.user_id.phone"><t t-out="object.user_id.phone">+91 93916 27905</t></t>
+<t t-if="not object.user_id.phone">+91 93916 27905</t>
+<br/>
+<t t-if="object.user_id.email"><t t-out="object.user_id.email">sales@marleyfans.in</t></t>
+<t t-if="not object.user_id.email">sales@marleyfans.in</t>
+</p>
 </div>
         </field>
         <field name="auto_delete" eval="False"/>
