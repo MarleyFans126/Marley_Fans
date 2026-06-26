@@ -70,6 +70,7 @@ sales@marleyfans.in</p>
 <p>Thank you for your interest in our fans. Your inquiry has now been moved to the next stage, and our concerned team member will assist you further with detailed discussions, technical support, and the best suitable solution for your requirement.</p>
 
 <p><b>Contact Details:</b><br/>
+<b><t t-out="object.user_id.name or 'Sales Team'">Sales Team</t></b><br/>
 <t t-if="object.user_id.phone"><t t-out="object.user_id.phone">+91 93916 27905</t></t>
 <t t-if="not object.user_id.phone">+91 93916 27905</t>
 <br/>
