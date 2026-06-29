@@ -91,6 +91,7 @@
                                 <field name="inst_advance_received" readonly="1" widget="monetary"/>
                                 <field name="inst_balance_amount" widget="monetary" readonly="1"/>
                                 <field name="inst_amount_in_words" readonly="1"/>
+                                <field name="inst_payment_terms_text" readonly="1"/>
                             </group>
                         </group>
 
