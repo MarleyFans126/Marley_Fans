@@ -126,25 +126,28 @@ Marley Enterprises Private Limited<br/>
         <field name="email_to">{{ object.email_from }}</field>
         <field name="body_html" type="html">
 <div style="margin:0; padding:0; font-family:Arial,sans-serif; font-size:14px; color:#333;">
-<p>Dear Valued Customer,</p>
+<p>Dear <t t-out="object.contact_name or object.partner_id.name or 'Valued Customer'">Valued Customer</t>,</p>
 
 <p>Greetings from <b>Marley Enterprises!</b></p>
 
-<p>We sincerely thank you for choosing us. We are delighted to have your confirmation and look forward to delivering the best solution for your requirement.</p>
+<p>Thank you for placing your order with Marley Enterprises. We truly appreciate your trust and look forward to delivering the best ventilation solution for your requirement.</p>
 
-<p>Our team will begin the next steps and stay in touch for smooth execution.</p>
+<p>Our team will now begin processing your order and will stay in touch to ensure smooth execution. For any order updates, installation coordination, or after-sales support, please feel free to connect with:</p>
 
-<p>Looking forward to working together.</p>
+<p><b>Ms. Anuradha R</b><br/>
+📞 +91 92810 81554<br/>
+📧 crm@marleyfans.in</p>
+
+<p><b>Customer Helpline:</b><br/>
+📞 +91 99499 45457</p>
+
+<p>Thank you once again for choosing Marley Enterprises. We look forward to serving you.</p>
 
 <p>Best Regards,<br/>
 <b><t t-out="object.user_id.name or 'Sales Team'">Sales Team</t></b><br/>
 Marley Enterprises Private Limited<br/>
-<t t-if="object.user_id.phone"><t t-out="object.user_id.phone">+91 93916 27905</t></t>
-<t t-if="not object.user_id.phone">+91 93916 27905</t>
-<br/>
-<t t-if="object.user_id.email"><t t-out="object.user_id.email">sales@marleyfans.in</t></t>
-<t t-if="not object.user_id.email">sales@marleyfans.in</t>
-</p>
+📞 <t t-out="object.user_id.phone or '+91 99499 45457'">+91 99499 45457</t><br/>
+📧 <t t-out="object.user_id.email or 'sales@marleyfans.in'">sales@marleyfans.in</t></p>
 </div>
         </field>
         <field name="auto_delete" eval="False"/>
