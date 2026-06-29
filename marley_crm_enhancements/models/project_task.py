@@ -406,6 +406,7 @@ class ProjectTask(models.Model):
     # ------------------------------------------------------------------
     @api.depends('sale_order_id',
                  'sale_order_id.amount_total',
+                 'installation_line_ids.price_subtotal',
                  'project_id.lead_id',
                  'lead_id')
     def _compute_invoice_details(self):
@@ -415,6 +416,11 @@ class ProjectTask(models.Model):
                 continue
             so = task._get_related_sale_order()
             if not so:
+                # No quotation linked — fall back to the task's own product
+                # lines: untaxed subtotal + 18% GST, so the amount isn't zero
+                # when details aren't imported from a quotation.
+                line_total = sum(task.installation_line_ids.mapped('price_subtotal'))
+                task.inst_invoice_value = (line_total * 1.18) if line_total else 0.0
                 continue
             # Posted invoices totals first, otherwise SO total (proforma amount)
             invoices = so.invoice_ids.filtered(
