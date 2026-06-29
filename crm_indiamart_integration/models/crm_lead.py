@@ -1,4 +1,4 @@
-from odoo import models, fields, api, _
+from odoo import models, fields, api, _, SUPERUSER_ID
 import logging
 
 _logger = logging.getLogger(__name__)
@@ -63,25 +63,26 @@ class CrmLead(models.Model):
                     "[INIT] Converted %d existing IndiaMART leads to opportunities.",
                     self.env.cr.rowcount,
                 )
-            # Move records assigned to OdooBot (id=1) onto a real admin user so
-            # they show up under the current user's "My Pipeline".
-            admin = self.env.ref('base.user_admin', raise_if_not_found=False)
-            if admin and admin.id != 1:
-                self.env.cr.execute(
-                    """
-                    UPDATE crm_lead
-                    SET user_id = %s
-                    WHERE is_indiamart = TRUE
-                      AND type = 'opportunity'
-                      AND user_id = 1
-                    """,
-                    (admin.id,),
+            # Give IndiaMART leads a DEFAULT owner (OdooBot, id=1) only when they
+            # have NO salesperson. Same policy as AAJJO: new lead → OdooBot, an
+            # admin assigns a real rep later, and that assignment persists. Never
+            # override a manually-assigned salesperson (and don't auto-bump to
+            # admin) — raw SQL here bypasses tracking, so any override would
+            # silently revert reps on every upgrade.
+            self.env.cr.execute(
+                """
+                UPDATE crm_lead
+                SET user_id = 1
+                WHERE is_indiamart = TRUE
+                  AND type = 'opportunity'
+                  AND user_id IS NULL
+                """
+            )
+            if self.env.cr.rowcount:
+                _logger.info(
+                    "[INIT] Assigned %d unowned IndiaMART opportunities to OdooBot (default salesperson).",
+                    self.env.cr.rowcount,
                 )
-                if self.env.cr.rowcount:
-                    _logger.info(
-                        "[INIT] Reassigned %d IndiaMART opportunities from OdooBot to admin.",
-                        self.env.cr.rowcount,
-                    )
         except Exception as e:
             _logger.warning("[INIT] IndiaMART lead→opportunity migration failed: %s", e)
 
@@ -644,6 +645,9 @@ class CrmLead(models.Model):
                     'street': api_lead.get('SENDER_ADDRESS') or False,
                     'source_id': source.id if source else False,
                     'is_indiamart': True,
+                    # Default salesperson for IndiaMART leads = OdooBot (id=1),
+                    # same policy as AAJJO. Admins reassign to a real rep later.
+                    'user_id': SUPERUSER_ID,
                     'stage_id': stage.id if stage else False,
                     'team_id': team.id if team else False,
                     'external_lead_id': api_lead_id,
