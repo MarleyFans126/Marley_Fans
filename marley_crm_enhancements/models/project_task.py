@@ -83,7 +83,7 @@ class ProjectTask(models.Model):
         ('to_pay', 'To Pay'),
         ('to_be_billed', 'To be Billed'),
     ], string='Transportation Terms', default='paid')
-    inst_invoice_value = fields.Float(string='Invoice Value', compute='_compute_invoice_details', readonly=True)
+    inst_invoice_value = fields.Float(string='Invoice Value', compute='_compute_derived_amounts', store=True, readonly=True)
     inst_amount_in_words = fields.Char(string='Amount In Words', compute='_compute_amount_words')
 
     # Installation Site Address (may differ from company address)
@@ -98,9 +98,9 @@ class ProjectTask(models.Model):
     inst_advance_received = fields.Float(string='Advance Received', compute='_compute_advance_received', readonly=True)
     inst_balance_amount = fields.Float(string='Balance Amount', compute='_compute_balance_amount', readonly=True)
     # Basic (untaxed) + 18% GST split of the GST-inclusive invoice value (report use)
-    inst_basic_value = fields.Float(string='Basic Value', compute='_compute_basic_gst', readonly=True)
-    inst_gst_value = fields.Float(string='GST Value', compute='_compute_basic_gst', readonly=True)
-    inst_payment_terms_text = fields.Text(string='Payment Terms', compute='_compute_payment_terms_text', readonly=True)
+    inst_basic_value = fields.Float(string='Basic Value', compute='_compute_basic_value', store=True, readonly=False)
+    inst_gst_value = fields.Float(string='GST Value', compute='_compute_derived_amounts', store=True, readonly=True)
+    inst_payment_terms_text = fields.Text(string='Payment Terms', compute='_compute_payment_terms_text', store=True, readonly=False)
 
     # Site Specification
     inst_ext_rod_length = fields.Char(string='Ext Rod Length', help='e.g. 500 mm')
@@ -368,20 +368,25 @@ class ProjectTask(models.Model):
         for task in self:
             task.inst_balance_amount = (task.inst_invoice_value or 0.0) - (task.inst_advance_received or 0.0)
 
-    @api.depends('inst_invoice_value')
-    def _compute_basic_gst(self):
-        """Split the GST-inclusive invoice value into basic (untaxed) + 18% GST."""
+    @api.depends('inst_basic_value')
+    def _compute_derived_amounts(self):
+        """GST (18%) and the GST-inclusive Total, derived from the (editable)
+        basic value: GST = basic x 0.18, Total = basic x 1.18."""
         for task in self:
-            total = task.inst_invoice_value or 0.0
-            task.inst_basic_value = (total / 1.18) if total else 0.0
-            task.inst_gst_value = total - task.inst_basic_value
+            base = task.inst_basic_value or 0.0
+            task.inst_gst_value = base * 0.18
+            task.inst_invoice_value = base * 1.18
 
     @api.depends('sale_order_id', 'project_id.lead_id', 'lead_id')
     def _compute_payment_terms_text(self):
-        """Payment-schedule text from the related sale order (same field the proforma uses)."""
+        """Payment-schedule text from the related sale order. Editable: only
+        auto-filled when empty so a manual override is preserved."""
         for task in self:
+            if task.inst_payment_terms_text:
+                continue
             so = task._get_related_sale_order() if task.is_installation else False
-            task.inst_payment_terms_text = (getattr(so, 'payment_terms_text', '') or '') if so else ''
+            if so:
+                task.inst_payment_terms_text = getattr(so, 'payment_terms_text', '') or ''
 
     # ------------------------------------------------------------------
     # Auto-fetch: Product models from Sale Order lines
@@ -405,31 +410,33 @@ class ProjectTask(models.Model):
     # Auto-fetch: Invoice value from Sale Order / Invoice
     # ------------------------------------------------------------------
     @api.depends('sale_order_id',
-                 'sale_order_id.amount_total',
+                 'sale_order_id.amount_untaxed',
                  'installation_line_ids.price_subtotal',
                  'project_id.lead_id',
                  'lead_id')
-    def _compute_invoice_details(self):
+    def _compute_basic_value(self):
+        """Basic (untaxed) amount — editable. Auto-filled when empty from the
+        quotation's untaxed total (or posted invoices), else from the task's own
+        product lines. GST and Total derive from this. Use "Refresh Installation
+        Details" to clear + re-fetch."""
         for task in self:
-            task.inst_invoice_value = 0.0
             if not task.is_installation:
+                continue
+            if task.inst_basic_value:   # manual / already set — preserve
                 continue
             so = task._get_related_sale_order()
             if not so:
-                # No quotation linked — fall back to the task's own product
-                # lines: untaxed subtotal + 18% GST, so the amount isn't zero
-                # when details aren't imported from a quotation.
-                line_total = sum(task.installation_line_ids.mapped('price_subtotal'))
-                task.inst_invoice_value = (line_total * 1.18) if line_total else 0.0
+                # No quotation linked — fall back to the task's own product lines.
+                task.inst_basic_value = sum(task.installation_line_ids.mapped('price_subtotal'))
                 continue
-            # Posted invoices totals first, otherwise SO total (proforma amount)
+            # Posted invoices first, otherwise the SO (proforma) untaxed amount.
             invoices = so.invoice_ids.filtered(
                 lambda i: i.state == 'posted' and i.move_type == 'out_invoice'
             )
             if invoices:
-                task.inst_invoice_value = sum(invoices.mapped('amount_total'))
+                task.inst_basic_value = sum(invoices.mapped('amount_untaxed'))
             else:
-                task.inst_invoice_value = so.amount_total or 0.0
+                task.inst_basic_value = so.amount_untaxed or 0.0
 
     # ------------------------------------------------------------------
     # Amount in words
@@ -498,11 +505,14 @@ class ProjectTask(models.Model):
             'inst_site_contact': False,
             'inst_site_phone': False,
             'inst_models_to_transport': False,
-            'inst_invoice_value': 0.0,
+            'inst_basic_value': 0.0,
+            'inst_payment_terms_text': False,
         })
         self._compute_installation_details()
         self._compute_product_details()
-        self._compute_invoice_details()
+        self._compute_basic_value()
+        self._compute_derived_amounts()
+        self._compute_payment_terms_text()
         return {
             'type': 'ir.actions.client',
             'tag': 'display_notification',

@@ -87,11 +87,11 @@
                                 <field name="inst_transportation_terms"/>
                             </group>
                             <group>
-                                <field name="inst_basic_value" string="Basic Value" widget="monetary" readonly="1"/>
+                                <field name="inst_basic_value" string="Basic Value" widget="monetary"/>
                                 <field name="inst_gst_value" string="GST Value (18%)" widget="monetary" readonly="1"/>
                                 <field name="inst_invoice_value" string="Total" widget="monetary" readonly="1"/>
                                 <field name="inst_amount_in_words" readonly="1"/>
-                                <field name="inst_payment_terms_text" readonly="1"/>
+                                <field name="inst_payment_terms_text"/>
                             </group>
                         </group>
 
