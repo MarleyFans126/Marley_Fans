@@ -155,31 +155,31 @@
                         </tr>
                         <tr>
                             <td style="border-bottom: 1px solid #f5a9ac; border-left: 1px solid #f5a9ac; padding: 16px 24px; font-size: 14px; font-weight: bold; vertical-align: middle;">
-                                Invoice Value:
+                                Basic Value:
                             </td>
                             <td style="border-bottom: 1px solid #f5a9ac; border-right: 1px solid #f5a9ac; padding: 16px 24px; font-size: 14px; vertical-align: middle;">
-                                <t t-if="doc.inst_invoice_value">
-                                    <t t-esc="'{:,.1f}'.format(doc.inst_invoice_value)"/>
+                                <t t-if="doc.inst_basic_value">
+                                    &#8377; <t t-esc="'{:,.2f}'.format(doc.inst_basic_value)"/>
                                 </t>
                             </td>
                         </tr>
                         <tr>
                             <td style="border-bottom: 1px solid #f5a9ac; border-left: 1px solid #f5a9ac; padding: 16px 24px; font-size: 14px; font-weight: bold; vertical-align: middle;">
-                                Advance Received:
+                                GST Value (18%):
                             </td>
                             <td style="border-bottom: 1px solid #f5a9ac; border-right: 1px solid #f5a9ac; padding: 16px 24px; font-size: 14px; vertical-align: middle;">
-                                <t t-if="doc.inst_advance_received">
-                                    &#8377; <t t-esc="'{:,.2f}'.format(doc.inst_advance_received)"/>
+                                <t t-if="doc.inst_gst_value">
+                                    &#8377; <t t-esc="'{:,.2f}'.format(doc.inst_gst_value)"/>
                                 </t>
                             </td>
                         </tr>
                         <tr>
                             <td style="border-bottom: 1px solid #f5a9ac; border-left: 1px solid #f5a9ac; padding: 16px 24px; font-size: 14px; font-weight: bold; vertical-align: middle;">
-                                Balance Amount:
+                                Total:
                             </td>
                             <td style="border-bottom: 1px solid #f5a9ac; border-right: 1px solid #f5a9ac; padding: 16px 24px; font-size: 14px; vertical-align: middle; font-weight: bold;">
-                                <t t-if="doc.inst_balance_amount">
-                                    &#8377; <t t-esc="'{:,.2f}'.format(doc.inst_balance_amount)"/>
+                                <t t-if="doc.inst_invoice_value">
+                                    &#8377; <t t-esc="'{:,.2f}'.format(doc.inst_invoice_value)"/>
                                 </t>
                             </td>
                         </tr>
@@ -189,6 +189,14 @@
                             </td>
                             <td style="border-bottom: 1px solid #f5a9ac; border-right: 1px solid #f5a9ac; padding: 16px 24px; font-size: 14px; vertical-align: middle;">
                                 <t t-esc="doc.inst_amount_in_words or ''"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="border-bottom: 1px solid #f5a9ac; border-left: 1px solid #f5a9ac; padding: 16px 24px; font-size: 14px; font-weight: bold; vertical-align: middle;">
+                                Payment Terms:
+                            </td>
+                            <td style="border-bottom: 1px solid #f5a9ac; border-right: 1px solid #f5a9ac; padding: 16px 24px; font-size: 14px; vertical-align: middle; white-space: pre-line;">
+                                <t t-esc="doc.inst_payment_terms_text or ''"/>
                             </td>
                         </tr>
                     </table>

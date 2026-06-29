@@ -72,6 +72,9 @@ class ProjectProject(models.Model):
     # Advance Received (auto-fetched from payments against invoices)
     advance_received = fields.Float(string='Advance Received', compute='_compute_advance_received', store=True, readonly=False)
     balance_amount = fields.Float(string='Balance Amount', compute='_compute_balance_amount', store=True)
+    # Basic (untaxed) + 18% GST split of the GST-inclusive invoice value (report use)
+    basic_value = fields.Float(string='Basic Value', compute='_compute_basic_gst')
+    gst_value = fields.Float(string='GST Value', compute='_compute_basic_gst')
 
     # Site Specification
     ext_rod_length = fields.Char(string='Ext Rod Length')
@@ -203,6 +206,15 @@ class ProjectProject(models.Model):
     def _compute_balance_amount(self):
         for rec in self:
             rec.balance_amount = (rec.invoice_value or 0.0) - (rec.advance_received or 0.0)
+
+    @api.depends('invoice_value')
+    def _compute_basic_gst(self):
+        """Split the GST-inclusive invoice value into basic (untaxed) + 18% GST.
+        Marley applies a flat 18% GST, so basic = total / 1.18."""
+        for rec in self:
+            total = rec.invoice_value or 0.0
+            rec.basic_value = (total / 1.18) if total else 0.0
+            rec.gst_value = total - rec.basic_value
 
     @api.depends('invoice_value')
     def _compute_amount_in_words(self):

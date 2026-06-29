@@ -97,6 +97,10 @@ class ProjectTask(models.Model):
     # Advance Received (auto-fetched from payments against invoices)
     inst_advance_received = fields.Float(string='Advance Received', compute='_compute_advance_received', readonly=True)
     inst_balance_amount = fields.Float(string='Balance Amount', compute='_compute_balance_amount', readonly=True)
+    # Basic (untaxed) + 18% GST split of the GST-inclusive invoice value (report use)
+    inst_basic_value = fields.Float(string='Basic Value', compute='_compute_basic_gst', readonly=True)
+    inst_gst_value = fields.Float(string='GST Value', compute='_compute_basic_gst', readonly=True)
+    inst_payment_terms_text = fields.Text(string='Payment Terms', compute='_compute_payment_terms_text', readonly=True)
 
     # Site Specification
     inst_ext_rod_length = fields.Char(string='Ext Rod Length', help='e.g. 500 mm')
@@ -354,6 +358,21 @@ class ProjectTask(models.Model):
     def _compute_balance_amount(self):
         for task in self:
             task.inst_balance_amount = (task.inst_invoice_value or 0.0) - (task.inst_advance_received or 0.0)
+
+    @api.depends('inst_invoice_value')
+    def _compute_basic_gst(self):
+        """Split the GST-inclusive invoice value into basic (untaxed) + 18% GST."""
+        for task in self:
+            total = task.inst_invoice_value or 0.0
+            task.inst_basic_value = (total / 1.18) if total else 0.0
+            task.inst_gst_value = total - task.inst_basic_value
+
+    @api.depends('sale_order_id', 'project_id.lead_id', 'lead_id')
+    def _compute_payment_terms_text(self):
+        """Payment-schedule text from the related sale order (same field the proforma uses)."""
+        for task in self:
+            so = task._get_related_sale_order() if task.is_installation else False
+            task.inst_payment_terms_text = (getattr(so, 'payment_terms_text', '') or '') if so else ''
 
     # ------------------------------------------------------------------
     # Auto-fetch: Product models from Sale Order lines
