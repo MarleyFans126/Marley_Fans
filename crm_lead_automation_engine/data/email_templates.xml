@@ -62,27 +62,23 @@ sales@marleyfans.in</p>
         <field name="email_to">{{ object.email_from }}</field>
         <field name="body_html" type="html">
 <div style="margin:0; padding:0; font-family:Arial,sans-serif; font-size:14px; color:#333;">
-<p>Dear Valued Customer,</p>
+<p>Dear <t t-out="object.contact_name or object.partner_id.name or 'Valued Customer'">Valued Customer</t>,</p>
 
 <p>Greetings from <b>Marley Enterprises!</b></p>
 
-<p>Thank you for your interest in our fans. Your inquiry has now been moved to the next stage, and our concerned team member will assist you further with detailed discussions, technical support, and the best suitable solution for your requirement.</p>
+<p>My name is <b><t t-out="object.user_id.name or 'Sales Team'">Sales Team</t></b>, and I will be your point of contact for your inquiry.</p>
 
-<p><b>Contact Details:</b><br/>
-<b><t t-out="object.user_id.name or 'Sales Team'">Sales Team</t></b><br/>
-<t t-if="object.user_id.phone"><t t-out="object.user_id.phone">+91 93916 27905</t></t>
-<t t-if="not object.user_id.phone">+91 93916 27905</t>
-<br/>
-<t t-if="object.user_id.email"><t t-out="object.user_id.email">sales@marleyfans.in</t></t>
-<t t-if="not object.user_id.email">sales@marleyfans.in</t>
-</p>
+<p>I am here to assist you with product information, technical guidance, quotations, and to help you choose the most suitable ventilation solution based on your requirements.</p>
 
-<p>Kindly feel free to connect directly for faster assistance.</p>
+<p>You can reach me anytime using the details below:<br/>
+📞 <b>Mobile:</b> <t t-out="object.user_id.phone or '+91 99499 45457'">+91 99499 45457</t><br/>
+📧 <b>Email:</b> <t t-out="object.user_id.email or 'sales@marleyfans.in'">sales@marleyfans.in</t></p>
 
-<p>Looking forward to working with you.</p>
+<p>Please feel free to contact me if you have any questions or need any assistance. I look forward to helping you find the right solution.</p>
 
 <p>Regards,<br/>
-<b>Team Marley Enterprises</b></p>
+<b><t t-out="object.user_id.name or 'Sales Team'">Sales Team</t></b><br/>
+Marley Enterprises Private Limited</p>
 </div>
         </field>
         <field name="auto_delete" eval="False"/>
