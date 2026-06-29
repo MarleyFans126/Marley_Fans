@@ -415,19 +415,22 @@ class ProjectTask(models.Model):
                  'project_id.lead_id',
                  'lead_id')
     def _compute_basic_value(self):
-        """Basic (untaxed) amount — editable. Auto-filled when empty from the
-        quotation's untaxed total (or posted invoices), else from the task's own
-        product lines. GST and Total derive from this. Use "Refresh Installation
-        Details" to clear + re-fetch."""
+        """Basic (untaxed) amount. When the task has its own product lines it
+        mirrors their grand total, updating live as soon as a line changes. With
+        no lines it's editable: auto-filled when empty from the quotation's
+        untaxed total (or posted invoices), then preserved. GST and Total derive
+        from this. Use "Refresh Installation Details" to clear + re-fetch."""
         for task in self:
             if not task.is_installation:
                 continue
-            if task.inst_basic_value:   # manual / already set — preserve
+            if task.installation_line_ids:
+                # Product lines present — Basic tracks their untaxed grand total.
+                task.inst_basic_value = sum(task.installation_line_ids.mapped('price_subtotal'))
+                continue
+            if task.inst_basic_value:   # no lines, manually set — preserve
                 continue
             so = task._get_related_sale_order()
             if not so:
-                # No quotation linked — fall back to the task's own product lines.
-                task.inst_basic_value = sum(task.installation_line_ids.mapped('price_subtotal'))
                 continue
             # Posted invoices first, otherwise the SO (proforma) untaxed amount.
             invoices = so.invoice_ids.filtered(
