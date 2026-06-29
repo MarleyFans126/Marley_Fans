@@ -50,21 +50,22 @@ class CrmLead(models.Model):
                     "[INIT] Converted %d existing AAJJO leads to opportunities.",
                     self.env.cr.rowcount,
                 )
-            # AAJJO leads should be owned by OdooBot (id=1) by default. Revert
-            # any that were previously reassigned to another user so their
-            # salesperson matches the source policy.
+            # Give AAJJO leads a DEFAULT owner (OdooBot, id=1) only when they
+            # have NO salesperson. Never override a manually-assigned
+            # salesperson — otherwise every module upgrade would silently
+            # revert sales reps back to OdooBot (raw SQL bypasses tracking).
             self.env.cr.execute(
                 """
                 UPDATE crm_lead
                 SET user_id = 1
                 WHERE is_aajjo = TRUE
                   AND type = 'opportunity'
-                  AND (user_id IS NULL OR user_id <> 1)
+                  AND user_id IS NULL
                 """
             )
             if self.env.cr.rowcount:
                 _logger.info(
-                    "[INIT] Assigned %d AAJJO opportunities to OdooBot (default salesperson).",
+                    "[INIT] Assigned %d unowned AAJJO opportunities to OdooBot (default salesperson).",
                     self.env.cr.rowcount,
                 )
         except Exception as e:
