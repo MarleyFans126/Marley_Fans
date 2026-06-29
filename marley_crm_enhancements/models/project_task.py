@@ -70,9 +70,9 @@ class ProjectTask(models.Model):
     # Auto-fetched from Sale Order / Invoice / Partner
     inst_sales_rep = fields.Char(string='Sales Representative', compute='_compute_installation_details', store=True, readonly=True)
     inst_installation_date = fields.Date(string='Scheduled Installation Date')
-    inst_company_name = fields.Char(string='Company Name', compute='_compute_installation_details', store=True, readonly=True)
-    inst_company_address = fields.Text(string='Company Address', compute='_compute_installation_details', store=True, readonly=True)
-    inst_gstin = fields.Char(string='GSTIN', compute='_compute_installation_details', store=True, readonly=True)
+    inst_company_name = fields.Char(string='Company Name', compute='_compute_installation_details', store=True, readonly=False)
+    inst_company_address = fields.Text(string='Company Address', compute='_compute_installation_details', store=True, readonly=False)
+    inst_gstin = fields.Char(string='GSTIN', compute='_compute_installation_details', store=True, readonly=False)
     inst_site_contact = fields.Char(string='Site Contact Person', compute='_compute_installation_details', store=True, readonly=False)
     inst_site_phone = fields.Char(string='Contact Number', compute='_compute_installation_details', store=True, readonly=False)
 
@@ -265,27 +265,36 @@ class ProjectTask(models.Model):
                     parts.append(city_line)
                 return '\n'.join(parts)
 
+            # These three fields are auto-fetched but user-editable: only fill
+            # them when empty so a manual override is never overwritten by a
+            # later recompute (same pattern as Site Contact below).
             if partner:
                 # Use the COMMERCIAL entity (parent company) for the company
                 # name, not the contact person. If `partner` is a contact like
                 # "Nithin" under "Anurag Engineering College",
                 # commercial_partner_id resolves to the company.
                 company = partner.commercial_partner_id or partner
-                task.inst_company_name = company.name or ''
-                task.inst_company_address = _build_address(company)
-                task.inst_gstin = company.vat or partner.vat or ''
+                if not task.inst_company_name:
+                    task.inst_company_name = company.name or ''
+                if not task.inst_company_address:
+                    task.inst_company_address = _build_address(company)
+                if not task.inst_gstin:
+                    task.inst_gstin = company.vat or partner.vat or ''
             elif lead:
                 # Lead is at New / Qualify stage with no partner yet — fetch
                 # the address details directly from the lead fields.
-                task.inst_company_name = (
-                    lead.partner_name or lead.contact_name or lead.name or ''
-                )
-                task.inst_company_address = _build_address(lead)
-                task.inst_gstin = (
-                    getattr(lead, 'x_gstin', False)
-                    or getattr(lead, 'vat', False)
-                    or ''
-                )
+                if not task.inst_company_name:
+                    task.inst_company_name = (
+                        lead.partner_name or lead.contact_name or lead.name or ''
+                    )
+                if not task.inst_company_address:
+                    task.inst_company_address = _build_address(lead)
+                if not task.inst_gstin:
+                    task.inst_gstin = (
+                        getattr(lead, 'x_gstin', False)
+                        or getattr(lead, 'vat', False)
+                        or ''
+                    )
             else:
                 task.inst_company_name = task.inst_company_name or ''
                 task.inst_company_address = task.inst_company_address or ''
