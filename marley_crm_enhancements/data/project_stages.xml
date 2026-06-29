@@ -1,34 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- noupdate="1": seed these task stages once on install, but NEVER
-         overwrite them on later module upgrades. Without this, every
-         `-u marley_crm_enhancements` re-imported the records and reset any
-         stage the user had renamed/re-sequenced in the UI. -->
+    <!-- Marley installation workflow task stages.
+
+         noupdate="1": seed once on install, never overwrite on upgrade, so any
+         rename / re-sequence done in the UI persists.
+
+         The first four REUSE the original external IDs (…_installation /
+         …_in_progress / …_done / …_cancelled) on purpose — they're referenced
+         in code (project_task / project_project / crm_lead) and changing the
+         id would orphan-delete existing records. Only the display names are
+         the workflow names below; on an existing DB those names are NOT changed
+         (noupdate) — they apply to a fresh install. -->
     <data noupdate="1">
 
-        <!-- Installation stage for project tasks -->
+        <!-- 1. New (default/initial stage for a new installation task) -->
         <record id="project_stage_installation" model="project.task.type">
-            <field name="name">Installation</field>
+            <field name="name">New</field>
+            <field name="sequence">1</field>
+            <field name="fold">False</field>
+        </record>
+
+        <!-- 2. Commercial Cleared -->
+        <record id="project_stage_in_progress" model="project.task.type">
+            <field name="name">Commercial Cleared</field>
+            <field name="sequence">2</field>
+            <field name="fold">False</field>
+        </record>
+
+        <!-- 3. Dispatched -->
+        <record id="project_stage_cancelled" model="project.task.type">
+            <field name="name">Dispatched</field>
+            <field name="sequence">3</field>
+            <field name="fold">False</field>
+        </record>
+
+        <!-- 4. Delivered -->
+        <record id="project_stage_done" model="project.task.type">
+            <field name="name">Delivered</field>
+            <field name="sequence">4</field>
+            <field name="fold">False</field>
+        </record>
+
+        <!-- 5. Installation Completed -->
+        <record id="project_stage_installation_completed" model="project.task.type">
+            <field name="name">Installation Completed</field>
             <field name="sequence">5</field>
             <field name="fold">False</field>
         </record>
 
-        <!-- Additional useful stages -->
-        <record id="project_stage_in_progress" model="project.task.type">
-            <field name="name">In Progress</field>
-            <field name="sequence">10</field>
-            <field name="fold">False</field>
-        </record>
-
-        <record id="project_stage_done" model="project.task.type">
-            <field name="name">Done</field>
-            <field name="sequence">20</field>
-            <field name="fold">True</field>
-        </record>
-
-        <record id="project_stage_cancelled" model="project.task.type">
-            <field name="name">Cancelled</field>
-            <field name="sequence">30</field>
+        <!-- 6. Warranty Stage (terminal, folded) -->
+        <record id="project_stage_warranty" model="project.task.type">
+            <field name="name">Warranty Stage</field>
+            <field name="sequence">6</field>
             <field name="fold">True</field>
         </record>
 

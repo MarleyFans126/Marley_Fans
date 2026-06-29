@@ -112,8 +112,10 @@ class CrmLead(models.Model):
         stage_xmlids = [
             'marley_crm_enhancements.project_stage_installation',
             'marley_crm_enhancements.project_stage_in_progress',
-            'marley_crm_enhancements.project_stage_done',
             'marley_crm_enhancements.project_stage_cancelled',
+            'marley_crm_enhancements.project_stage_done',
+            'marley_crm_enhancements.project_stage_installation_completed',
+            'marley_crm_enhancements.project_stage_warranty',
         ]
         stages = []
         for xmlid in stage_xmlids:

@@ -28,8 +28,10 @@ class ProjectProject(models.Model):
         stage_ids = [
             self.env.ref('marley_crm_enhancements.project_stage_installation', raise_if_not_found=False),
             self.env.ref('marley_crm_enhancements.project_stage_in_progress', raise_if_not_found=False),
-            self.env.ref('marley_crm_enhancements.project_stage_done', raise_if_not_found=False),
             self.env.ref('marley_crm_enhancements.project_stage_cancelled', raise_if_not_found=False),
+            self.env.ref('marley_crm_enhancements.project_stage_done', raise_if_not_found=False),
+            self.env.ref('marley_crm_enhancements.project_stage_installation_completed', raise_if_not_found=False),
+            self.env.ref('marley_crm_enhancements.project_stage_warranty', raise_if_not_found=False),
         ]
         valid_stages = [s for s in stage_ids if s]
         if valid_stages:
