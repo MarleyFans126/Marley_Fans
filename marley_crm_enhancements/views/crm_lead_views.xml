@@ -53,4 +53,20 @@
         </field>
     </record>
 
+    <!-- Show Loss Reason + Loss Remarks as optional columns in the opportunity
+         list, so lost leads can be scanned without opening each one.
+         optional="show" = visible by default; users can toggle via the column
+         picker. -->
+    <record id="crm_case_tree_view_oppor_loss_marley" model="ir.ui.view">
+        <field name="name">crm.lead.list.opportunity.loss.marley</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_case_tree_view_oppor"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='source_id']" position="after">
+                <field name="loss_reason_id" optional="show"/>
+                <field name="loss_remarks" optional="show"/>
+            </xpath>
+        </field>
+    </record>
+
 </odoo>

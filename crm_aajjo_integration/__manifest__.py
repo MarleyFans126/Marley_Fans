@@ -15,7 +15,6 @@
         'data/ir_cron.xml',
         'views/res_config_settings_views.xml',
         'views/crm_lead_views.xml',
-        'views/crm_lead_lost_views.xml',
         'views/res_partner_views.xml',
         'views/aajjo_api_log_views.xml',
         # 'data/mail_templates.xml', # Moved to automation engine

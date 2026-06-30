@@ -1,3 +1,5 @@
+from markupsafe import Markup
+
 from odoo import api, fields, models, _
 from odoo.exceptions import ValidationError
 
@@ -26,11 +28,18 @@ class CrmLeadLost(models.TransientModel):
         if not self.loss_remarks or not self.loss_remarks.strip():
             raise ValidationError(_('Please provide Loss Remarks before marking as lost.'))
 
-        # Store loss fields on the lead records
+        # Store loss fields on the lead records AND log them to the chatter so
+        # the reason + remarks are visible in the timeline forever (not only in
+        # the form field, which hides when empty).
         for lead in self.lead_ids:
             lead.write({
                 'loss_reason_id': self.lost_reason_id.id,
                 'loss_remarks': self.loss_remarks,
             })
+            lead.message_post(body=Markup(
+                "<b>Lead marked Lost</b><br/>"
+                "<b>Loss Reason:</b> %s<br/>"
+                "<b>Loss Remarks:</b> %s"
+            ) % (self.lost_reason_id.name or '', self.loss_remarks or ''))
 
         return super().action_lost_reason_apply()
