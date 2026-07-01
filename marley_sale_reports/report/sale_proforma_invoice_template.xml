@@ -408,16 +408,16 @@
 
                     </t>
 
-                    <!-- AUTHORIZED SIGNATORY -->
+                    <!-- COMPANY STAMP (replaces the Authorized Signatory line) -->
                     <div style="margin-top: 30px; font-size: 14px;">
                         <table style="width: 100%;"><tr>
                             <td style="width: 50%;"></td>
                             <td style="width: 50%; text-align: right;">
-                                <strong>Marley Enterprises Pvt. Ltd</strong>
-                                <br/><br/><br/><br/>
-                                <div style="border-top: 1px solid #000; width: 200px; margin-left: auto; padding-top: 5px;">
-                                    <strong>Authorized Signatory</strong>
-                                </div>
+                                <strong>For Marley Enterprises Pvt. Ltd.</strong>
+                                <br/>
+                                <img src="/marley_sale_reports/static/src/img/marley_stamp.png"
+                                     alt="Company Stamp"
+                                     style="height: 135px; width: auto; margin-top: 6px;"/>
                             </td>
                         </tr></table>
                     </div>
