@@ -495,12 +495,31 @@ class CrmLead(models.Model):
                                record.email_from)
                 reply_to_v  = rendered.get('reply_to') or tmpl.reply_to
 
+                # CC the customer's other contacts: the commercial (company)
+                # partner and its child contacts that have an email, excluding
+                # the primary recipient already in email_to. So a company with
+                # several people gets the mail to one + CC to the rest.
+                cc_emails = []
+                if record.partner_id:
+                    company = record.partner_id.commercial_partner_id or record.partner_id
+                    related = company | company.child_ids
+                    primary = (email_to_v or '').strip().lower()
+                    seen = set()
+                    for contact in related:
+                        addr = (contact.email or '').strip()
+                        key = addr.lower()
+                        if addr and key != primary and key not in seen:
+                            seen.add(key)
+                            cc_emails.append(addr)
+                email_cc_v = ', '.join(cc_emails)
+
                 # 1) Plain mail to the customer (no email_layout wrapper)
                 mail_vals = {
                     'subject':    subject_v,
                     'body_html':  body_v,
                     'email_from': email_from_v,
                     'email_to':   email_to_v,
+                    'email_cc':   email_cc_v,
                     'reply_to':   reply_to_v,
                     'auto_delete': False,
                     'model':      'crm.lead',

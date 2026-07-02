@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_techmatic_incoming_mail_user,techmatic.incoming.mail.user,model_techmatic_incoming_mail,sales_team.group_sale_salesman,1,1,1,0
+access_techmatic_incoming_mail_manager,techmatic.incoming.mail.manager,model_techmatic_incoming_mail,sales_team.group_sale_manager,1,1,1,1

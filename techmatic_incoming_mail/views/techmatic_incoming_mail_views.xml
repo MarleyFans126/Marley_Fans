@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ============ LIST ============ -->
+    <record id="view_techmatic_incoming_mail_list" model="ir.ui.view">
+        <field name="name">techmatic.incoming.mail.list</field>
+        <field name="model">techmatic.incoming.mail</field>
+        <field name="arch" type="xml">
+            <list string="Incoming Mails" decoration-bf="not is_read"
+                  decoration-muted="is_read" default_order="date_received desc">
+                <field name="date_received" string="Received"/>
+                <field name="email_from" string="From"/>
+                <field name="company_name" string="Company" optional="show"/>
+                <field name="subject"/>
+                <field name="lead_id" string="Lead"/>
+                <field name="stage_id" optional="hide"/>
+                <field name="user_id" string="Salesperson" optional="show"/>
+                <field name="is_read" string="Read"/>
+                <button name="action_open_lead" type="object" icon="fa-external-link"
+                        string="Open Lead" class="btn-link"/>
+                <button name="action_mark_read" type="object" icon="fa-check"
+                        string="Mark Read" invisible="is_read"/>
+                <button name="action_mark_unread" type="object" icon="fa-envelope"
+                        string="Mark Unread" invisible="not is_read"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ============ FORM ============ -->
+    <record id="view_techmatic_incoming_mail_form" model="ir.ui.view">
+        <field name="name">techmatic.incoming.mail.form</field>
+        <field name="model">techmatic.incoming.mail</field>
+        <field name="arch" type="xml">
+            <form string="Incoming Mail">
+                <header>
+                    <button name="action_open_lead" type="object" string="Open Lead" class="btn-primary"/>
+                    <button name="action_mark_read" type="object" string="Mark Read" invisible="is_read"/>
+                    <button name="action_mark_unread" type="object" string="Mark Unread" invisible="not is_read"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="subject" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="email_from" readonly="1"/>
+                            <field name="partner_id" readonly="1"/>
+                            <field name="company_name" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="lead_id" readonly="1"/>
+                            <field name="stage_id" readonly="1"/>
+                            <field name="user_id" readonly="1"/>
+                            <field name="date_received" readonly="1"/>
+                            <field name="is_read"/>
+                        </group>
+                    </group>
+                    <separator string="Message"/>
+                    <field name="body" readonly="1"/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ============ SEARCH ============ -->
+    <record id="view_techmatic_incoming_mail_search" model="ir.ui.view">
+        <field name="name">techmatic.incoming.mail.search</field>
+        <field name="model">techmatic.incoming.mail</field>
+        <field name="arch" type="xml">
+            <search string="Incoming Mails">
+                <field name="subject"/>
+                <field name="email_from"/>
+                <field name="company_name"/>
+                <field name="lead_id"/>
+                <filter name="filter_unread" string="Unread" domain="[('is_read', '=', False)]"/>
+                <filter name="filter_read" string="Read" domain="[('is_read', '=', True)]"/>
+                <separator/>
+                <filter name="filter_my" string="My Leads" domain="[('user_id', '=', uid)]"/>
+                <separator/>
+                <filter name="filter_today" string="Today"
+                        domain="[('date_received', '&gt;=', datetime.datetime.combine(context_today(), datetime.time(0,0,0)))]"/>
+                <group>
+                    <filter name="group_salesperson" string="Salesperson" context="{'group_by': 'user_id'}"/>
+                    <filter name="group_company" string="Company" context="{'group_by': 'company_name'}"/>
+                    <filter name="group_stage" string="Lead Stage" context="{'group_by': 'stage_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ============ ACTION ============ -->
+    <record id="action_techmatic_incoming_mail" model="ir.actions.act_window">
+        <field name="name">Incoming Mails</field>
+        <field name="res_model">techmatic.incoming.mail</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_techmatic_incoming_mail_search"/>
+        <field name="context">{'search_default_filter_unread': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiley_face">No incoming replies yet</p>
+            <p>Customer email replies to your leads will appear here as they arrive.</p>
+        </field>
+    </record>
+
+    <!-- ============ MENU ============ -->
+    <menuitem id="menu_techmatic_incoming_mail_root" name="Incoming Mails"
+              web_icon="mail,static/description/icon.png" sequence="45"/>
+    <menuitem id="menu_techmatic_incoming_mail" name="Incoming Mails"
+              parent="menu_techmatic_incoming_mail_root"
+              action="action_techmatic_incoming_mail" sequence="10"/>
+
+</odoo>
