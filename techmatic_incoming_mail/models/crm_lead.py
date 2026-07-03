@@ -25,6 +25,13 @@ class CrmLead(models.Model):
         """
         if not message or message.message_type != 'email':
             return
+        # Incoming customer replies land with the internal "Note" subtype, which
+        # is de-emphasised / hidden in the chatter thread. Promote them to the
+        # public "Discussions" (mt_comment) subtype so the reply is clearly
+        # visible in the lead's chatter as an incoming email exchange.
+        comment = self.env.ref('mail.mt_comment', raise_if_not_found=False)
+        if comment and message.subtype_id != comment:
+            message.sudo().write({'subtype_id': comment.id})
         Incoming = self.env['techmatic.incoming.mail'].sudo()
         for lead in self:
             # Never capture the same source message twice.
