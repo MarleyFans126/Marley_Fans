@@ -16,7 +16,7 @@ _BANK_DEFAULTS = {
 
 # Default commercial terms
 _TERM_DEFAULTS = {
-    'proforma_warranty': '5 Years warranty on Mechanical items & 1 year OEM warranty on Motors & VFD Drive',
+    'proforma_warranty': '',
     'proforma_gst_note': '18% Extra',
     'proforma_delivery': '1-2 Weeks from the date of receipt of your technically and commercially clear purchase order.',
     'proforma_payment_terms_text': 'Supply: 100% Advance with Purchase Order\nInstallation: 100% immediately after Installation',

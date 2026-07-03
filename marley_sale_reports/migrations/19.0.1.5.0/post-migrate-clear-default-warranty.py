@@ -27,7 +27,18 @@ def migrate(cr, version):
         (DEFAULT,),
     )
     orders = cr.rowcount
+    # Invoice-proforma warranty field (account.move.proforma_warranty) had the
+    # same default — clear it too so no proforma prints it unless typed.
+    moves = 0
+    try:
+        cr.execute(
+            "UPDATE account_move SET proforma_warranty = NULL WHERE proforma_warranty = %s",
+            (DEFAULT,),
+        )
+        moves = cr.rowcount
+    except Exception:
+        pass  # column may not exist on some DBs
     _logger.info(
-        "[MIGRATE 1.5.0] Cleared default warranty from %d product(s) and %d order(s).",
-        products, orders,
+        "[MIGRATE 1.5.0] Cleared default warranty from %d product(s), %d order(s), %d invoice(s).",
+        products, orders, moves,
     )

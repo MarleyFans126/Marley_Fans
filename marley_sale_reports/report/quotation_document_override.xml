@@ -207,20 +207,22 @@
                     <div style="margin-bottom: 14px;">
                         <div class="section-heading">TERMS &amp; CONDITIONS:</div>
 
-                        <!-- Warranty — auto-aggregated from product.warranty_terms -->
-                        <p class="section-text" style="margin-bottom: 4px;">
-                            <strong>QUALITY ASSURANCE &amp; WARRANTY:</strong>
-                        </p>
+                        <!-- Warranty — shown ONLY when a product on the order has
+                             its own Warranty Terms. No hardcoded default. -->
                         <t t-set="_seen_w" t-value="[]"/>
                         <t t-foreach="doc.order_line.filtered(lambda l: l.product_id and (l.product_id.warranty_terms or '').strip())" t-as="_wline">
                             <t t-set="_wt" t-value="_wline.product_id.warranty_terms.strip()"/>
                             <t t-if="_wt not in _seen_w">
                                 <t t-set="_dummy" t-value="_seen_w.append(_wt)"/>
-                                <p class="section-text" style="margin: 2px 0 2px 14px; white-space: pre-line;">&#8226; <t t-esc="_wt"/></p>
                             </t>
                         </t>
-                        <t t-if="not _seen_w">
-                            <p class="section-text" style="margin: 2px 0 2px 14px;">&#8226; 5 Years warranty on Mechanical items &amp; 1 year OEM warranty on Motors &amp; VFD Drive.</p>
+                        <t t-if="_seen_w">
+                            <p class="section-text" style="margin-bottom: 4px;">
+                                <strong>QUALITY ASSURANCE &amp; WARRANTY:</strong>
+                            </p>
+                            <t t-foreach="_seen_w" t-as="_wt">
+                                <p class="section-text" style="margin: 2px 0 2px 14px; white-space: pre-line;">&#8226; <t t-esc="_wt"/></p>
+                            </t>
                         </t>
 
                         <!-- Everything else — rich-text block from `note`,
