@@ -1,6 +1,6 @@
 {
     'name': 'Marley Sale Reports',
-    'version': '19.0.1.4.0',
+    'version': '19.0.1.5.0',
     'summary': 'Custom Quotation and Proforma Invoice print layouts for Marley Fans',
     'description': 'QWeb report templates matching Marley Fans branding: Quotation with technical specs and commercial terms, Proforma Invoice. Delivery Note will be added once the stock module is available.',
     'category': 'Sales',

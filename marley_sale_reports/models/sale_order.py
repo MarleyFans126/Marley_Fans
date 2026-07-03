@@ -171,10 +171,9 @@ class SaleOrder(models.Model):
             if terms:
                 order.warranty_terms = '\n\n'.join(terms)
             elif not order.warranty_terms:
-                order.warranty_terms = (
-                    '5 Years warranty on Mechanical items & '
-                    '1 year OEM warranty on Motors & VFD Drive'
-                )
+                # No default: warranty only prints when a product on the order
+                # has its own Warranty Terms (or it's typed on the quotation).
+                order.warranty_terms = False
     delivery_terms = fields.Text(
         string='Delivery Terms',
         default='1-2 Weeks from the date of receipt of your technically and commercially clear purchase order.',
