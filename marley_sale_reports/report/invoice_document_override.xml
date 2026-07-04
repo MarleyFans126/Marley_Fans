@@ -209,26 +209,26 @@
                     </div>
                 </t>
 
-                <div style="margin-bottom: 14px;">
-                    <div class="section-heading">TERMS &amp; CONDITIONS:</div>
-                    <t t-set="_seen_w" t-value="[]"/>
-                    <t t-if="linked_so">
-                        <t t-foreach="linked_so.order_line.filtered(lambda l: l.product_id and (l.product_id.warranty_terms or '').strip())" t-as="_wline">
-                            <t t-set="_wt" t-value="_wline.product_id.warranty_terms.strip()"/>
-                            <t t-if="_wt not in _seen_w">
-                                <t t-set="_dummy" t-value="_seen_w.append(_wt)"/>
-                            </t>
+                <t t-set="_seen_w" t-value="[]"/>
+                <t t-if="linked_so">
+                    <t t-foreach="linked_so.order_line.filtered(lambda l: l.product_id and (l.product_id.warranty_terms or '').strip())" t-as="_wline">
+                        <t t-set="_wt" t-value="_wline.product_id.warranty_terms.strip()"/>
+                        <t t-if="_wt not in _seen_w">
+                            <t t-set="_dummy" t-value="_seen_w.append(_wt)"/>
                         </t>
                     </t>
-                    <t t-if="_seen_w">
+                </t>
+                <t t-if="_seen_w">
+                    <div style="margin-bottom: 14px;">
+                        <div class="section-heading">TERMS &amp; CONDITIONS:</div>
                         <p class="section-text" style="margin-bottom: 4px;">
                             <strong>QUALITY ASSURANCE &amp; WARRANTY:</strong>
                         </p>
                         <t t-foreach="_seen_w" t-as="_wt">
                             <p class="section-text" style="margin: 2px 0 2px 14px; white-space: pre-line;">&#8226; <t t-esc="_wt"/></p>
                         </t>
-                    </t>
-                </div>
+                    </div>
+                </t>
 
                 <div style="margin-bottom: 14px;">
                     <div class="section-heading">PAYMENT SCHEDULE:</div>
