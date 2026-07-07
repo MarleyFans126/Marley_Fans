@@ -28,10 +28,15 @@
                         class="btn-primary"
                         icon="fa-file-text-o"/>
                 <button name="action_create_project"
-                        string="Create Task"
+                        string="Create Order Booking Form"
                         type="object"
                         class="btn-primary"
                         icon="fa-tasks"/>
+                <button name="action_send_intro_email"
+                        string="Send Intro Email"
+                        type="object"
+                        class="btn-secondary"
+                        icon="fa-envelope-o"/>
             </xpath>
 
             <!-- Project link field after team_id -->

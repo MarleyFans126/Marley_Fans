@@ -408,11 +408,121 @@ class CrmLead(models.Model):
     # STAGE EMAIL: Send stage-based email (called from automated action)
     # Emails are sent via message_post so they appear in the chatter.
     # -------------------------------------------------------------------------
+    def _send_crm_stage_email(self, template_name, extra_attachment_ids=None):
+        """Render a crm.lead mail.template and send it to the customer as a
+        plain email (no Odoo "Your Lead <name>" wrapper) while posting the
+        same body to the chatter as a comment. Returns True on success.
+
+        Shared by the stage automation (_send_stage_email) and the manual
+        "Send Intro Email" button (action_send_intro_email).
+        """
+        self.ensure_one()
+        record = self
+        if not record.email_from:
+            return False
+
+        # Scope by model so we never pick up a same-named template that
+        # belongs to a different model (e.g. a crm.stage / sale.order
+        # template that happens to share the display name).
+        tmpl = self.env['mail.template'].search([
+            ('name', '=', template_name),
+            ('model', '=', 'crm.lead'),
+        ], limit=1)
+        if not tmpl:
+            _logger.warning("Stage email template '%s' not found.", template_name)
+            return False
+
+        extra_attachment_ids = extra_attachment_ids or []
+
+        # Two-step send so the customer gets a plain email AND the chatter
+        # shows the full body:
+        #   1. Render the template (subject, body, recipients).
+        #   2. Post the same body to the lead chatter as a comment.
+        #   3. Create a raw mail.mail linked to that chatter message; the
+        #      "Mail: Email Queue Manager" cron flushes it asynchronously
+        #      (no inline SMTP blocking the web request).
+        try:
+            all_attachment_ids = list(tmpl.attachment_ids.ids) + extra_attachment_ids
+
+            rendered = tmpl._generate_template(
+                record.ids,
+                ('subject', 'body_html', 'email_to', 'email_from',
+                 'reply_to'),
+            )[record.id]
+
+            subject_v   = rendered.get('subject') or tmpl.subject or ''
+            body_v      = rendered.get('body_html') or ''
+            email_from_v = (rendered.get('email_from') or
+                            tmpl.email_from or self.env.company.email)
+            email_to_v  = (rendered.get('email_to') or
+                           record.email_from)
+            reply_to_v  = rendered.get('reply_to') or tmpl.reply_to
+
+            # CC the customer's other contacts: the commercial (company)
+            # partner and its child contacts that have an email, excluding
+            # the primary recipient already in email_to. So a company with
+            # several people gets the mail to one + CC to the rest.
+            cc_emails = []
+            if record.partner_id:
+                company = record.partner_id.commercial_partner_id or record.partner_id
+                related = company | company.child_ids
+                primary = (email_to_v or '').strip().lower()
+                seen = set()
+                for contact in related:
+                    addr = (contact.email or '').strip()
+                    key = addr.lower()
+                    if addr and key != primary and key not in seen:
+                        seen.add(key)
+                        cc_emails.append(addr)
+            email_cc_v = ', '.join(cc_emails)
+
+            mail_vals = {
+                'subject':    subject_v,
+                'body_html':  body_v,
+                'email_from': email_from_v,
+                'email_to':   email_to_v,
+                'email_cc':   email_cc_v,
+                'reply_to':   reply_to_v,
+                'auto_delete': False,
+                'model':      'crm.lead',
+                'res_id':     record.id,
+            }
+            # Post to chatter FIRST (mt_comment) so it shows immediately.
+            # No partner_ids → message_post does not send a mail of its own.
+            chatter_msg = record.message_post(
+                subject=subject_v,
+                body=body_v,
+                subtype_xmlid='mail.mt_comment',
+                attachment_ids=all_attachment_ids or None,
+                message_type='comment',
+            )
+            # Link the mail to the same chatter message so mail.send() does
+            # not create a duplicate chatter entry — attachments appear once.
+            mail_vals['mail_message_id'] = chatter_msg.id
+            mail = self.env['mail.mail'].sudo().create(mail_vals)
+            if all_attachment_ids:
+                mail.write({
+                    'attachment_ids':
+                        [(4, aid) for aid in all_attachment_ids]
+                })
+        except Exception as e:
+            _logger.warning(
+                "Failed to send CRM email '%s' for Lead %d: %s",
+                template_name, record.id, e,
+            )
+            return False
+
+        _logger.info(
+            "CRM email '%s' sent for Lead %d (%s).",
+            template_name, record.id, record.name,
+        )
+        return True
+
     def _send_stage_email(self):
         """Send the appropriate stage-based email template for this lead.
         Called from the automated action on create/write of stage_id.
-        Project creation is manual — triggered by the "Create Project" button
-        on the lead form, not by stage changes.
+        Project creation is manual — triggered by the "Create Order Booking
+        Form" button on the lead form, not by stage changes.
         """
         for record in self:
             stage = record.stage_id
@@ -440,17 +550,6 @@ class CrmLead(models.Model):
             if not template_name or not flag_field:
                 continue
 
-            # Scope by model so we never pick up a same-named template that
-            # belongs to a different model (e.g. a crm.stage / sale.order
-            # template that happens to share the display name).
-            tmpl = self.env['mail.template'].search([
-                ('name', '=', template_name),
-                ('model', '=', 'crm.lead'),
-            ], limit=1)
-            if not tmpl:
-                _logger.warning("Stage email template '%s' not found.", template_name)
-                continue
-
             # Build extra attachments for proposition/won (SO PDF)
             extra_attachment_ids = []
             if flag_field in ('proposition_email_sent', 'won_email_sent') and 'order_ids' in record._fields:
@@ -471,98 +570,34 @@ class CrmLead(models.Model):
                     except Exception as e:
                         _logger.warning("Failed to generate SO PDF for %s: %s", so.name, e)
 
-            # Two-step send so the customer gets a plain email AND the
-            # chatter shows the full body:
-            #   1. Render the template (subject, body, recipients).
-            #   2. Send a raw mail.mail to the customer (no Odoo
-            #      "Your Lead <name>" wrapper, no logo header).
-            #   3. Post the same body to the lead chatter as a comment
-            #      so the team can see exactly what went out.
-            try:
-                all_attachment_ids = list(tmpl.attachment_ids.ids) + extra_attachment_ids
+            if record._send_crm_stage_email(template_name, extra_attachment_ids):
+                record.write({flag_field: True})
 
-                rendered = tmpl._generate_template(
-                    record.ids,
-                    ('subject', 'body_html', 'email_to', 'email_from',
-                     'reply_to'),
-                )[record.id]
-
-                subject_v   = rendered.get('subject') or tmpl.subject or ''
-                body_v      = rendered.get('body_html') or ''
-                email_from_v = (rendered.get('email_from') or
-                                tmpl.email_from or self.env.company.email)
-                email_to_v  = (rendered.get('email_to') or
-                               record.email_from)
-                reply_to_v  = rendered.get('reply_to') or tmpl.reply_to
-
-                # CC the customer's other contacts: the commercial (company)
-                # partner and its child contacts that have an email, excluding
-                # the primary recipient already in email_to. So a company with
-                # several people gets the mail to one + CC to the rest.
-                cc_emails = []
-                if record.partner_id:
-                    company = record.partner_id.commercial_partner_id or record.partner_id
-                    related = company | company.child_ids
-                    primary = (email_to_v or '').strip().lower()
-                    seen = set()
-                    for contact in related:
-                        addr = (contact.email or '').strip()
-                        key = addr.lower()
-                        if addr and key != primary and key not in seen:
-                            seen.add(key)
-                            cc_emails.append(addr)
-                email_cc_v = ', '.join(cc_emails)
-
-                # 1) Plain mail to the customer (no email_layout wrapper)
-                mail_vals = {
-                    'subject':    subject_v,
-                    'body_html':  body_v,
-                    'email_from': email_from_v,
-                    'email_to':   email_to_v,
-                    'email_cc':   email_cc_v,
-                    'reply_to':   reply_to_v,
-                    'auto_delete': False,
-                    'model':      'crm.lead',
-                    'res_id':     record.id,
-                }
-                # 1) Post to chatter FIRST so it shows immediately,
-                #    using mt_comment to land in the "Send message" tab.
-                #    No partner_ids → message_post does not generate a
-                #    separate email of its own.
-                chatter_msg = record.message_post(
-                    subject=subject_v,
-                    body=body_v,
-                    subtype_xmlid='mail.mt_comment',
-                    attachment_ids=all_attachment_ids or None,
-                    message_type='comment',
-                )
-
-                # 2) Create mail.mail linked to the same chatter message
-                #    (mail_message_id) so mail.send() does NOT auto-create
-                #    a duplicate chatter entry — attachments appear once.
-                #    DO NOT call .send() inline: SMTP with ~5 MB of PDFs
-                #    blocks the web request for ~50 s and freezes the
-                #    lead-save UI. The "Mail: Email Queue Manager" cron
-                #    (every 60 s) flushes the queue asynchronously.
-                mail_vals['mail_message_id'] = chatter_msg.id
-                mail = self.env['mail.mail'].sudo().create(mail_vals)
-                if all_attachment_ids:
-                    mail.write({
-                        'attachment_ids':
-                            [(4, aid) for aid in all_attachment_ids]
-                    })
-            except Exception as e:
-                _logger.warning(
-                    "Failed to send stage email '%s' for Lead %d: %s",
-                    template_name, record.id, e,
-                )
-                continue
-
-            record.write({flag_field: True})
-            _logger.info(
-                "Stage email '%s' sent for Lead %d (%s).",
-                template_name, record.id, record.name,
-            )
+    def action_send_intro_email(self):
+        """Manual button: send the New-stage intro (acknowledgment) email to
+        the customer now, regardless of the lead's current stage. Pressing it
+        again re-sends."""
+        sent = 0
+        for record in self:
+            if record._send_crm_stage_email('New stage mail'):
+                record.acknowledgment_sent = True
+                sent += 1
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('Send Intro Email'),
+                'message': (
+                    _('Intro email queued for %d lead(s). It appears in the '
+                      'chatter now and goes out on the next mail cycle.') % sent
+                ) if sent else _(
+                    'Nothing sent — the lead has no email address, or the '
+                    '"New stage mail" template is missing.'
+                ),
+                'type': 'success' if sent else 'warning',
+                'sticky': False,
+            },
+        }
 
     # -------------------------------------------------------------------------
     # DEBUG / UI ACTION METHODS
