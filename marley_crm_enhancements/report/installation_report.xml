@@ -17,14 +17,14 @@
         <field name="disable_shrinking" eval="True"/>
     </record>
 
-    <!-- Installation Report Action -->
+    <!-- Order Booking Form Action -->
     <record id="action_report_installation" model="ir.actions.report">
-        <field name="name">Installation Report</field>
+        <field name="name">Order Booking Form</field>
         <field name="model">project.project</field>
         <field name="report_type">qweb-pdf</field>
         <field name="report_name">marley_crm_enhancements.report_installation</field>
         <field name="report_file">marley_crm_enhancements.report_installation</field>
-        <field name="print_report_name">'Installation - %s' % object.partner_id.name</field>
+        <field name="print_report_name">'Order Booking Form - %s' % object.partner_id.name</field>
         <field name="binding_model_id" ref="project.model_project_project"/>
         <field name="binding_type">report</field>
         <field name="paperformat_id" ref="paperformat_installation"/>

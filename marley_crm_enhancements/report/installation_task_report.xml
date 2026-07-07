@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <!-- Installation Report Action — bound to Task -->
+    <!-- Order Booking Form Action — bound to Task -->
     <record id="action_report_task_installation" model="ir.actions.report">
-        <field name="name">Installation Report</field>
+        <field name="name">Order Booking Form</field>
         <field name="model">project.task</field>
         <field name="report_type">qweb-pdf</field>
         <field name="report_name">marley_crm_enhancements.report_task_installation</field>
         <field name="report_file">marley_crm_enhancements.report_task_installation</field>
-        <field name="print_report_name">'Installation - %s' % (object.inst_company_name or object.partner_id.name or object.name)</field>
+        <field name="print_report_name">'Order Booking Form - %s' % (object.inst_company_name or object.partner_id.name or object.name)</field>
         <field name="binding_model_id" ref="project.model_project_task"/>
         <field name="binding_type">report</field>
         <field name="paperformat_id" ref="paperformat_installation"/>
