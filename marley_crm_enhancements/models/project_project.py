@@ -340,8 +340,8 @@ class ProjectProject(models.Model):
                 },
             }
 
-        # ── Generate Installation Report PDF ─────────────────────────
-        pdf_filename = 'Installation - %s.pdf' % (partner.name or self.name)
+        # ── Generate Order Booking Form PDF ─────────────────────────
+        pdf_filename = 'Order Booking Form - %s.pdf' % (partner.name or self.name)
 
         report = self.env.ref(
             'marley_crm_enhancements.action_report_installation',

@@ -51,7 +51,7 @@
                     <!-- ============ TITLE ============ -->
                     <div style="text-align: center; margin: 10px 0 22px 0;">
                         <span style="font-size: 20px; font-weight: bold; color: #e30613; text-decoration: underline; letter-spacing: 1px;">
-                            Installation for: <t t-esc="doc.inst_company_name or doc.partner_id.commercial_partner_id.name or '-'"/>
+                            Order Booking for: <t t-esc="doc.inst_company_name or doc.partner_id.commercial_partner_id.name or '-'"/>
                         </span>
                     </div>
 

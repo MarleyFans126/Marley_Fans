@@ -601,9 +601,9 @@ class ProjectTask(models.Model):
                 },
             }
 
-        # ── Generate Installation Report PDF ─────────────────────────
+        # ── Generate Order Booking Form PDF ─────────────────────────
         company_name = self.inst_company_name or (partner.name if partner else self.name)
-        pdf_filename = 'Installation - %s.pdf' % company_name
+        pdf_filename = 'Order Booking Form - %s.pdf' % company_name
 
         report = self.env.ref(
             'marley_crm_enhancements.action_report_task_installation',
