@@ -349,16 +349,15 @@
                         </table>
                     </t>
 
-                    <!-- ===== TERMS SECTIONS ===== -->
+                    <!-- ===== TERMS &amp; CONDITIONS =====
+                         Warranty stays as its own subsection (auto-fetched
+                         from the product). Everything else (taxes, payment,
+                         bank, delivery, validity) is rendered from the single
+                         `note` field that the salesperson populates via the
+                         Terms Template selector — identical to the quotation.
+                         No hardcoded defaults: when no Terms Template is
+                         chosen, no boilerplate prints. -->
                     <t t-if="doc.proforma_print_terms">
-
-                        <!-- TAXES &amp; DUTIES -->
-                        <div style="margin-bottom: 14px;">
-                            <div class="section-heading">TAXES &amp; DUTIES:</div>
-                            <p class="section-text">GST at the rate of 18% shall be applicable on above quoted price.</p>
-                        </div>
-
-                        <!-- WARRANTY -->
                         <t t-set="_seen_w" t-value="[]"/>
                         <t t-foreach="doc.order_line.filtered(lambda l: l.product_id and (l.product_id.warranty_terms or '').strip())" t-as="_wline">
                             <t t-set="_wt" t-value="_wline.product_id.warranty_terms.strip()"/>
@@ -366,46 +365,28 @@
                                 <t t-set="_dummy" t-value="_seen_w.append(_wt)"/>
                             </t>
                         </t>
-                        <t t-if="_seen_w">
+                        <t t-if="_seen_w or doc.note">
                             <div style="margin-bottom: 14px;">
                                 <div class="section-heading">TERMS &amp; CONDITIONS:</div>
-                                <p class="section-text" style="margin-bottom: 4px;">
-                                    <strong>QUALITY ASSURANCE &amp; WARRANTY:</strong>
-                                </p>
-                                <t t-foreach="_seen_w" t-as="_wt">
-                                    <p class="section-text" style="margin: 2px 0 2px 14px; white-space: pre-line;">&#8226; <t t-esc="_wt"/></p>
+
+                                <!-- Warranty — shown ONLY when a product has its
+                                     own Warranty Terms. No hardcoded default. -->
+                                <t t-if="_seen_w">
+                                    <p class="section-text" style="margin-bottom: 4px;">
+                                        <strong>QUALITY ASSURANCE &amp; WARRANTY:</strong>
+                                    </p>
+                                    <t t-foreach="_seen_w" t-as="_wt">
+                                        <p class="section-text" style="margin: 2px 0 2px 14px; white-space: pre-line;">&#8226; <t t-esc="_wt"/></p>
+                                    </t>
+                                </t>
+
+                                <!-- Everything else — rich-text block from the
+                                     selected Terms Template (`note`). -->
+                                <t t-if="doc.note">
+                                    <div class="section-text" style="margin-top: 10px;"><t t-out="doc.note"/></div>
                                 </t>
                             </div>
                         </t>
-
-                        <!-- PAYMENT SCHEDULE -->
-                        <t t-if="doc.payment_terms_text">
-                            <div style="margin-bottom: 14px;">
-                                <div class="section-heading">PAYMENT SCHEDULE:</div>
-                                <div class="section-text" style="white-space: pre-line;"><t t-esc="doc.payment_terms_text"/></div>
-                            </div>
-                        </t>
-
-                        <!-- BANK DETAILS -->
-                        <div style="margin-bottom: 14px;">
-                            <strong style="font-size: 15px;">Bank Details :</strong>
-                            <div style="margin-top: 6px; font-size: 13px; line-height: 1.7;">
-                                <div><span style="display: inline-block; width: 120px;">Account Name</span>: Marley Enterprises Private Limited</div>
-                                <div><span style="display: inline-block; width: 120px;">Account No.</span>: <t t-esc="doc.bank_account_number or '50200092737354'"/></div>
-                                <div><span style="display: inline-block; width: 120px;">Bank Name</span>: <t t-esc="doc.bank_name or 'HDFC Bank'"/></div>
-                                <div><span style="display: inline-block; width: 120px;">Bank Branch</span>: <t t-esc="doc.bank_branch or 'Kukatpally, Hyderabad'"/></div>
-                                <div><span style="display: inline-block; width: 120px;">IFSC Code</span>: <t t-esc="doc.bank_ifsc or 'HDFC0000364'"/></div>
-                            </div>
-                        </div>
-
-                        <!-- DELIVERY -->
-                        <t t-if="doc.delivery_terms">
-                            <div style="margin-bottom: 14px;">
-                                <div class="section-heading">DELIVERY SCHEDULE:</div>
-                                <p class="section-text"><t t-esc="doc.delivery_terms"/></p>
-                            </div>
-                        </t>
-
                     </t>
 
                     <!-- COMPANY STAMP (replaces the Authorized Signatory line) -->
