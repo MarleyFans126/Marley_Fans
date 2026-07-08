@@ -53,8 +53,15 @@
                 </h2>
             </xpath>
 
-            <!-- Last printed date (optional info, revision is only shown in the title) -->
+            <!-- Editable Quotation Date. The standard form hides date_order
+                 while the order is a quotation (draft/sent) and only shows it
+                 once confirmed, yet the quotation PDF prints date_order — so
+                 the salesperson had no way to set it. Expose it here for
+                 quotations only (the standard "Order Date" still shows after
+                 confirmation, so there's no duplicate). -->
             <xpath expr="//field[@name='validity_date']" position="after">
+                <field name="date_order" string="Quotation Date"
+                       invisible="state not in ('draft', 'sent')"/>
                 <field name="last_print_date" readonly="1" invisible="not last_print_date"/>
             </xpath>
 
