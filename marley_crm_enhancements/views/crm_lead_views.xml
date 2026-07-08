@@ -39,6 +39,12 @@
                         icon="fa-envelope-o"/>
             </xpath>
 
+            <!-- Hide the standard "New Quotation" button (from sale_crm) —
+                 Marley uses its own "Create Quotation" button instead. -->
+            <xpath expr="//button[@name='action_sale_quotations_new']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
             <!-- Project link field after team_id -->
             <xpath expr="//field[@name='team_id']" position="after">
                 <field name="project_id" readonly="1"
