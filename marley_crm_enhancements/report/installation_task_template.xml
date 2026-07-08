@@ -331,7 +331,11 @@
                                 Mounting structure
                             </td>
                             <td style="border-bottom: 1px solid #f5a9ac; border-right: 1px solid #f5a9ac; padding: 16px 24px; font-size: 14px; vertical-align: middle;">
-                                <span t-field="doc.inst_mounting_structure"/>
+                                <!-- Render the selection label safely: a stale
+                                     stored value (e.g. an imported "I-Beam" that
+                                     isn't a current option key) would make
+                                     t-field crash. Fall back to the raw value. -->
+                                <span t-out="dict(doc._fields['inst_mounting_structure'].selection).get(doc.inst_mounting_structure, doc.inst_mounting_structure or '')"/>
                             </td>
                         </tr>
                         <tr>
