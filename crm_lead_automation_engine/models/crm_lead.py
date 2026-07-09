@@ -275,7 +275,7 @@ class CrmLead(models.Model):
             lead.duplicate_star = '★' if lead.duplicate_flag else ''
             if lead.duplicate_flag and lead.id:
                 try:
-                    domain = self._get_duplicate_domain(lead.phone, lead.email_from)
+                    domain = self._get_duplicate_domain(lead.phone, lead.email_from, lead.partner_name)
                     if domain:
                         count_domain = domain + [('id', '!=', lead.id)]
                         lead.duplicate_count = self.search_count(count_domain)
@@ -286,7 +286,31 @@ class CrmLead(models.Model):
             else:
                 lead.duplicate_count = 0
 
-    def _get_duplicate_domain(self, phone, email):
+    @api.model
+    def _normalize_company_name(self, name):
+        """Normalized 'core' of a company name for fuzzy duplicate matching:
+        lowercased, parenthetical qualifiers and common legal suffixes removed,
+        punctuation stripped, whitespace collapsed. Returns '' when nothing
+        meaningful is left. e.g. 'Airserve Engineering (JSW Cement)' and
+        'Airserve Engineering Pvt. Ltd.' both reduce to 'airserve engineering'.
+        """
+        if not name:
+            return ''
+        s = name.lower()
+        # Drop bracketed qualifiers e.g. "(JSW Cement)", "[Unit 2]".
+        s = re.sub(r'[\(\[\{][^\)\]\}]*[\)\]\}]', ' ', s)
+        # Drop common legal / entity suffixes (keep descriptive words like
+        # "engineering" / "industries" so the core stays specific).
+        s = re.sub(
+            r'\b(private limited|pvt\.?\s*ltd\.?|p\.?\s*ltd\.?|limited|ltd\.?|'
+            r'llp|inc\.?|incorporated|corp\.?|corporation|company|co\.?|'
+            r'and co|& co)\b',
+            ' ', s)
+        # Strip punctuation, collapse whitespace.
+        s = re.sub(r'[^a-z0-9 ]', ' ', s)
+        return re.sub(r'\s+', ' ', s).strip()
+
+    def _get_duplicate_domain(self, phone, email, company_name=None):
         domain = []
         if phone:
             sanitized = re.sub(r'\D', '', str(phone))
@@ -297,17 +321,23 @@ class CrmLead(models.Model):
                 domain.append(('phone', '=ilike', phone.strip()))
         if email:
             domain.append(('email_from', '=ilike', email.strip()))
+        # Company-name similarity: flag leads whose Company Name shares the same
+        # normalized core (legal suffixes / parenthetical qualifiers stripped),
+        # e.g. "Airserve Engineering" ~ "Airserve Engineering (JSW Cement)".
+        # Only when the core is specific enough (>= 5 chars) to avoid noise.
+        core = self._normalize_company_name(company_name)
+        if len(core) >= 5:
+            domain.append(('partner_name', 'ilike', core))
         if not domain:
             return []
-        if len(domain) > 1:
-            return ['|'] + domain
-        return domain
+        # OR all clauses together (needs N-1 leading '|' operators).
+        return ['|'] * (len(domain) - 1) + domain
 
     def _check_and_mark_duplicates(self):
         for lead in self:
-            if not lead.phone and not lead.email_from:
+            if not lead.phone and not lead.email_from and not lead.partner_name:
                 continue
-            domain = self._get_duplicate_domain(lead.phone, lead.email_from)
+            domain = self._get_duplicate_domain(lead.phone, lead.email_from, lead.partner_name)
             if not domain:
                 continue
             search_domain = domain + [('id', '!=', lead.id)]
@@ -373,8 +403,8 @@ class CrmLead(models.Model):
     def write(self, vals):
         res = super().write(vals)
 
-        # Duplicate detection on phone/email change
-        if 'phone' in vals or 'email_from' in vals:
+        # Duplicate detection on phone / email / company-name change
+        if 'phone' in vals or 'email_from' in vals or 'partner_name' in vals:
             self._check_and_mark_duplicates()
 
         if 'partner_id' in vals:
