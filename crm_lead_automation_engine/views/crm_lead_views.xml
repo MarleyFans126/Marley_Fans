@@ -73,7 +73,7 @@
                 <div class="alert alert-danger mb-0 d-flex align-items-center gap-2"
                      role="alert" invisible="not duplicate_flag">
                     <strong style="font-size: 18px;">★ Duplicate Lead Detected</strong>
-                    <span>— This lead shares a mobile number or email with
+                    <span>— This lead shares a mobile number, email, or company name with
                         <field name="duplicate_count" readonly="1" class="oe_inline" nolabel="1"/>
                         other lead(s)
                     </span>
@@ -98,6 +98,22 @@
     <!-- 
       4. SEARCH VIEW Filter 
     -->
+    <!-- KANBAN — show a "Duplicate" badge on the card so it's visible on the
+         Pipeline board (the list view already colours duplicate rows red). -->
+    <record id="crm_lead_kanban_inherit_automation" model="ir.ui.view">
+        <field name="name">crm.lead.kanban.inherit.automation</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.view_crm_lead_kanban"/>
+        <field name="arch" type="xml">
+            <xpath expr="//t[@t-name='card']/field[@name='name']" position="before">
+                <field name="duplicate_flag" invisible="1"/>
+                <span t-if="record.duplicate_flag.raw_value"
+                      class="badge text-bg-danger float-end ms-1"
+                      title="Shares a phone, email, or similar company name with another lead">★ Duplicate</span>
+            </xpath>
+        </field>
+    </record>
+
     <record id="view_crm_case_leads_filter_inherit_automation" model="ir.ui.view">
         <field name="name">crm.lead.search.inherit.automation</field>
         <field name="model">crm.lead</field>

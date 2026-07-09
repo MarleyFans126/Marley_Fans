@@ -275,7 +275,7 @@ class CrmLead(models.Model):
             lead.duplicate_star = '★' if lead.duplicate_flag else ''
             if lead.duplicate_flag and lead.id:
                 try:
-                    domain = self._get_duplicate_domain(lead.phone, lead.email_from, lead.partner_name)
+                    domain = self._get_duplicate_domain(lead.phone, lead.email_from, lead._lead_company_name())
                     if domain:
                         count_domain = domain + [('id', '!=', lead.id)]
                         lead.duplicate_count = self.search_count(count_domain)
@@ -310,34 +310,55 @@ class CrmLead(models.Model):
         s = re.sub(r'[^a-z0-9 ]', ' ', s)
         return re.sub(r'\s+', ' ', s).strip()
 
+    def _lead_company_name(self):
+        """Best available company name for duplicate matching: the free-text
+        Company Name, else the linked customer's commercial (company) name."""
+        self.ensure_one()
+        if self.partner_name:
+            return self.partner_name
+        if self.partner_id:
+            return (self.partner_id.commercial_partner_id.name
+                    or self.partner_id.name or '')
+        return ''
+
     def _get_duplicate_domain(self, phone, email, company_name=None):
-        domain = []
+        # Each entry is a sub-domain; the whole thing is OR-ed together.
+        clauses = []
         if phone:
             sanitized = re.sub(r'\D', '', str(phone))
             if len(sanitized) >= 10:
-                search_term = sanitized[-10:]
-                domain.append(('phone', 'ilike', search_term))
+                clauses.append([('phone', 'ilike', sanitized[-10:])])
             else:
-                domain.append(('phone', '=ilike', phone.strip()))
+                clauses.append([('phone', '=ilike', phone.strip())])
         if email:
-            domain.append(('email_from', '=ilike', email.strip()))
-        # Company-name similarity: flag leads whose Company Name shares the same
+            clauses.append([('email_from', '=ilike', email.strip())])
+        # Company-name similarity: flag leads whose company shares the same
         # normalized core (legal suffixes / parenthetical qualifiers stripped),
         # e.g. "Airserve Engineering" ~ "Airserve Engineering (JSW Cement)".
-        # Only when the core is specific enough (>= 5 chars) to avoid noise.
+        # The company can live in the free-text Company Name OR the linked
+        # customer, so match either. Only when the core is specific enough
+        # (>= 5 chars) to avoid noise.
         core = self._normalize_company_name(company_name)
         if len(core) >= 5:
-            domain.append(('partner_name', 'ilike', core))
-        if not domain:
+            clauses.append([
+                '|',
+                ('partner_name', 'ilike', core),
+                ('partner_id.commercial_partner_id.name', 'ilike', core),
+            ])
+        if not clauses:
             return []
-        # OR all clauses together (needs N-1 leading '|' operators).
-        return ['|'] * (len(domain) - 1) + domain
+        # OR the sub-domains together (needs N-1 leading '|' operators).
+        domain = ['|'] * (len(clauses) - 1)
+        for c in clauses:
+            domain += c
+        return domain
 
     def _check_and_mark_duplicates(self):
         for lead in self:
-            if not lead.phone and not lead.email_from and not lead.partner_name:
+            company = lead._lead_company_name()
+            if not lead.phone and not lead.email_from and not company:
                 continue
-            domain = self._get_duplicate_domain(lead.phone, lead.email_from, lead.partner_name)
+            domain = self._get_duplicate_domain(lead.phone, lead.email_from, company)
             if not domain:
                 continue
             search_domain = domain + [('id', '!=', lead.id)]
