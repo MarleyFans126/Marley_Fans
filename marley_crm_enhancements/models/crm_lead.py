@@ -102,13 +102,25 @@ class CrmLead(models.Model):
                 [('lead_id', '=', lead.id)]
             )
 
+    # Name of the singleton container project the Order Booking Forms live in.
+    _ORDER_BOOKING_PROJECT = 'Order Booking Form'
+
     @api.model
     def _get_installation_project(self):
-        """Return the singleton 'Installation' project, creating it if needed."""
+        """Return the singleton 'Order Booking Form' project, creating it if
+        needed. The container used to be named 'Installation'; if that legacy
+        project exists it is renamed in place so all its existing tasks keep
+        their home.
+        """
         Project = self.env['project.project'].sudo()
-        project = Project.search([('name', '=', 'Installation')], limit=1)
+        project = Project.search([('name', '=', self._ORDER_BOOKING_PROJECT)], limit=1)
         if project:
             return project
+        # Migrate the legacy "Installation" container name in place.
+        legacy = Project.search([('name', '=', 'Installation')], limit=1)
+        if legacy:
+            legacy.name = self._ORDER_BOOKING_PROJECT
+            return legacy
         stage_xmlids = [
             'marley_crm_enhancements.project_stage_installation',
             'marley_crm_enhancements.project_stage_in_progress',
@@ -123,7 +135,7 @@ class CrmLead(models.Model):
             if s:
                 stages.append(s.id)
         return Project.create({
-            'name': 'Installation',
+            'name': self._ORDER_BOOKING_PROJECT,
             'type_ids': [(6, 0, stages)] if stages else False,
         })
 
@@ -133,7 +145,7 @@ class CrmLead(models.Model):
         tasks = self.env['project.task'].sudo().search([('lead_id', '=', self.id)])
         action = {
             'type': 'ir.actions.act_window',
-            'name': _('Installation Tasks'),
+            'name': _('Order Booking Forms'),
             'res_model': 'project.task',
             'domain': [('lead_id', '=', self.id)],
             'context': {
@@ -395,10 +407,10 @@ class CrmLead(models.Model):
     # ------------------------------------------------------------------
 
     def action_create_project(self):
-        """Create a new installation task in the shared 'Installation' project,
-        pre-filled from this lead, then open it. Creating (instead of just
-        opening a form with defaults) ensures the compute that fetches
-        Company Name / Address / GSTIN / Sales Rep runs immediately.
+        """Create a new Order Booking Form task in the shared 'Order Booking
+        Form' project, pre-filled from this lead, then open it. Creating
+        (instead of just opening a form with defaults) ensures the compute that
+        fetches Company Name / Address / GSTIN / Sales Rep runs immediately.
         """
         self.ensure_one()
 
@@ -427,7 +439,7 @@ class CrmLead(models.Model):
 
         return {
             'type': 'ir.actions.act_window',
-            'name': _('Installation Task'),
+            'name': _('Order Booking Form'),
             'res_model': 'project.task',
             'res_id': task.id,
             'view_mode': 'form',
