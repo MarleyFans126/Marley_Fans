@@ -160,4 +160,72 @@
         </field>
     </record>
 
+    <!-- ================================================================
+         Dispatch / Installation date: searchable filters + a calendar.
+         "Dispatch Date" is the standard task Deadline (date_deadline), which
+         already drives the standard task Calendar. We just relabel the filter
+         (it was called "Deadline") and add the same for Installation Date.
+         ================================================================ -->
+    <record id="project_task_search_marley_dates" model="ir.ui.view">
+        <field name="name">project.task.search.marley.dates</field>
+        <field name="model">project.task</field>
+        <field name="inherit_id" ref="project.view_task_search_form"/>
+        <field name="arch" type="xml">
+            <!-- Relabel the "Deadline" date filter -> "Dispatch Date" and add
+                 an Installation Date filter right after it. -->
+            <filter name="date_deadline" position="attributes">
+                <attribute name="string">Dispatch Date</attribute>
+            </filter>
+            <filter name="date_deadline" position="after">
+                <filter string="Installation Date" name="inst_installation_date_filter"
+                        date="inst_installation_date"/>
+            </filter>
+            <!-- Relabel the "Deadline" group-by -> "Dispatch Date" and add an
+                 Installation Date group-by. -->
+            <filter name="deadline" position="attributes">
+                <attribute name="string">Dispatch Date</attribute>
+            </filter>
+            <filter name="deadline" position="after">
+                <filter string="Installation Date" name="group_inst_installation_date"
+                        context="{'group_by': 'inst_installation_date'}"/>
+            </filter>
+        </field>
+    </record>
+
+    <!-- Installation-date calendar (Dispatch Date already has the standard
+         task calendar, keyed on date_deadline). -->
+    <record id="project_task_calendar_installation" model="ir.ui.view">
+        <field name="name">project.task.calendar.installation</field>
+        <field name="model">project.task</field>
+        <field name="arch" type="xml">
+            <calendar string="Installation Calendar" date_start="inst_installation_date"
+                      color="stage_id" mode="month" quick_create="0"
+                      event_open_popup="true" hide_time="true">
+                <field name="inst_company_name"/>
+                <field name="stage_id"/>
+                <field name="user_ids"/>
+            </calendar>
+        </field>
+    </record>
+
+    <record id="action_installation_calendar" model="ir.actions.act_window">
+        <field name="name">Installation Calendar</field>
+        <field name="res_model">project.task</field>
+        <field name="view_mode">calendar,list,form</field>
+        <field name="domain">[('inst_installation_date', '!=', False)]</field>
+        <field name="context">{}</field>
+    </record>
+    <record id="action_installation_calendar_cal_view" model="ir.actions.act_window.view">
+        <field name="sequence">1</field>
+        <field name="view_mode">calendar</field>
+        <field name="view_id" ref="project_task_calendar_installation"/>
+        <field name="act_window_id" ref="action_installation_calendar"/>
+    </record>
+
+    <menuitem id="menu_installation_calendar"
+              name="Installation Calendar"
+              parent="project.menu_main_pm"
+              action="action_installation_calendar"
+              sequence="45"/>
+
 </odoo>
