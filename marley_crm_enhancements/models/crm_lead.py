@@ -102,42 +102,64 @@ class CrmLead(models.Model):
                 [('lead_id', '=', lead.id)]
             )
 
-    # Name of the singleton container project the Order Booking Forms live in.
+    # Name of the singleton container project the Order Booking Forms live in,
+    # plus the legacy names it may still be found under on older databases.
     _ORDER_BOOKING_PROJECT = 'Order Booking Form'
+    _LEGACY_PROJECT_NAMES = ['Installation', 'Order Booking']
 
     @api.model
     def _get_installation_project(self):
-        """Return the singleton 'Order Booking Form' project, creating it if
-        needed. The container used to be named 'Installation'; if that legacy
-        project exists it is renamed in place so all its existing tasks keep
-        their home.
+        """Return the single 'Order Booking Form' container project, folding any
+        stragglers into it. The container has been called 'Installation' and
+        'Order Booking' over time; if such projects exist they are consolidated
+        into the canonical 'Order Booking Form' — their tasks and stages moved
+        over and the empty legacy project archived — so the button always files
+        into ONE project.
         """
         Project = self.env['project.project'].sudo()
-        project = Project.search([('name', '=', self._ORDER_BOOKING_PROJECT)], limit=1)
-        if project:
-            return project
-        # Migrate the legacy "Installation" container name in place.
-        legacy = Project.search([('name', '=', 'Installation')], limit=1)
-        if legacy:
-            legacy.name = self._ORDER_BOOKING_PROJECT
-            return legacy
-        stage_xmlids = [
-            'marley_crm_enhancements.project_stage_installation',
-            'marley_crm_enhancements.project_stage_in_progress',
-            'marley_crm_enhancements.project_stage_cancelled',
-            'marley_crm_enhancements.project_stage_done',
-            'marley_crm_enhancements.project_stage_installation_completed',
-            'marley_crm_enhancements.project_stage_warranty',
-        ]
-        stages = []
-        for xmlid in stage_xmlids:
-            s = self.env.ref(xmlid, raise_if_not_found=False)
-            if s:
-                stages.append(s.id)
-        return Project.create({
-            'name': self._ORDER_BOOKING_PROJECT,
-            'type_ids': [(6, 0, stages)] if stages else False,
-        })
+        Task = self.env['project.task'].sudo()
+
+        canonical = Project.search([('name', '=', self._ORDER_BOOKING_PROJECT)], limit=1)
+        legacy = Project.search([('name', 'in', self._LEGACY_PROJECT_NAMES)])
+
+        if not canonical:
+            if legacy:
+                # Promote the legacy container with the most tasks; fold the rest.
+                canonical = max(
+                    legacy, key=lambda p: Task.search_count([('project_id', '=', p.id)]))
+                canonical.name = self._ORDER_BOOKING_PROJECT
+                legacy -= canonical
+            else:
+                # Fresh install: create with the full 6-stage workflow.
+                stage_xmlids = [
+                    'marley_crm_enhancements.project_stage_installation',
+                    'marley_crm_enhancements.project_stage_in_progress',
+                    'marley_crm_enhancements.project_stage_cancelled',
+                    'marley_crm_enhancements.project_stage_done',
+                    'marley_crm_enhancements.project_stage_installation_completed',
+                    'marley_crm_enhancements.project_stage_warranty',
+                ]
+                stages = []
+                for xmlid in stage_xmlids:
+                    s = self.env.ref(xmlid, raise_if_not_found=False)
+                    if s:
+                        stages.append(s.id)
+                return Project.create({
+                    'name': self._ORDER_BOOKING_PROJECT,
+                    'type_ids': [(6, 0, stages)] if stages else False,
+                })
+
+        # Fold any remaining legacy containers into the canonical project:
+        # union their stages so every moved task keeps a valid column, move the
+        # tasks over, then archive the emptied legacy project.
+        for lp in legacy:
+            if lp.type_ids:
+                canonical.write({'type_ids': [(4, s.id) for s in lp.type_ids]})
+            tasks = Task.search([('project_id', '=', lp.id)])
+            if tasks:
+                tasks.write({'project_id': canonical.id})
+            lp.active = False
+        return canonical
 
     def action_view_project(self):
         """Open installation tasks linked to this lead."""
