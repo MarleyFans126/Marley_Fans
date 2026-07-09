@@ -35,6 +35,18 @@ class CrmLead(models.Model):
     # Fields moved from crm_aajjo_integration that are needed for general automation display
     second_salesperson_id = fields.Many2one('res.users', string='Second SalesPerson', domain=[('share', '=', False)])
 
+    # Salesperson lock: only Sales Administrators may (re)assign the
+    # Salesperson. For everyone else the field is read-only in the form
+    # (the server-side auto-assign / propagation is unaffected).
+    can_edit_salesperson = fields.Boolean(
+        compute='_compute_can_edit_salesperson',
+        help='True when the current user may (re)assign the Salesperson.')
+
+    def _compute_can_edit_salesperson(self):
+        is_mgr = self.env.user.has_group('sales_team.group_sale_manager')
+        for lead in self:
+            lead.can_edit_salesperson = is_mgr
+
     # Unified Source Flags (Shared across modules)
     is_indiamart = fields.Boolean(string='Is IndiaMART Lead', default=False, readonly=True)
     is_aajjo = fields.Boolean(string='Is AAJJO Lead', default=False, readonly=True)

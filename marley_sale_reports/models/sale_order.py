@@ -269,6 +269,17 @@ class SaleOrder(models.Model):
         'res.users', string='Additional Salesperson',
         domain=[('share', '=', False)],
     )
+
+    # Salesperson lock: only Sales Administrators may (re)assign the
+    # Salesperson; read-only in the form for everyone else.
+    can_edit_salesperson = fields.Boolean(
+        compute='_compute_can_edit_salesperson',
+        help='True when the current user may (re)assign the Salesperson.')
+
+    def _compute_can_edit_salesperson(self):
+        is_mgr = self.env.user.has_group('sales_team.group_sale_manager')
+        for order in self:
+            order.can_edit_salesperson = is_mgr
     po_reference_date = fields.Date(string='P.O. Reference Date')
     proforma_date = fields.Date(string='Proforma Invoice Date')
 

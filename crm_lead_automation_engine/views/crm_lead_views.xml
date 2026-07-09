@@ -68,6 +68,19 @@
         <field name="model">crm.lead</field>
         <field name="inherit_id" ref="crm.crm_lead_view_form"/>
         <field name="arch" type="xml">
+            <!-- Salesperson lock: only Sales Administrators may (re)assign it.
+                 Hidden helper drives the readonly on both user_id fields
+                 (the form shows one for leads and one for opportunities). -->
+            <xpath expr="//sheet" position="inside">
+                <field name="can_edit_salesperson" invisible="1"/>
+            </xpath>
+            <xpath expr="//group[@invisible=&quot;type == 'lead'&quot;]/field[@name='user_id']" position="attributes">
+                <attribute name="readonly">not can_edit_salesperson</attribute>
+            </xpath>
+            <xpath expr="//group[@invisible=&quot;type == 'opportunity'&quot;]/field[@name='user_id']" position="attributes">
+                <attribute name="readonly">not can_edit_salesperson</attribute>
+            </xpath>
+
             <!-- Red warning banner above the sheet, visible only when flagged -->
             <xpath expr="//sheet" position="before">
                 <div class="alert alert-danger mb-0 d-flex align-items-center gap-2"

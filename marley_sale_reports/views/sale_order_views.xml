@@ -18,6 +18,16 @@
                         invisible="not partner_id"/>
             </xpath>
 
+            <!-- Salesperson lock: only Sales Administrators may (re)assign it.
+                 Applied here (before the Proforma tab below adds its own
+                 user_id) so this targets the standard Salesperson field. -->
+            <xpath expr="//sheet" position="inside">
+                <field name="can_edit_salesperson" invisible="1"/>
+            </xpath>
+            <xpath expr="//field[@name='user_id']" position="attributes">
+                <attribute name="readonly">not can_edit_salesperson</attribute>
+            </xpath>
+
             <!-- Button at the top of the Order Lines area to choose which
                  products print on the Proforma Invoice PDF. -->
             <xpath expr="//field[@name='order_line']" position="before">
@@ -99,7 +109,7 @@
                 <page string="Precise Info for Proforma" name="marley_proforma_info">
                     <group>
                         <group string="Sales">
-                            <field name="user_id"/>
+                            <field name="user_id" readonly="not can_edit_salesperson"/>
                             <field name="second_user_id"/>
                             <field name="team_id"/>
                             <field name="require_signature"/>
