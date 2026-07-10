@@ -44,13 +44,14 @@ class CrmLead(models.Model):
 
     def _compute_can_edit_salesperson(self):
         user = self.env.user
-        is_mgr = user.has_group('sales_team.group_sale_manager')
+        # "User: All Documents" and "Administrator" may (re)assign ANY lead's
+        # Salesperson (Administrator implies All Documents, so this one group
+        # check covers both). An "Own Documents Only" user may change it only on
+        # their OWN lead (or one that's still unassigned).
+        can_edit_any = user.has_group('sales_team.group_sale_salesman_all_leads')
         for lead in self:
-            # Sales Admins may (re)assign any lead. A regular salesperson may
-            # change the Salesperson only on their OWN lead (or one that's still
-            # unassigned) — never on a lead that belongs to someone else.
             lead.can_edit_salesperson = (
-                is_mgr or not lead.user_id or lead.user_id == user
+                can_edit_any or not lead.user_id or lead.user_id == user
             )
 
     # Unified Source Flags (Shared across modules)
