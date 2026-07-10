@@ -43,9 +43,15 @@ class CrmLead(models.Model):
         help='True when the current user may (re)assign the Salesperson.')
 
     def _compute_can_edit_salesperson(self):
-        is_mgr = self.env.user.has_group('sales_team.group_sale_manager')
+        user = self.env.user
+        is_mgr = user.has_group('sales_team.group_sale_manager')
         for lead in self:
-            lead.can_edit_salesperson = is_mgr
+            # Sales Admins may (re)assign any lead. A regular salesperson may
+            # change the Salesperson only on their OWN lead (or one that's still
+            # unassigned) — never on a lead that belongs to someone else.
+            lead.can_edit_salesperson = (
+                is_mgr or not lead.user_id or lead.user_id == user
+            )
 
     # Unified Source Flags (Shared across modules)
     is_indiamart = fields.Boolean(string='Is IndiaMART Lead', default=False, readonly=True)

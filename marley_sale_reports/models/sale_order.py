@@ -277,9 +277,15 @@ class SaleOrder(models.Model):
         help='True when the current user may (re)assign the Salesperson.')
 
     def _compute_can_edit_salesperson(self):
-        is_mgr = self.env.user.has_group('sales_team.group_sale_manager')
+        user = self.env.user
+        is_mgr = user.has_group('sales_team.group_sale_manager')
         for order in self:
-            order.can_edit_salesperson = is_mgr
+            # Sales Admins may (re)assign any order. A regular salesperson may
+            # change the Salesperson only on their OWN order (or one that's
+            # still unassigned) — never on another person's order.
+            order.can_edit_salesperson = (
+                is_mgr or not order.user_id or order.user_id == user
+            )
     po_reference_date = fields.Date(string='P.O. Reference Date')
     proforma_date = fields.Date(string='Proforma Invoice Date')
 
