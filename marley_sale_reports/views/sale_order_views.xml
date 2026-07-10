@@ -110,7 +110,7 @@
                     <group>
                         <group string="Sales">
                             <field name="user_id" readonly="not can_edit_salesperson"/>
-                            <field name="second_user_id"/>
+                            <field name="second_user_id" readonly="not can_edit_salesperson"/>
                             <field name="team_id"/>
                             <field name="require_signature"/>
                             <field name="require_payment"/>

@@ -48,7 +48,7 @@
                  Order: Address -> Business Area -> Business City ->
                  Pincode -> Business State. -->
             <xpath expr="//field[@name='user_id']" position="after">
-                <field name="second_salesperson_id"/>
+                <field name="second_salesperson_id" readonly="not can_edit_salesperson"/>
 
                 <!-- ===== Address (auto-fetched from Customer; shown on main
                      form, not buried in the Contacts tab). Only street lines
