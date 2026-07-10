@@ -44,12 +44,12 @@
             </xpath>
 
             <xpath expr="//notebook" position="inside">
-                <page string="Installation" name="installation_tab">
+                <page string="Order Booking Form" name="installation_tab">
 
-                    <!-- Installation toggle (refresh is automatic) -->
+                    <!-- Order Booking Form toggle (refresh is automatic) -->
                     <div class="d-flex align-items-center gap-3 mb-3">
                         <field name="is_installation" widget="boolean_toggle"/>
-                        <label for="is_installation" string="This is an Installation Task"/>
+                        <label for="is_installation" string="This is an Order Booking Form"/>
                     </div>
 
                     <div invisible="not is_installation">

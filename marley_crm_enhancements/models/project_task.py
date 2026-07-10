@@ -55,7 +55,7 @@ class ProjectTask(models.Model):
     # ------------------------------------------------------------------
     # Installation Fields
     # ------------------------------------------------------------------
-    is_installation = fields.Boolean(string='Installation Task', default=True)
+    is_installation = fields.Boolean(string='Order Booking Form', default=True)
 
     # Auto-fetched from Sale Order / Invoice / Partner
     inst_sales_rep = fields.Char(string='Sales Representative', compute='_compute_installation_details', store=True, readonly=True)
