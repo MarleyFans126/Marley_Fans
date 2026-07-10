@@ -180,9 +180,11 @@ class CrmLead(models.Model):
         try:
             rule = self.env.ref('crm.crm_rule_personal_lead', raise_if_not_found=False)
             if rule and 'second_salesperson_id' in self._fields:
+                # Own Documents salespeople see ONLY their own leads and leads
+                # where they are the Second Salesperson — not unassigned leads
+                # and not other people's.
                 new_domain = (
-                    "['|', '|', ('user_id', '=', user.id), "
-                    "('user_id', '=', False), "
+                    "['|', ('user_id', '=', user.id), "
                     "('second_salesperson_id', '=', user.id)]"
                 )
                 if rule.domain_force != new_domain:

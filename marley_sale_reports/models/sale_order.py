@@ -23,8 +23,7 @@ class SaleOrder(models.Model):
             rule = self.env.ref('sale.sale_order_personal_rule', raise_if_not_found=False)
             if rule:
                 new_domain = (
-                    "['|', '|', ('user_id', '=', user.id), "
-                    "('user_id', '=', False), "
+                    "['|', ('user_id', '=', user.id), "
                     "('second_user_id', '=', user.id)]"
                 )
                 if rule.domain_force != new_domain:
@@ -49,8 +48,7 @@ class SaleOrder(models.Model):
             )
             if line_rule:
                 new_line_domain = (
-                    "['|', '|', ('salesman_id', '=', user.id), "
-                    "('salesman_id', '=', False), "
+                    "['|', ('salesman_id', '=', user.id), "
                     "('order_id.second_user_id', '=', user.id)]"
                 )
                 if line_rule.domain_force != new_line_domain:
