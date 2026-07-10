@@ -17,6 +17,7 @@
     ],
     'data': [
         'security/ir.model.access.csv',
+        'security/order_booking_task_rules.xml',
         'data/crm_stages.xml',
         'data/crm_lost_reasons.xml',
         'data/project_stages.xml',
