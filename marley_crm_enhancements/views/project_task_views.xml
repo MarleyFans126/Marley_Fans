@@ -192,8 +192,42 @@
         </field>
     </record>
 
-    <!-- Installation-date calendar (Dispatch Date already has the standard
-         task calendar, keyed on date_deadline). -->
+    <!-- Dispatch-date calendar: tasks shown on their Dispatch Date
+         (date_deadline). -->
+    <record id="project_task_calendar_dispatch" model="ir.ui.view">
+        <field name="name">project.task.calendar.dispatch</field>
+        <field name="model">project.task</field>
+        <field name="arch" type="xml">
+            <calendar string="Dispatch Calendar" date_start="date_deadline"
+                      color="stage_id" mode="month" quick_create="0"
+                      event_open_popup="true">
+                <field name="inst_company_name"/>
+                <field name="stage_id"/>
+                <field name="user_ids"/>
+            </calendar>
+        </field>
+    </record>
+
+    <record id="action_dispatch_calendar" model="ir.actions.act_window">
+        <field name="name">Dispatch Calendar</field>
+        <field name="res_model">project.task</field>
+        <field name="view_mode">calendar,list,form</field>
+        <field name="domain">[('date_deadline', '!=', False)]</field>
+        <field name="context">{}</field>
+    </record>
+    <record id="action_dispatch_calendar_cal_view" model="ir.actions.act_window.view">
+        <field name="sequence">1</field>
+        <field name="view_mode">calendar</field>
+        <field name="view_id" ref="project_task_calendar_dispatch"/>
+        <field name="act_window_id" ref="action_dispatch_calendar"/>
+    </record>
+    <menuitem id="menu_dispatch_calendar"
+              name="Dispatch Calendar"
+              parent="project.menu_main_pm"
+              action="action_dispatch_calendar"
+              sequence="44"/>
+
+    <!-- Installation-date calendar: tasks shown on their Installation Date. -->
     <record id="project_task_calendar_installation" model="ir.ui.view">
         <field name="name">project.task.calendar.installation</field>
         <field name="model">project.task</field>
