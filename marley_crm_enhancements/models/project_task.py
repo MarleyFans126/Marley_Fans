@@ -27,33 +27,21 @@ class ProjectTask(models.Model):
     stage_id = fields.Many2one(default=_get_default_stage_id)
 
     # ------------------------------------------------------------------
-    # Default project: the singleton "Installation" project
+    # Default project: the singleton "Order Booking Form" project
     # ------------------------------------------------------------------
     @api.model
     def _get_default_installation_project(self):
-        Project = self.env['project.project'].sudo()
-        project = Project.search([('name', '=', 'Installation')], limit=1)
-        if project:
-            return project.id
-        stage_xmlids = [
-            'marley_crm_enhancements.project_stage_installation',
-            'marley_crm_enhancements.project_stage_in_progress',
-            'marley_crm_enhancements.project_stage_cancelled',
-            'marley_crm_enhancements.project_stage_done',
-            'marley_crm_enhancements.project_stage_installation_completed',
-            'marley_crm_enhancements.project_stage_warranty',
-        ]
-        stages = []
-        for xmlid in stage_xmlids:
-            s = self.env.ref(xmlid, raise_if_not_found=False)
-            if s:
-                stages.append(s.id)
-        return Project.create({
-            'name': 'Installation',
-            'type_ids': [(6, 0, stages)] if stages else False,
-        }).id
+        # Reuse the self-consolidating getter so a task never re-creates a
+        # stray "Installation" project — it always lands in the canonical
+        # "Order Booking Form".
+        return self.env['crm.lead']._get_installation_project().id
 
     project_id = fields.Many2one(default=_get_default_installation_project)
+
+    # Relabel the standard task Deadline as "Dispatch Date" at the MODEL level
+    # (not only in the form) so it reads "Dispatch Date" everywhere — the form,
+    # the Custom Filter field picker, exports, and Group By.
+    date_deadline = fields.Datetime(string='Dispatch Date')
 
     # Link task directly to the CRM opportunity / lead
     lead_id = fields.Many2one(
