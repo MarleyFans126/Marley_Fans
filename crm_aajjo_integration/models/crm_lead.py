@@ -198,8 +198,12 @@ class CrmLead(models.Model):
         else:
             external_id = str(external_id)
         
-        # Check against universal external_lead_id field
-        existing = self.search([('external_lead_id', '=', external_id)], limit=1)
+        # Check against the universal external_lead_id field. Include archived
+        # leads (active_test=False) so the 2-hour re-scan window never
+        # resurrects a lead that was already imported and later archived/lost —
+        # the same LeadID is the same inquiry, so it stays skipped.
+        existing = self.with_context(active_test=False).search(
+            [('external_lead_id', '=', external_id)], limit=1)
         if existing:
             _logger.info(f"AAJJO lead {external_id} already exists (ID: {existing.id}). Skipping.")
             return existing

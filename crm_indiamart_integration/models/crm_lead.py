@@ -228,10 +228,12 @@ class CrmLead(models.Model):
             return
 
         # ── Time window ──
-        # start = previous end_time (no overlap, no gap)
-        # UNIQUE_QUERY_ID dedup handles any edge-case duplicates.
+        # Start 2 hours BEFORE the previous end_time. IndiaMART's API can serve
+        # a lead a few minutes after its timestamp; a zero-overlap window (which
+        # only moves forward) would then drop it permanently. The archived-aware
+        # external_lead_id dedup below makes re-scanning harmless.
         if config.last_end_time:
-            start_dt = config.last_end_time
+            start_dt = config.last_end_time - timedelta(hours=2)
         else:
             start_dt = now - timedelta(minutes=10)
 
@@ -579,8 +581,11 @@ class CrmLead(models.Model):
                 skipped_invalid += 1
                 continue
 
-            # Duplicate check
-            if self.env['crm.lead'].sudo().search_count([
+            # Duplicate check — include archived leads (active_test=False):
+            # the UNIQUE(external_lead_id) constraint counts archived rows, so a
+            # re-scanned lead whose Odoo record was archived must be skipped, not
+            # re-inserted (which would raise the unique constraint).
+            if self.env['crm.lead'].sudo().with_context(active_test=False).search_count([
                 ('external_lead_id', '=', api_lead_id),
             ]):
                 skipped_dup += 1
