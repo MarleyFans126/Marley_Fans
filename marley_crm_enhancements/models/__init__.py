@@ -4,3 +4,4 @@ from . import mail_message_access
 from . import project_project
 from . import project_task
 from . import project_task_installation_line
+from . import task_date

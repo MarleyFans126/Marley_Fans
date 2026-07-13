@@ -198,32 +198,72 @@
         </field>
     </record>
 
-    <!-- Dispatch calendar: tasks shown on their SCHEDULED Dispatch Date. -->
-    <record id="project_task_calendar_dispatch" model="ir.ui.view">
-        <field name="name">project.task.calendar.dispatch</field>
-        <field name="model">project.task</field>
+    <!-- ================================================================
+         Key-dates calendars. Both plot the read-only project.task.date SQL
+         view, so a single calendar shows TWO date-types side by side,
+         differentiated by colour + a filter panel + a labelled title:
+           Dispatch Calendar     = Scheduled Dispatch + Dispatch Date
+           Installation Calendar = Scheduled Installation + Installation Completed
+         ================================================================ -->
+    <record id="project_task_date_calendar" model="ir.ui.view">
+        <field name="name">project.task.date.calendar</field>
+        <field name="model">project.task.date</field>
         <field name="arch" type="xml">
-            <calendar string="Dispatch Calendar" date_start="inst_scheduled_dispatch_date"
-                      color="stage_id" mode="month" quick_create="0"
+            <calendar string="Key Dates" date_start="date" color="date_type"
+                      mode="month" create="0" quick_create="0"
                       event_open_popup="true" hide_time="true">
-                <field name="inst_company_name"/>
+                <field name="date_type" filters="1"/>
+                <field name="name"/>
                 <field name="stage_id"/>
-                <field name="user_ids"/>
+                <field name="task_id"/>
             </calendar>
         </field>
     </record>
 
+    <record id="project_task_date_list" model="ir.ui.view">
+        <field name="name">project.task.date.list</field>
+        <field name="model">project.task.date</field>
+        <field name="arch" type="xml">
+            <list string="Key Dates" create="0">
+                <field name="date"/>
+                <field name="date_type"/>
+                <field name="task_id"/>
+                <field name="company_name"/>
+                <field name="stage_id"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="project_task_date_form" model="ir.ui.view">
+        <field name="name">project.task.date.form</field>
+        <field name="model">project.task.date</field>
+        <field name="arch" type="xml">
+            <form string="Key Date" create="0" edit="0">
+                <sheet>
+                    <group>
+                        <field name="task_id"/>
+                        <field name="company_name"/>
+                        <field name="date"/>
+                        <field name="date_type"/>
+                        <field name="stage_id"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Dispatch Calendar: Scheduled Dispatch + actual Dispatch dates -->
     <record id="action_dispatch_calendar" model="ir.actions.act_window">
         <field name="name">Dispatch Calendar</field>
-        <field name="res_model">project.task</field>
+        <field name="res_model">project.task.date</field>
         <field name="view_mode">calendar,list,form</field>
-        <field name="domain">[('inst_scheduled_dispatch_date', '!=', False)]</field>
+        <field name="domain">[('category', '=', 'dispatch')]</field>
         <field name="context">{}</field>
     </record>
     <record id="action_dispatch_calendar_cal_view" model="ir.actions.act_window.view">
         <field name="sequence">1</field>
         <field name="view_mode">calendar</field>
-        <field name="view_id" ref="project_task_calendar_dispatch"/>
+        <field name="view_id" ref="project_task_date_calendar"/>
         <field name="act_window_id" ref="action_dispatch_calendar"/>
     </record>
     <menuitem id="menu_dispatch_calendar"
@@ -232,35 +272,20 @@
               action="action_dispatch_calendar"
               sequence="44"/>
 
-    <!-- Installation-date calendar: tasks shown on their Installation Date. -->
-    <record id="project_task_calendar_installation" model="ir.ui.view">
-        <field name="name">project.task.calendar.installation</field>
-        <field name="model">project.task</field>
-        <field name="arch" type="xml">
-            <calendar string="Installation Calendar" date_start="inst_installation_date"
-                      color="stage_id" mode="month" quick_create="0"
-                      event_open_popup="true" hide_time="true">
-                <field name="inst_company_name"/>
-                <field name="stage_id"/>
-                <field name="user_ids"/>
-            </calendar>
-        </field>
-    </record>
-
+    <!-- Installation Calendar: Scheduled Installation + Installation Completed -->
     <record id="action_installation_calendar" model="ir.actions.act_window">
         <field name="name">Installation Calendar</field>
-        <field name="res_model">project.task</field>
+        <field name="res_model">project.task.date</field>
         <field name="view_mode">calendar,list,form</field>
-        <field name="domain">[('inst_installation_date', '!=', False)]</field>
+        <field name="domain">[('category', '=', 'install')]</field>
         <field name="context">{}</field>
     </record>
     <record id="action_installation_calendar_cal_view" model="ir.actions.act_window.view">
         <field name="sequence">1</field>
         <field name="view_mode">calendar</field>
-        <field name="view_id" ref="project_task_calendar_installation"/>
+        <field name="view_id" ref="project_task_date_calendar"/>
         <field name="act_window_id" ref="action_installation_calendar"/>
     </record>
-
     <menuitem id="menu_installation_calendar"
               name="Installation Calendar"
               parent="project.menu_main_pm"
