@@ -39,6 +39,7 @@
             <!-- Move Sales Representative + Scheduled Installation Date
                  to the top-right group, right after Dispatch Date -->
             <xpath expr="//div[@id='date_deadline_and_recurring_task']" position="after">
+                <field name="inst_scheduled_dispatch_date"/>
                 <field name="inst_sales_rep"/>
                 <field name="inst_installation_date"/>
                 <field name="inst_completed_date"/>
@@ -178,6 +179,8 @@
                 <attribute name="string">Dispatch Date</attribute>
             </filter>
             <filter name="date_deadline" position="after">
+                <filter string="Scheduled Dispatch Date" name="inst_scheduled_dispatch_filter"
+                        date="inst_scheduled_dispatch_date"/>
                 <filter string="Installation Date" name="inst_installation_date_filter"
                         date="inst_installation_date"/>
             </filter>
@@ -187,21 +190,22 @@
                 <attribute name="string">Dispatch Date</attribute>
             </filter>
             <filter name="deadline" position="after">
+                <filter string="Scheduled Dispatch Date" name="group_inst_scheduled_dispatch"
+                        context="{'group_by': 'inst_scheduled_dispatch_date'}"/>
                 <filter string="Installation Date" name="group_inst_installation_date"
                         context="{'group_by': 'inst_installation_date'}"/>
             </filter>
         </field>
     </record>
 
-    <!-- Dispatch-date calendar: tasks shown on their Dispatch Date
-         (date_deadline). -->
+    <!-- Dispatch calendar: tasks shown on their SCHEDULED Dispatch Date. -->
     <record id="project_task_calendar_dispatch" model="ir.ui.view">
         <field name="name">project.task.calendar.dispatch</field>
         <field name="model">project.task</field>
         <field name="arch" type="xml">
-            <calendar string="Dispatch Calendar" date_start="date_deadline"
+            <calendar string="Dispatch Calendar" date_start="inst_scheduled_dispatch_date"
                       color="stage_id" mode="month" quick_create="0"
-                      event_open_popup="true">
+                      event_open_popup="true" hide_time="true">
                 <field name="inst_company_name"/>
                 <field name="stage_id"/>
                 <field name="user_ids"/>
@@ -213,7 +217,7 @@
         <field name="name">Dispatch Calendar</field>
         <field name="res_model">project.task</field>
         <field name="view_mode">calendar,list,form</field>
-        <field name="domain">[('date_deadline', '!=', False)]</field>
+        <field name="domain">[('inst_scheduled_dispatch_date', '!=', False)]</field>
         <field name="context">{}</field>
     </record>
     <record id="action_dispatch_calendar_cal_view" model="ir.actions.act_window.view">

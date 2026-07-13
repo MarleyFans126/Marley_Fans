@@ -59,6 +59,7 @@ class ProjectTask(models.Model):
 
     # Auto-fetched from Sale Order / Invoice / Partner
     inst_sales_rep = fields.Char(string='Sales Representative', compute='_compute_installation_details', store=True, readonly=True)
+    inst_scheduled_dispatch_date = fields.Date(string='Scheduled Dispatch Date')
     inst_installation_date = fields.Date(string='Scheduled Installation Date')
     inst_completed_date = fields.Date(string='Installation Completed Date')
     inst_company_name = fields.Char(string='Company Name', compute='_compute_installation_details', store=True, readonly=False)
