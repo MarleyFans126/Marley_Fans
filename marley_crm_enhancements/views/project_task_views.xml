@@ -41,6 +41,7 @@
             <xpath expr="//div[@id='date_deadline_and_recurring_task']" position="after">
                 <field name="inst_sales_rep"/>
                 <field name="inst_installation_date"/>
+                <field name="inst_completed_date"/>
             </xpath>
 
             <xpath expr="//notebook" position="inside">
