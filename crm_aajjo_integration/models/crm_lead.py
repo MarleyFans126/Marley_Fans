@@ -118,8 +118,18 @@ class CrmLead(models.Model):
         IST = timezone(timedelta(hours=5, minutes=30))
         now_ist = datetime.now(IST)
 
+        # Re-scan a 2-hour overlap before the stored cursor. AAJJO's API often
+        # serves a lead a few minutes after its timestamp, so a zero-overlap
+        # window — which only ever moves forward — silently drops leads that
+        # arrive late. The external_lead_id dedup makes re-scanning harmless
+        # (nothing is imported twice); late leads simply get a second chance.
+        OVERLAP = timedelta(hours=2)
         if last_sync:
-            start_dt = str(last_sync)[:19]
+            try:
+                _ls = datetime.strptime(str(last_sync)[:19], '%Y-%m-%d %H:%M:%S')
+                start_dt = (_ls - OVERLAP).strftime('%Y-%m-%d %H:%M:%S')
+            except Exception:
+                start_dt = str(last_sync)[:19]
         else:
             start_dt = (now_ist - timedelta(days=7)).strftime('%Y-%m-%d %H:%M:%S')
 
