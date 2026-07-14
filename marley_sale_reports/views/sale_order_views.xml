@@ -207,4 +207,19 @@
         </field>
     </record>
 
+    <!-- Quotations list: optional Quantity + Unit Price columns (toggle via the
+         list's column picker). Quantity = total across all product lines;
+         Unit Price = the first product line's price. -->
+    <record id="view_quotation_tree_marley_qty_price" model="ir.ui.view">
+        <field name="name">sale.order.list.quotes.marley.qty.price</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_quotation_tree"/>
+        <field name="arch" type="xml">
+            <field name="amount_total" position="after">
+                <field name="total_quantity" optional="hide"/>
+                <field name="first_unit_price" optional="hide"/>
+            </field>
+        </field>
+    </record>
+
 </odoo>

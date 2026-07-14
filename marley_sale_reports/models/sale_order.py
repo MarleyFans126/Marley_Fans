@@ -144,6 +144,30 @@ class SaleOrder(models.Model):
         }
 
     # ------------------------------------------------------------------
+    # Quotation list quick-glance columns: total quantity + first-line unit
+    # price. A quotation has many lines, so "Quantity" sums all product lines
+    # and "Unit Price" shows the first product line's price.
+    # ------------------------------------------------------------------
+    total_quantity = fields.Float(
+        string='Quantity',
+        compute='_compute_marley_qty_price',
+        help='Total quantity across all product lines of the quotation.')
+    first_unit_price = fields.Monetary(
+        string='Unit Price',
+        compute='_compute_marley_qty_price',
+        currency_field='currency_id',
+        help='Unit price of the first product line.')
+
+    @api.depends('order_line.product_uom_qty', 'order_line.price_unit',
+                 'order_line.display_type', 'order_line.product_id')
+    def _compute_marley_qty_price(self):
+        for order in self:
+            lines = order.order_line.filtered(
+                lambda l: not l.display_type and l.product_id)
+            order.total_quantity = sum(lines.mapped('product_uom_qty'))
+            order.first_unit_price = lines[0].price_unit if lines else 0.0
+
+    # ------------------------------------------------------------------
     # Quotation Commercial Terms (as per Marley Fans template)
     # ------------------------------------------------------------------
     warranty_terms = fields.Text(
