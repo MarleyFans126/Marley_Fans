@@ -151,7 +151,7 @@ class SaleOrder(models.Model):
     total_quantity = fields.Float(
         string='Quantity',
         compute='_compute_marley_qty_price',
-        help='Total quantity across all product lines of the quotation.')
+        help='Quantity of the first product line — matches the Unit Price shown.')
     first_unit_price = fields.Monetary(
         string='Unit Price',
         compute='_compute_marley_qty_price',
@@ -162,10 +162,12 @@ class SaleOrder(models.Model):
                  'order_line.display_type', 'order_line.product_id')
     def _compute_marley_qty_price(self):
         for order in self:
-            lines = order.order_line.filtered(
-                lambda l: not l.display_type and l.product_id)
-            order.total_quantity = sum(lines.mapped('product_uom_qty'))
-            order.first_unit_price = lines[0].price_unit if lines else 0.0
+            # Both columns describe the SAME (first) product line, so the
+            # quantity shown is the quantity for the unit price shown.
+            first = order.order_line.filtered(
+                lambda l: not l.display_type and l.product_id)[:1]
+            order.total_quantity = first.product_uom_qty if first else 0.0
+            order.first_unit_price = first.price_unit if first else 0.0
 
     # ------------------------------------------------------------------
     # Quotation Commercial Terms (as per Marley Fans template)
