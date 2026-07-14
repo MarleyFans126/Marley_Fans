@@ -296,7 +296,7 @@ class CrmLead(models.Model):
             lead.duplicate_star = '★' if lead.duplicate_flag else ''
             if lead.duplicate_flag and lead.id:
                 try:
-                    domain = self._get_duplicate_domain(lead.phone, lead.email_from, lead._lead_company_name())
+                    domain = self._get_duplicate_domain(lead.phone, lead.email_from, lead._lead_company_name(), lead.contact_name)
                     if domain:
                         count_domain = domain + [('id', '!=', lead.id)]
                         lead.duplicate_count = self.search_count(count_domain)
@@ -342,8 +342,10 @@ class CrmLead(models.Model):
                     or self.partner_id.name or '')
         return ''
 
-    def _get_duplicate_domain(self, phone, email, company_name=None):
-        # Each entry is a sub-domain; the whole thing is OR-ed together.
+    def _get_duplicate_domain(self, phone, email, company_name=None, contact_name=None):
+        # Each entry is a sub-domain; the whole thing is OR-ed together. A lead
+        # is a duplicate when ANY of mobile / email / company name / contact
+        # person name matches another lead.
         clauses = []
         if phone:
             sanitized = re.sub(r'\D', '', str(phone))
@@ -366,6 +368,11 @@ class CrmLead(models.Model):
                 ('partner_name', 'ilike', core),
                 ('partner_id.commercial_partner_id.name', 'ilike', core),
             ])
+        # Contact-person name: match the same person (case-insensitive, trimmed).
+        # A >= 4-char guard avoids flagging on trivial/partial names.
+        cname = (contact_name or '').strip()
+        if len(cname) >= 4:
+            clauses.append([('contact_name', '=ilike', cname)])
         if not clauses:
             return []
         # OR the sub-domains together (needs N-1 leading '|' operators).
@@ -377,9 +384,10 @@ class CrmLead(models.Model):
     def _check_and_mark_duplicates(self):
         for lead in self:
             company = lead._lead_company_name()
-            if not lead.phone and not lead.email_from and not company:
+            if not lead.phone and not lead.email_from and not company and not lead.contact_name:
                 continue
-            domain = self._get_duplicate_domain(lead.phone, lead.email_from, company)
+            domain = self._get_duplicate_domain(
+                lead.phone, lead.email_from, company, lead.contact_name)
             if not domain:
                 continue
             search_domain = domain + [('id', '!=', lead.id)]
@@ -445,8 +453,9 @@ class CrmLead(models.Model):
     def write(self, vals):
         res = super().write(vals)
 
-        # Duplicate detection on phone / email / company-name change
-        if 'phone' in vals or 'email_from' in vals or 'partner_name' in vals:
+        # Duplicate detection on phone / email / company / contact-name change
+        if ('phone' in vals or 'email_from' in vals or 'partner_name' in vals
+                or 'contact_name' in vals):
             self._check_and_mark_duplicates()
 
         if 'partner_id' in vals:
@@ -701,6 +710,24 @@ class CrmLead(models.Model):
                 'type': 'success',
                 'sticky': False,
             }
+        }
+
+    def action_view_similar_leads(self):
+        """Open the leads that look similar to this one — same mobile, email,
+        company name, or contact person (the duplicate-detection criteria)."""
+        self.ensure_one()
+        domain = self._get_duplicate_domain(
+            self.phone, self.email_from, self._lead_company_name(), self.contact_name)
+        if not domain:
+            domain = [('id', '=', self.id)]
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Similar Leads'),
+            'res_model': 'crm.lead',
+            'view_mode': 'list,form',
+            'domain': domain + [('id', '!=', self.id)],
+            'context': {'create': False},
+            'target': 'current',
         }
 
     @api.model
