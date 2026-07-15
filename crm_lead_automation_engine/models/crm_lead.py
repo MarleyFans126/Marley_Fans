@@ -355,21 +355,17 @@ class CrmLead(models.Model):
                 clauses.append([('phone', '=ilike', phone.strip())])
         if email:
             clauses.append([('email_from', '=ilike', email.strip())])
-        # Company-name similarity: flag leads whose company shares the same
-        # normalized core (legal suffixes / parenthetical qualifiers stripped),
-        # e.g. "Airserve Engineering" ~ "Airserve Engineering (JSW Cement)".
-        # The company can live in the free-text Company Name OR the linked
-        # customer, so match either. Only when the core is specific enough
-        # (>= 5 chars) to avoid noise.
-        core = self._normalize_company_name(company_name)
-        if len(core) >= 5:
+        # Company name: EXACT match (case-insensitive, trimmed) — no fuzzy /
+        # partial matching. The company can live in the free-text Company Name
+        # OR the linked customer, so match either.
+        company = (company_name or '').strip()
+        if len(company) >= 3:
             clauses.append([
                 '|',
-                ('partner_name', 'ilike', core),
-                ('partner_id.commercial_partner_id.name', 'ilike', core),
+                ('partner_name', '=ilike', company),
+                ('partner_id.commercial_partner_id.name', '=ilike', company),
             ])
-        # Contact-person name: match the same person (case-insensitive, trimmed).
-        # A >= 4-char guard avoids flagging on trivial/partial names.
+        # Contact-person name: EXACT match (case-insensitive, trimmed).
         cname = (contact_name or '').strip()
         if len(cname) >= 4:
             clauses.append([('contact_name', '=ilike', cname)])
