@@ -30,6 +30,23 @@
                         </setting>
 
                     </block>
+
+                    <block title="Incoming Email Forwarding"
+                           name="crm_automation_forward_block">
+
+                        <setting id="crm_forward_incoming_email_setting"
+                                 string="Forward Incoming Customer Emails"
+                                 help="When a customer emails a lead — a reply to our mails or a fresh email routed to a lead — forward a copy to the operations mailbox and to the assigned salesperson (and second salesperson, if set). It reaches their own inbox on top of appearing in the lead chatter.">
+                            <field name="crm_forward_incoming_email" widget="boolean_toggle"/>
+                            <div class="content-group mt-2" invisible="not crm_forward_incoming_email">
+                                <div class="row">
+                                    <label for="crm_forward_ops_email" string="Operations Mailbox" class="col-lg-4 o_light_label"/>
+                                    <field name="crm_forward_ops_email" placeholder="operations@marleyfans.in"/>
+                                </div>
+                            </div>
+                        </setting>
+
+                    </block>
                 </app>
 
             </xpath>

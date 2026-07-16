@@ -1,6 +1,6 @@
 {
     'name': 'CRM Lead Automation Engine',
-    'version': '19.0.1.8.0',
+    'version': '19.0.1.9.0',
     'summary': 'Centralized automation for CRM leads (Email, WhatsApp, Stage Logic)',
     'description': """
         Handles all CRM automation independent of lead source:
@@ -17,6 +17,7 @@
         'data/business_location_data.xml',
         'data/email_templates.xml',
         'data/stage_email_automation.xml',
+        'data/forward_email_params.xml',
         'data/debug_actions.xml',
         'views/business_location_views.xml',
         'views/res_partner_views.xml',
