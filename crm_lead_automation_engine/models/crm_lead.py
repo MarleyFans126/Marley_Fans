@@ -810,12 +810,27 @@ class CrmLead(models.Model):
             if sp and sp != root_user and not sp.share and sp.email:
                 recipients.append(sp.email)
 
-        # De-dupe case-insensitively, preserve order.
+        # Loopback guard: never forward to a mailbox Odoo itself fetches
+        # (the forward would be re-imported and spawn a spurious lead / loop)
+        # nor to the company's own catchall/bounce address.
+        blocked = set()
+        for fs in self.env['fetchmail.server'].sudo().search([]):
+            if fs.user:
+                blocked.add(fs.user.strip().lower())
+        if self.env.company.email:
+            blocked.add(self.env.company.email.strip().lower())
+        for dom in self.env['mail.alias.domain'].sudo().search([]):
+            for a in (getattr(dom, 'catchall_email', ''), getattr(dom, 'bounce_email', '')):
+                if a:
+                    blocked.add(a.strip().lower())
+
+        # De-dupe case-insensitively, drop blocked/self addresses, preserve order.
         seen, email_to_list = set(), []
         for addr in recipients:
             a = (addr or '').strip()
-            if a and a.lower() not in seen:
-                seen.add(a.lower())
+            k = a.lower()
+            if a and k not in seen and k not in blocked:
+                seen.add(k)
                 email_to_list.append(a)
         if not email_to_list:
             return

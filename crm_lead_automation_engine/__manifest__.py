@@ -1,6 +1,6 @@
 {
     'name': 'CRM Lead Automation Engine',
-    'version': '19.0.1.9.0',
+    'version': '19.0.1.9.1',
     'summary': 'Centralized automation for CRM leads (Email, WhatsApp, Stage Logic)',
     'description': """
         Handles all CRM automation independent of lead source:
