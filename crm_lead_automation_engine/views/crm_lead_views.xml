@@ -86,14 +86,14 @@
                 <div class="alert alert-danger mb-0 d-flex align-items-center gap-2"
                      role="alert" invisible="not duplicate_flag">
                     <strong style="font-size: 18px;">★ Duplicate Lead Detected</strong>
-                    <span>— This lead shares a mobile number, email, company name, or contact person with
+                    <span>— This lead shares a mobile number, email, or company name with
                         <field name="duplicate_count" readonly="1" class="oe_inline" nolabel="1"/>
                         other lead(s)
                     </span>
                     <button name="action_view_similar_leads" type="object"
                             string="View similar leads" class="btn btn-sm btn-danger ms-auto"
                             invisible="duplicate_count == 0"
-                            help="Open the leads that match on mobile / email / company / contact person"/>
+                            help="Open the leads that match on mobile / email / company name"/>
                     <button name="action_manual_duplicate_check" type="object"
                             string="Re-check" class="btn btn-sm btn-warning"
                             help="Re-run duplicate detection for this lead"/>
