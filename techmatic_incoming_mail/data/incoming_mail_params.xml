@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Defaults for incoming-email forwarding. noupdate=1 so a change made in
+         Settings is never overwritten on upgrade; the records are still created
+         on first install / upgrade if missing. -->
+    <data noupdate="1">
+        <record id="param_tim_forward_enabled" model="ir.config_parameter">
+            <field name="key">techmatic_incoming_mail.forward_enabled</field>
+            <field name="value">True</field>
+        </record>
+        <record id="param_tim_ops_email" model="ir.config_parameter">
+            <field name="key">techmatic_incoming_mail.ops_email</field>
+            <field name="value">operations@marleyfans.in</field>
+        </record>
+    </data>
+</odoo>

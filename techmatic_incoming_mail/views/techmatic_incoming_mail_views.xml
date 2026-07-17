@@ -9,12 +9,17 @@
             <list string="Incoming Mails" decoration-bf="not is_read"
                   decoration-muted="is_read" default_order="date_received desc">
                 <field name="date_received" string="Received"/>
+                <field name="sender_name" string="Sender" optional="show"/>
                 <field name="email_from" string="From"/>
                 <field name="company_name" string="Company" optional="show"/>
                 <field name="subject"/>
                 <field name="lead_id" string="Lead"/>
                 <field name="stage_id" optional="hide"/>
                 <field name="user_id" string="Salesperson" optional="show"/>
+                <field name="processing_status" string="Status" optional="show"/>
+                <field name="attachment_count" string="Files" optional="hide"/>
+                <field name="forwarded_to" string="Forwarded To" optional="hide"/>
+                <field name="message_id" optional="hide"/>
                 <field name="is_read" string="Read"/>
                 <button name="action_open_lead" type="object" icon="fa-external-link"
                         string="Open Lead" class="btn-link"/>
@@ -42,21 +47,29 @@
                         <h1><field name="subject" readonly="1"/></h1>
                     </div>
                     <group>
-                        <group>
+                        <group string="Sender">
+                            <field name="sender_name" readonly="1"/>
                             <field name="email_from" readonly="1"/>
                             <field name="partner_id" readonly="1"/>
                             <field name="company_name" readonly="1"/>
+                            <field name="date_received" readonly="1"/>
                         </group>
-                        <group>
+                        <group string="Handling">
                             <field name="lead_id" readonly="1"/>
                             <field name="stage_id" readonly="1"/>
                             <field name="user_id" readonly="1"/>
-                            <field name="date_received" readonly="1"/>
+                            <field name="processing_status" readonly="1"/>
+                            <field name="forwarded_to" readonly="1"/>
+                            <field name="message_id" readonly="1"/>
                             <field name="is_read"/>
                         </group>
                     </group>
                     <separator string="Message"/>
                     <field name="body" readonly="1"/>
+                    <separator string="Attachments" invisible="attachment_count == 0"/>
+                    <field name="attachment_count" invisible="1"/>
+                    <field name="attachment_ids" widget="many2many_binary" readonly="1"
+                           invisible="attachment_count == 0"/>
                 </sheet>
             </form>
         </field>
@@ -70,10 +83,16 @@
             <search string="Incoming Mails">
                 <field name="subject"/>
                 <field name="email_from"/>
+                <field name="sender_name"/>
                 <field name="company_name"/>
                 <field name="lead_id"/>
                 <filter name="filter_unread" string="Unread" domain="[('is_read', '=', False)]"/>
                 <filter name="filter_read" string="Read" domain="[('is_read', '=', True)]"/>
+                <separator/>
+                <filter name="filter_matched" string="Matched Lead"
+                        domain="[('processing_status', '=', 'matched')]"/>
+                <filter name="filter_created" string="New Lead Created"
+                        domain="[('processing_status', '=', 'created')]"/>
                 <separator/>
                 <filter name="filter_my" string="My Leads" domain="[('user_id', '=', uid)]"/>
                 <separator/>
@@ -83,6 +102,7 @@
                     <filter name="group_salesperson" string="Salesperson" context="{'group_by': 'user_id'}"/>
                     <filter name="group_company" string="Company" context="{'group_by': 'company_name'}"/>
                     <filter name="group_stage" string="Lead Stage" context="{'group_by': 'stage_id'}"/>
+                    <filter name="group_status" string="Processing Status" context="{'group_by': 'processing_status'}"/>
                 </group>
             </search>
         </field>

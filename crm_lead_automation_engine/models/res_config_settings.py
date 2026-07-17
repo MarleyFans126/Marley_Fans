@@ -32,19 +32,3 @@ class ResConfigSettings(models.TransientModel):
         config_parameter='crm_automation.qualify_whatsapp_enabled',
         help='Automatically send WhatsApp (lead_qualified_notification) to client with salesperson details when lead moves to Qualify stage.',
     )
-
-    # -------------------------------------------------------------------------
-    # Incoming Email Forwarding
-    # -------------------------------------------------------------------------
-    crm_forward_incoming_email = fields.Boolean(
-        string='Forward Incoming Customer Emails',
-        config_parameter='crm_automation.forward_incoming_email',
-        help='When a customer emails a lead (a reply or a fresh email routed to a lead), '
-             'forward a copy to the operations mailbox and to the assigned salesperson.',
-    )
-    crm_forward_ops_email = fields.Char(
-        string='Operations Mailbox',
-        config_parameter='crm_automation.forward_ops_email',
-        help='Fixed address that always receives a copy of every incoming customer email '
-             '(e.g. operations@marleyfans.in).',
-    )
