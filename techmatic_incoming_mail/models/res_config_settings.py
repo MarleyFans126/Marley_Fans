@@ -11,8 +11,10 @@ class ResConfigSettings(models.TransientModel):
              'mailbox and to the assigned (and secondary) salesperson.',
     )
     tim_ops_email = fields.Char(
-        string='Operations Mailbox',
+        string='Internal Recipients',
         config_parameter='techmatic_incoming_mail.ops_email',
-        help='Fixed address that receives a copy of every incoming customer '
-             'email (e.g. operations@marleyfans.in).',
+        help='Fixed mailboxes that receive a copy of every incoming customer '
+             'email, on top of the lead\'s assigned salesperson. Separate '
+             'several with commas, e.g. '
+             'operations@marleyfans.in, sales@marleyfans.in',
     )

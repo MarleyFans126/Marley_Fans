@@ -15,7 +15,10 @@ AUTO_LOCALPARTS = frozenset({
     'notifications', 'automailer', 'auto-reply', 'autoreply',
 })
 
-DEFAULT_OPS_EMAIL = 'operations@marleyfans.in'
+# Fixed internal mailboxes that get a copy of every customer email, on top of
+# the lead's salesperson. Comma-separated so more can be added from Settings
+# without a code change.
+DEFAULT_OPS_EMAIL = 'operations@marleyfans.in,sales@marleyfans.in'
 
 
 class CrmLead(models.Model):
@@ -48,10 +51,15 @@ class CrmLead(models.Model):
     # CONFIG
     # -------------------------------------------------------------------------
     @api.model
-    def _tim_ops_email(self):
-        """Fixed operations mailbox that receives a copy of every customer email."""
-        return (self.env['ir.config_parameter'].sudo().get_param(
-            'techmatic_incoming_mail.ops_email', DEFAULT_OPS_EMAIL) or '').strip()
+    def _tim_ops_emails(self):
+        """Fixed internal mailboxes copied on every customer email, as a list.
+
+        Stored as one comma-separated parameter so the client can add or drop a
+        mailbox in Settings without a code change.
+        """
+        raw = self.env['ir.config_parameter'].sudo().get_param(
+            'techmatic_incoming_mail.ops_email', DEFAULT_OPS_EMAIL) or ''
+        return [part.strip() for part in raw.replace(';', ',').split(',') if part.strip()]
 
     @api.model
     def _tim_forward_enabled(self):
@@ -181,10 +189,11 @@ class CrmLead(models.Model):
                 message.id)
             return False
 
-        if sender == self._tim_normalize_sender(self._tim_ops_email()):
+        own_boxes = {self._tim_normalize_sender(addr) for addr in self._tim_ops_emails()}
+        if sender in own_boxes:
             _logger.info(
-                "[INCOMING] loop guard: message %s is from the operations mailbox "
-                "(%s) — not processed.", message.id, sender)
+                "[INCOMING] loop guard: message %s is from one of our own internal "
+                "mailboxes (%s) — not processed.", message.id, sender)
             return False
 
         localpart = sender.split('@')[0].lower()
@@ -268,19 +277,16 @@ class CrmLead(models.Model):
     # 5. INTERNAL FORWARD
     # -------------------------------------------------------------------------
     def _tim_forward_recipients(self):
-        """Operations mailbox + assigned and secondary salesperson, de-duplicated
-        and with any of our own addresses removed."""
+        """Fixed internal mailboxes + assigned and secondary salesperson,
+        de-duplicated and with any of our own addresses removed."""
         self.ensure_one()
         blocked = self._tim_blocked_addresses()
         root_user = self.env.ref('base.user_root', raise_if_not_found=False)
 
-        candidates = []
-        ops = self._tim_ops_email()
-        if ops:
-            candidates.append(ops)
-        else:
+        candidates = self._tim_ops_emails()
+        if not candidates:
             _logger.warning(
-                "[INCOMING] lead %s: no operations address configured.", self.id)
+                "[INCOMING] lead %s: no internal mailbox configured.", self.id)
 
         users = self.user_id
         # The secondary salesperson field is optional (added by another module).
@@ -351,7 +357,7 @@ class CrmLead(models.Model):
         mail = self.env['mail.mail'].sudo().create({
             'subject': subject,
             'body_html': header + Markup(message.body or ''),
-            'email_from': self.env.company.email or self._tim_ops_email(),
+            'email_from': self.env.company.email or (self._tim_ops_emails() or [''])[0],
             'email_to': ', '.join(recipients),
             'auto_delete': True,
             'attachment_ids': attachment_commands or False,

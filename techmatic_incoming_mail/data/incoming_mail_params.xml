@@ -10,7 +10,7 @@
         </record>
         <record id="param_tim_ops_email" model="ir.config_parameter">
             <field name="key">techmatic_incoming_mail.ops_email</field>
-            <field name="value">operations@marleyfans.in</field>
+            <field name="value">operations@marleyfans.in,sales@marleyfans.in</field>
         </record>
     </data>
 </odoo>

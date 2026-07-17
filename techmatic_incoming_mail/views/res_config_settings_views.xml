@@ -15,13 +15,20 @@
                     <block title="Internal Forwarding" name="tim_forward_block">
                         <setting id="tim_forward_setting"
                                  string="Forward Incoming Customer Emails"
-                                 help="When a customer emails a lead — a reply, or a fresh email that lands on the lead — forward a copy to the operations mailbox and to the assigned (and secondary) salesperson, so it reaches their own inbox on top of the lead chatter.">
+                                 help="When a customer emails a lead — a reply, or a fresh email that lands on the lead — forward a copy to the internal mailboxes below and to the assigned (and secondary) salesperson, so it reaches their own inbox on top of the lead chatter.">
                             <field name="tim_forward_enabled" widget="boolean_toggle"/>
                             <div class="content-group mt-2" invisible="not tim_forward_enabled">
                                 <div class="row">
-                                    <label for="tim_ops_email" string="Operations Mailbox"
+                                    <label for="tim_ops_email" string="Internal Recipients"
                                            class="col-lg-4 o_light_label"/>
-                                    <field name="tim_ops_email" placeholder="operations@marleyfans.in"/>
+                                    <field name="tim_ops_email"
+                                           placeholder="operations@marleyfans.in, sales@marleyfans.in"/>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-8 offset-lg-4 text-muted small">
+                                        Comma-separated. The lead's assigned salesperson is always
+                                        added automatically.
+                                    </div>
                                 </div>
                             </div>
                         </setting>
