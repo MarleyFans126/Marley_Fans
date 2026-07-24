@@ -32,3 +32,16 @@ class ResConfigSettings(models.TransientModel):
              '(1–30). Only genuinely new mail is downloaded; already-imported '
              'mail costs a tiny header check. Default 3.',
     )
+    tim_health_enabled = fields.Boolean(
+        string='Incoming Mail Watchdog',
+        config_parameter='techmatic_incoming_mail.health_enabled',
+        help='Check the incoming-mail pipeline hourly and email an alert if it '
+             'breaks (connection down, fetch stalled, routing/config missing), '
+             'so a silent failure is caught in hours rather than by accident.',
+    )
+    tim_health_alert_email = fields.Char(
+        string='Alert Recipients',
+        config_parameter='techmatic_incoming_mail.health_alert_email',
+        help='Where watchdog alerts are sent (comma-separated). If empty, the '
+             'forwarding mailboxes are used, then any system administrator.',
+    )

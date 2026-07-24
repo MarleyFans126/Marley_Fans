@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="ir_cron_tim_mail_health" model="ir.cron">
+        <field name="name">Incoming Mail: Health Watchdog</field>
+        <field name="model_id" ref="mail.model_fetchmail_server"/>
+        <field name="state">code</field>
+        <field name="code">model._tim_cron_health_check()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">hours</field>
+        <field name="nextcall" eval="(DateTime.now() + timedelta(hours=1)).strftime('%Y-%m-%d %H:%M:%S')"/>
+        <field name="active" eval="True"/>
+    </record>
+</odoo>

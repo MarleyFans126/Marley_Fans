@@ -1,6 +1,6 @@
 {
     'name': 'Techmatic Incoming Mail Panel',
-    'version': '19.0.2.2.0',
+    'version': '19.0.2.3.0',
     'summary': 'Inbound customer email pipeline for CRM leads: match, capture, forward',
     'description': """
 Techmatic Incoming Mail Panel
@@ -29,6 +29,7 @@ Outbound automation (stage emails, templates, quotations) is untouched.
     'data': [
         'security/ir.model.access.csv',
         'data/incoming_mail_params.xml',
+        'data/health_cron.xml',
         'views/techmatic_incoming_mail_views.xml',
         'views/crm_lead_views.xml',
         'views/res_config_settings_views.xml',

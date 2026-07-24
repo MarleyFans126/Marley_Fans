@@ -20,5 +20,17 @@
             <field name="key">techmatic_incoming_mail.rescan_days</field>
             <field name="value">3</field>
         </record>
+        <record id="param_tim_health_enabled" model="ir.config_parameter">
+            <field name="key">techmatic_incoming_mail.health_enabled</field>
+            <field name="value">True</field>
+        </record>
+        <record id="param_tim_health_stale_hours" model="ir.config_parameter">
+            <field name="key">techmatic_incoming_mail.health_stale_hours</field>
+            <field name="value">2</field>
+        </record>
+        <record id="param_tim_health_throttle_hours" model="ir.config_parameter">
+            <field name="key">techmatic_incoming_mail.health_throttle_hours</field>
+            <field name="value">6</field>
+        </record>
     </data>
 </odoo>

@@ -55,6 +55,28 @@
                         </setting>
                     </block>
 
+                    <block title="Health Watchdog" name="tim_health_block">
+                        <setting id="tim_health_setting"
+                                 string="Incoming Mail Watchdog"
+                                 help="Check the incoming-mail pipeline every hour and email an alert the moment it breaks — mailbox connection down, fetch stalled, or routing/config missing. Turns a silent failure into a loud one.">
+                            <field name="tim_health_enabled" widget="boolean_toggle"/>
+                            <div class="content-group mt-2" invisible="not tim_health_enabled">
+                                <div class="row">
+                                    <label for="tim_health_alert_email" string="Alert Recipients"
+                                           class="col-lg-4 o_light_label"/>
+                                    <field name="tim_health_alert_email"
+                                           placeholder="tech@techmaticsys.com"/>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-8 offset-lg-4 text-muted small">
+                                        Comma-separated. Leave blank to alert the forwarding
+                                        mailboxes, then system administrators.
+                                    </div>
+                                </div>
+                            </div>
+                        </setting>
+                    </block>
+
                 </app>
 
             </xpath>
