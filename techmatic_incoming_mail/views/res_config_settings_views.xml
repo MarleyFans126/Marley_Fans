@@ -34,6 +34,27 @@
                         </setting>
                     </block>
 
+                    <block title="Reliable Fetch" name="tim_fetch_block">
+                        <setting id="tim_rescan_setting"
+                                 string="Read-Independent Fetch"
+                                 help="Import recent mail even if it was already opened (marked read) in the webmail inbox before Odoo fetched it. Odoo skips any message it has already imported, so nothing is duplicated.">
+                            <field name="tim_rescan_enabled" widget="boolean_toggle"/>
+                            <div class="content-group mt-2" invisible="not tim_rescan_enabled">
+                                <div class="row">
+                                    <label for="tim_rescan_days" string="Look-back (days)"
+                                           class="col-lg-4 o_light_label"/>
+                                    <field name="tim_rescan_days" class="oe_inline"/>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-8 offset-lg-4 text-muted small">
+                                        How far back each fetch scans (1–30). Only genuinely new
+                                        mail is downloaded.
+                                    </div>
+                                </div>
+                            </div>
+                        </setting>
+                    </block>
+
                 </app>
 
             </xpath>

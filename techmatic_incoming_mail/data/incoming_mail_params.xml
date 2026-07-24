@@ -12,5 +12,13 @@
             <field name="key">techmatic_incoming_mail.ops_email</field>
             <field name="value">operations@marleyfans.in,sales@marleyfans.in</field>
         </record>
+        <record id="param_tim_rescan_enabled" model="ir.config_parameter">
+            <field name="key">techmatic_incoming_mail.rescan_enabled</field>
+            <field name="value">True</field>
+        </record>
+        <record id="param_tim_rescan_days" model="ir.config_parameter">
+            <field name="key">techmatic_incoming_mail.rescan_days</field>
+            <field name="value">3</field>
+        </record>
     </data>
 </odoo>
