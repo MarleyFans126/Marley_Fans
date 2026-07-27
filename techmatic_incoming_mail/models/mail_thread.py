@@ -46,24 +46,22 @@ class MailThread(models.AbstractModel):
                 rerouted.append(route)
                 continue
             if r_model == 'crm.lead' and not r_thread_id:
-                # This route would CREATE a lead. Two guards before letting it:
-                # 1) Only genuine external customers may create a lead — our own
-                #    outbound / system mail (Odoo digests, mail our salespeople
-                #    send, info@/sales@ etc.) must NOT become junk leads.
-                if not Lead._tim_is_external_sender(email_from):
-                    _logger.info(
-                        "[INCOMING] sender %s is not an external customer — "
-                        "dropping lead creation (no junk lead).", email_from)
-                    continue  # drop this route entirely; no lead is created
-                # 2) If the customer already has an open lead, attach to it
-                #    instead of opening a duplicate.
-                lead = Lead._tim_find_open_lead_by_email(email_from)
+                # This route would CREATE a lead. Per policy we NEVER create a
+                # lead from incoming mail: if the sender's email already belongs
+                # to a lead, attach the mail to that lead's chatter; otherwise
+                # drop it entirely (no lead, no bounce). This keeps the pipeline
+                # free of junk — Odoo digests, staff-sent mail, newsletters,
+                # first-time senders — and lets sales create leads deliberately.
+                lead = Lead._tim_find_lead_by_email(email_from)
                 if lead:
                     _logger.info(
-                        "[INCOMING] sender %s matched open lead %s (%s) — attaching "
-                        "to it instead of creating a duplicate lead.",
-                        email_from, lead.id, lead.name,
-                    )
+                        "[INCOMING] sender %s matched existing lead %s (%s) — "
+                        "attaching mail to its log.", email_from, lead.id, lead.name)
                     route = (r_model, lead.id, r_custom, r_user_id, r_alias)
+                else:
+                    _logger.info(
+                        "[INCOMING] sender %s has no existing lead — mail dropped "
+                        "(no new lead created).", email_from)
+                    continue  # drop this route; nothing is created
             rerouted.append(route)
         return rerouted

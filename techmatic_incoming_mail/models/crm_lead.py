@@ -180,6 +180,25 @@ class CrmLead(models.Model):
             order='write_date desc', limit=1,
         )
 
+    @api.model
+    def _tim_find_lead_by_email(self, email_from):
+        """Best existing lead for this sender, or an empty recordset.
+
+        Prefers an open, active lead; if there is none, falls back to ANY lead
+        with this email (won / lost / archived) so the mail still lands on the
+        customer's own record. Used to decide where an incoming email attaches —
+        and, since we no longer create leads from mail, whether it is kept at all.
+        """
+        normalized = self._tim_normalize_sender(email_from)
+        if not normalized:
+            return self.browse()
+        open_lead = self._tim_find_open_lead_by_email(email_from)
+        if open_lead:
+            return open_lead
+        return self.with_context(active_test=False).search(
+            [('email_normalized', '=', normalized)],
+            order='write_date desc', limit=1)
+
     # -------------------------------------------------------------------------
     # 2. LEAD CREATION (unknown sender)
     # -------------------------------------------------------------------------
