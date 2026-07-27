@@ -1,6 +1,6 @@
 {
     'name': 'Techmatic Incoming Mail Panel',
-    'version': '19.0.2.3.0',
+    'version': '19.0.2.4.0',
     'summary': 'Inbound customer email pipeline for CRM leads: match, capture, forward',
     'description': """
 Techmatic Incoming Mail Panel

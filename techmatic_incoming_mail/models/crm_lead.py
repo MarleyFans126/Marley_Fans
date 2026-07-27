@@ -112,6 +112,48 @@ class CrmLead(models.Model):
         return blocked
 
     # -------------------------------------------------------------------------
+    # 0. IS THIS A GENUINE EXTERNAL CUSTOMER?
+    # -------------------------------------------------------------------------
+    @api.model
+    def _tim_is_external_sender(self, email_from):
+        """True only when the sender is a genuine external customer.
+
+        Everything else is blocked from creating (or being captured as) a lead:
+        any address on our own mail domain (info@, sales@, sales6@, …), the
+        fetched mailbox / catchall / bounce, mailer-daemon / no-reply style
+        senders, and internal Odoo users. This is what stops Odoo's own periodic
+        digest and the mail our salespeople send out from turning into junk leads
+        once a fallback model is set on the incoming server.
+        """
+        sender = self._tim_normalize_sender(email_from)
+        if not sender:
+            return False
+        localpart, _sep, domain = sender.partition('@')
+        if localpart in AUTO_LOCALPARTS:
+            return False
+        if sender in self._tim_blocked_addresses():
+            return False
+        # Our own mail domains => internal. Gathered from the alias domains, the
+        # company email and the fetched mailbox, so this still holds even if the
+        # alias-domain config is ever missing.
+        our_domains = {d.name.strip().lower()
+                       for d in self.env['mail.alias.domain'].sudo().search([]) if d.name}
+        company_email = self.env.company.email or ''
+        if '@' in company_email:
+            our_domains.add(company_email.rsplit('@', 1)[-1].strip().lower())
+        for server in self.env['fetchmail.server'].sudo().search([]):
+            if server.user and '@' in server.user:
+                our_domains.add(server.user.rsplit('@', 1)[-1].strip().lower())
+        if domain and domain in our_domains:
+            return False
+        # An internal (non-share) Odoo user's address => internal.
+        partner = self.env['res.partner'].sudo().search(
+            [('email_normalized', '=', sender)], limit=1)
+        if partner and partner.user_ids and all(not u.share for u in partner.user_ids):
+            return False
+        return True
+
+    # -------------------------------------------------------------------------
     # 1. LEAD MATCHING
     # -------------------------------------------------------------------------
     @api.model
@@ -176,37 +218,14 @@ class CrmLead(models.Model):
     def _tim_is_customer_email(self, message):
         """True only for a genuine inbound customer email worth processing.
 
-        Rejects anything that must never be captured or forwarded: our own
-        operations mailbox, internal Odoo users, mailer-daemon / bounce /
-        no-reply style senders, and our own fetched/catchall addresses (which
-        is what a forwarded copy coming back around would look like).
+        Reuses the same external-sender test used to gate lead creation, plus a
+        belt-and-suspenders check on the message author (an internal Odoo user).
         """
         self.ensure_one()
-        sender = self._tim_normalize_sender(message.email_from)
-        if not sender:
+        if not self._tim_is_external_sender(message.email_from):
             _logger.info(
-                "[INCOMING] message %s has no usable sender address — skipped.",
-                message.id)
-            return False
-
-        own_boxes = {self._tim_normalize_sender(addr) for addr in self._tim_ops_emails()}
-        if sender in own_boxes:
-            _logger.info(
-                "[INCOMING] loop guard: message %s is from one of our own internal "
-                "mailboxes (%s) — not processed.", message.id, sender)
-            return False
-
-        localpart = sender.split('@')[0].lower()
-        if localpart in AUTO_LOCALPARTS:
-            _logger.info(
-                "[INCOMING] loop guard: message %s is automated system mail from "
-                "%s — not processed.", message.id, sender)
-            return False
-
-        if sender in self._tim_blocked_addresses():
-            _logger.info(
-                "[INCOMING] loop guard: message %s is from one of our own "
-                "addresses (%s) — not processed.", message.id, sender)
+                "[INCOMING] message %s is not from an external customer (%s) — "
+                "not processed.", message.id, message.email_from)
             return False
 
         author = message.author_id

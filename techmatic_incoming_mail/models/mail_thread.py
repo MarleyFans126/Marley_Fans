@@ -46,6 +46,17 @@ class MailThread(models.AbstractModel):
                 rerouted.append(route)
                 continue
             if r_model == 'crm.lead' and not r_thread_id:
+                # This route would CREATE a lead. Two guards before letting it:
+                # 1) Only genuine external customers may create a lead — our own
+                #    outbound / system mail (Odoo digests, mail our salespeople
+                #    send, info@/sales@ etc.) must NOT become junk leads.
+                if not Lead._tim_is_external_sender(email_from):
+                    _logger.info(
+                        "[INCOMING] sender %s is not an external customer — "
+                        "dropping lead creation (no junk lead).", email_from)
+                    continue  # drop this route entirely; no lead is created
+                # 2) If the customer already has an open lead, attach to it
+                #    instead of opening a duplicate.
                 lead = Lead._tim_find_open_lead_by_email(email_from)
                 if lead:
                     _logger.info(
