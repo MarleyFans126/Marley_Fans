@@ -1,6 +1,6 @@
 {
     'name': 'Marley CRM Enhancements',
-    'version': '19.0.1.5.0',
+    'version': '19.0.1.6.0',
     'summary': 'CRM lifecycle stages, Won/Loss logic, quotation from lead, project creation',
     'description': 'Implements Marley Fans CRM requirements: stage data, Won conversion to Customer + Project, Loss enforcement with mandatory remarks, Won notifications, and quotation creation from leads.',
     'category': 'Sales/CRM',
