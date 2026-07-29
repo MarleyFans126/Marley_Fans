@@ -102,27 +102,48 @@ class CrmLead(models.Model):
     # ------------------------------------------------------------------
     last_lognote_date = fields.Datetime(
         string='Last Log Note',
-        compute='_compute_last_lognote_date',
+        compute='_compute_last_lognote',
         store=True, readonly=True, index=True,
         help="Date of the most recent note, message or email logged on this "
              "lead's chatter. Useful to spot leads with no recent follow-up.",
     )
+    last_lognote_by_id = fields.Many2one(
+        'res.partner', string='Last Log Note By',
+        compute='_compute_last_lognote',
+        store=True, readonly=True, index=True,
+        help="Who made the most recent chatter entry (the same entry as 'Last "
+             "Log Note') — the author the chatter shows for that note. This is "
+             "NOT 'Last Updated by', which is whoever last wrote any field on "
+             "the lead (often OdooBot / an automation).",
+    )
 
-    @api.depends('message_ids', 'message_ids.date', 'message_ids.message_type')
-    def _compute_last_lognote_date(self):
-        # Resolve the newest qualifying message per lead in ONE query rather
-        # than iterating each lead's chatter.
+    @api.depends('message_ids', 'message_ids.date', 'message_ids.message_type',
+                 'message_ids.author_id')
+    def _compute_last_lognote(self):
+        # Resolve the newest qualifying message per lead in ONE query and take
+        # BOTH its date and its author, so the date and the "by" always refer to
+        # the same chatter entry.
         self.last_lognote_date = False
+        self.last_lognote_by_id = False
         if not self.ids:
             return
-        groups = self.env['mail.message'].sudo()._read_group(
-            [('model', '=', 'crm.lead'),
-             ('res_id', 'in', self.ids),
-             ('message_type', 'in', ('comment', 'email'))],
-            ['res_id'], ['date:max'])
-        latest = {res_id: last for res_id, last in groups}
+        # The raw read bypasses the ORM cache, so flush pending messages first.
+        self.env['mail.message'].flush_model(
+            ['model', 'res_id', 'date', 'message_type', 'author_id'])
+        self.env.cr.execute("""
+            SELECT DISTINCT ON (res_id) res_id, date, author_id
+            FROM mail_message
+            WHERE model = 'crm.lead'
+              AND res_id = ANY(%s)
+              AND message_type IN ('comment', 'email')
+            ORDER BY res_id, date DESC, id DESC
+        """, (self.ids,))
+        latest = {res_id: (dt, author) for res_id, dt, author in self.env.cr.fetchall()}
         for lead in self:
-            lead.last_lognote_date = latest.get(lead.id, False)
+            vals = latest.get(lead.id)
+            if vals:
+                lead.last_lognote_date = vals[0]
+                lead.last_lognote_by_id = vals[1]
 
     def _compute_project_count(self):
         has_task_model = 'project.task' in self.env

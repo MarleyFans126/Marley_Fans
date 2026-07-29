@@ -77,6 +77,7 @@
                 <field name="loss_reason_id" optional="show"/>
                 <field name="loss_remarks" optional="show"/>
                 <field name="last_lognote_date" optional="hide"/>
+                <field name="last_lognote_by_id" optional="hide"/>
             </xpath>
         </field>
     </record>
@@ -90,6 +91,7 @@
             <filter name="unassigned" position="after">
                 <separator/>
                 <field name="last_lognote_date"/>
+                <field name="last_lognote_by_id" string="Last Log Note By"/>
                 <filter name="lognote_stale_7" string="No Log Note in 7 Days"
                         domain="['|', ('last_lognote_date', '=', False),
                                  ('last_lognote_date', '&lt;', datetime.datetime.combine(context_today() + relativedelta(days=-7), datetime.time(0,0,0)))]"/>
@@ -98,6 +100,8 @@
                                  ('last_lognote_date', '&lt;', datetime.datetime.combine(context_today() + relativedelta(days=-30), datetime.time(0,0,0)))]"/>
                 <filter name="group_last_lognote" string="Last Log Note"
                         context="{'group_by': 'last_lognote_date'}"/>
+                <filter name="group_last_lognote_by" string="Last Log Note By"
+                        context="{'group_by': 'last_lognote_by_id'}"/>
             </filter>
         </field>
     </record>
@@ -111,6 +115,7 @@
             <filter name="lost" position="after">
                 <separator/>
                 <field name="last_lognote_date"/>
+                <field name="last_lognote_by_id" string="Last Log Note By"/>
                 <filter name="lognote_stale_7" string="No Log Note in 7 Days"
                         domain="['|', ('last_lognote_date', '=', False),
                                  ('last_lognote_date', '&lt;', datetime.datetime.combine(context_today() + relativedelta(days=-7), datetime.time(0,0,0)))]"/>
@@ -119,6 +124,8 @@
                                  ('last_lognote_date', '&lt;', datetime.datetime.combine(context_today() + relativedelta(days=-30), datetime.time(0,0,0)))]"/>
                 <filter name="group_last_lognote" string="Last Log Note"
                         context="{'group_by': 'last_lognote_date'}"/>
+                <filter name="group_last_lognote_by" string="Last Log Note By"
+                        context="{'group_by': 'last_lognote_by_id'}"/>
             </filter>
         </field>
     </record>
