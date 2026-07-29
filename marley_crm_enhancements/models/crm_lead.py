@@ -92,6 +92,38 @@ class CrmLead(models.Model):
         compute='_compute_project_count',
     )
 
+    # ------------------------------------------------------------------
+    # Last Log Note — the date of the most recent chatter entry on the
+    # lead (a logged note, message or email). Stored + indexed so it can be
+    # filtered, sorted and grouped like any normal field. Used to surface
+    # stale leads ("no note in X days"). Excludes pure system 'notification'
+    # messages (stage-change tracking etc.) so automation noise doesn't make a
+    # neglected lead look freshly touched.
+    # ------------------------------------------------------------------
+    last_lognote_date = fields.Datetime(
+        string='Last Log Note',
+        compute='_compute_last_lognote_date',
+        store=True, readonly=True, index=True,
+        help="Date of the most recent note, message or email logged on this "
+             "lead's chatter. Useful to spot leads with no recent follow-up.",
+    )
+
+    @api.depends('message_ids', 'message_ids.date', 'message_ids.message_type')
+    def _compute_last_lognote_date(self):
+        # Resolve the newest qualifying message per lead in ONE query rather
+        # than iterating each lead's chatter.
+        self.last_lognote_date = False
+        if not self.ids:
+            return
+        groups = self.env['mail.message'].sudo()._read_group(
+            [('model', '=', 'crm.lead'),
+             ('res_id', 'in', self.ids),
+             ('message_type', 'in', ('comment', 'email'))],
+            ['res_id'], ['date:max'])
+        latest = {res_id: last for res_id, last in groups}
+        for lead in self:
+            lead.last_lognote_date = latest.get(lead.id, False)
+
     def _compute_project_count(self):
         has_task_model = 'project.task' in self.env
         for lead in self:
