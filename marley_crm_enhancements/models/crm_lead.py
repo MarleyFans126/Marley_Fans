@@ -116,6 +116,14 @@ class CrmLead(models.Model):
              "NOT 'Last Updated by', which is whoever last wrote any field on "
              "the lead (often OdooBot / an automation).",
     )
+    last_lognote_by_user_id = fields.Many2one(
+        'res.users', string='Last Note By (Team)',
+        compute='_compute_last_lognote',
+        store=True, readonly=True, index=True,
+        help="The internal user (team member) who made the most recent chatter "
+             "entry. Empty when the last entry was a customer email. Drives the "
+             "'Last Note By' side panel so you can filter by a specific person.",
+    )
 
     @api.depends('message_ids', 'message_ids.date', 'message_ids.message_type',
                  'message_ids.author_id')
@@ -125,6 +133,7 @@ class CrmLead(models.Model):
         # the same chatter entry.
         self.last_lognote_date = False
         self.last_lognote_by_id = False
+        self.last_lognote_by_user_id = False
         if not self.ids:
             return
         # The raw read bypasses the ORM cache, so flush pending messages first.
@@ -139,11 +148,29 @@ class CrmLead(models.Model):
             ORDER BY res_id, date DESC, id DESC
         """, (self.ids,))
         latest = {res_id: (dt, author) for res_id, dt, author in self.env.cr.fetchall()}
+
+        # Map each author partner -> its internal (non-share) user, in one query,
+        # so we can also expose "who on the team made the last note".
+        author_ids = {v[1] for v in latest.values() if v[1]}
+        partner_to_user = {}
+        if author_ids:
+            root = self.env.ref('base.user_root', raise_if_not_found=False)
+            # Exclude OdooBot: an automated system message is not a "person", so
+            # such leads carry no team member and stay out of the side panel.
+            domain = [('partner_id', 'in', list(author_ids)), ('share', '=', False)]
+            if root:
+                domain.append(('id', '!=', root.id))
+            users = self.env['res.users'].sudo().with_context(active_test=False).search(domain)
+            for user in users:
+                # first internal user wins if a partner somehow maps to several
+                partner_to_user.setdefault(user.partner_id.id, user.id)
+
         for lead in self:
             vals = latest.get(lead.id)
             if vals:
                 lead.last_lognote_date = vals[0]
                 lead.last_lognote_by_id = vals[1]
+                lead.last_lognote_by_user_id = partner_to_user.get(vals[1], False)
 
     def _compute_project_count(self):
         has_task_model = 'project.task' in self.env

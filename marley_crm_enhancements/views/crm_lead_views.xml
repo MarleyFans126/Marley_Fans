@@ -103,6 +103,14 @@
                 <filter name="group_last_lognote_by" string="Last Log Note By"
                         context="{'group_by': 'last_lognote_by_id'}"/>
             </filter>
+            <!-- Clickable "Last Note By" side panel: pick a team member to see
+                 the leads whose most recent note was made by that person. -->
+            <xpath expr="//search" position="inside">
+                <searchpanel>
+                    <field name="last_lognote_by_user_id" string="Last Note By"
+                           icon="fa-user" enable_counters="1"/>
+                </searchpanel>
+            </xpath>
         </field>
     </record>
 
@@ -127,6 +135,12 @@
                 <filter name="group_last_lognote_by" string="Last Log Note By"
                         context="{'group_by': 'last_lognote_by_id'}"/>
             </filter>
+            <xpath expr="//search" position="inside">
+                <searchpanel>
+                    <field name="last_lognote_by_user_id" string="Last Note By"
+                           icon="fa-user" enable_counters="1"/>
+                </searchpanel>
+            </xpath>
         </field>
     </record>
 
