@@ -36,6 +36,10 @@
                 <attribute name="force_save">1</attribute>
             </xpath>
 
+            <xpath expr="//field[@name='user_ids']" position="after">
+                <field name="po_mode"/>
+            </xpath>
+
             <!-- Move Sales Representative + Scheduled Installation Date
                  to the top-right group, right after Dispatch Date -->
             <xpath expr="//div[@id='date_deadline_and_recurring_task']" position="after">

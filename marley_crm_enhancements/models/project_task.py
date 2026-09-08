@@ -10,6 +10,12 @@ _logger = logging.getLogger(__name__)
 class ProjectTask(models.Model):
     _inherit = 'project.task'
 
+    po_mode = fields.Selection([
+        ('verbal', 'Verbal'),
+        ('mail_confirmation', 'Mail Confirmation'),
+        ('po_received', 'PO Received'),
+    ], string='PO Mode')
+
     # ------------------------------------------------------------------
     # Default stage: "Installation"
     # ------------------------------------------------------------------
