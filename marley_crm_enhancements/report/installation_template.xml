@@ -144,16 +144,6 @@
                     <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px; border-top: 1px solid #f5a9ac;">
                         <tr>
                             <td style="border-bottom: 1px solid #f5a9ac; border-left: 1px solid #f5a9ac; padding: 16px 24px; width: 60%; font-size: 14px; font-weight: bold; vertical-align: middle;">
-                                Models to transport
-                            </td>
-                            <td style="border-bottom: 1px solid #f5a9ac; border-right: 1px solid #f5a9ac; padding: 16px 24px; font-size: 14px; vertical-align: middle;">
-                                <t t-if="doc.models_to_transport">
-                                    | <t t-esc="doc.models_to_transport"/> |
-                                </t>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td style="border-bottom: 1px solid #f5a9ac; border-left: 1px solid #f5a9ac; padding: 16px 24px; font-size: 14px; font-weight: bold; vertical-align: middle;">
                                 Transportation terms:
                             </td>
                             <td style="border-bottom: 1px solid #f5a9ac; border-right: 1px solid #f5a9ac; padding: 16px 24px; font-size: 14px; vertical-align: middle;">
