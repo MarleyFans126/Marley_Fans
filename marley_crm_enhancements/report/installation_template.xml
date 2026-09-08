@@ -62,6 +62,9 @@
                         <t t-set="addr_partner" t-value="doc.lead_id.partner_id"/>
                     </t>
 
+                    <!-- Resolve the Order Booking task (holds PO Mode) linked to the same lead -->
+                    <t t-set="ob_task" t-value="doc.env['project.task'].search([('lead_id', '=', doc.lead_id.id)], limit=1) if doc.lead_id else doc.env['project.task']"/>
+
                     <!-- ============ DETAILS TABLE ============ -->
                     <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px; border-top: 1px solid #f5a9ac;">
                         <tr>
@@ -85,6 +88,16 @@
                                 <t t-if="doc.installation_date">
                                     <t t-esc="doc.installation_date" t-options='{"widget": "date", "format": "MMM dd, yyyy"}'/>
                                 </t>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="border-bottom: 1px solid #f5a9ac; border-left: 1px solid #f5a9ac; padding: 16px 24px; font-weight: bold; font-size: 14px; vertical-align: middle;">
+                                PO Mode
+                            </td>
+                            <td style="border-bottom: 1px solid #f5a9ac; border-right: 1px solid #f5a9ac; padding: 16px 24px; font-size: 14px; vertical-align: middle;">
+                                <t t-if="ob_task.po_mode == 'verbal'">Verbal</t>
+                                <t t-if="ob_task.po_mode == 'mail_confirmation'">Mail Confirmation</t>
+                                <t t-if="ob_task.po_mode == 'po_received'">PO Received</t>
                             </td>
                         </tr>
                         <tr>

@@ -76,6 +76,16 @@
                             </td>
                         </tr>
                         <tr>
+                            <td style="border-bottom: 1px solid #f5a9ac; border-left: 1px solid #f5a9ac; padding: 16px 24px; font-weight: bold; font-size: 14px; vertical-align: middle;">
+                                PO Mode
+                            </td>
+                            <td style="border-bottom: 1px solid #f5a9ac; border-right: 1px solid #f5a9ac; padding: 16px 24px; font-size: 14px; vertical-align: middle;">
+                                <t t-if="doc.po_mode == 'verbal'">Verbal</t>
+                                <t t-if="doc.po_mode == 'mail_confirmation'">Mail Confirmation</t>
+                                <t t-if="doc.po_mode == 'po_received'">PO Received</t>
+                            </td>
+                        </tr>
+                        <tr>
                             <td style="border-bottom: 1px solid #f5a9ac; border-left: 1px solid #f5a9ac; padding: 16px 24px; font-weight: bold; font-size: 14px; vertical-align: top;">
                                 Bill To Details
                             </td>
