@@ -358,13 +358,11 @@
                          No hardcoded defaults: when no Terms Template is
                          chosen, no boilerplate prints. -->
                     <t t-if="doc.proforma_print_terms">
-                        <t t-set="_seen_w" t-value="[]"/>
-                        <t t-foreach="doc.order_line.filtered(lambda l: l.product_id and (l.product_id.warranty_terms or '').strip())" t-as="_wline">
-                            <t t-set="_wt" t-value="_wline.product_id.warranty_terms.strip()"/>
-                            <t t-if="_wt not in _seen_w">
-                                <t t-set="_dummy" t-value="_seen_w.append(_wt)"/>
-                            </t>
-                        </t>
+                        <!-- Warranty from the order's Warranty Terms field
+                             (auto-fetched from products, overridable per
+                             order), split back into bullets on the blank-line
+                             separator the auto-fetch inserts. -->
+                        <t t-set="_seen_w" t-value="[p.strip() for p in (doc.warranty_terms or '').split('\n\n') if p.strip()]"/>
                         <t t-if="_seen_w or doc.note">
                             <div style="margin-bottom: 14px;">
                                 <div class="section-heading">TERMS &amp; CONDITIONS:</div>

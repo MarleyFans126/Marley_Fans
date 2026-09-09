@@ -175,15 +175,37 @@ class SaleOrder(models.Model):
     warranty_terms = fields.Text(
         string='Warranty Terms',
         compute='_compute_warranty_terms',
+        inverse='_inverse_warranty_terms',
         store=True,
         readonly=False,
+        copy=True,
         help='Auto-fetched from the products in this order (deduplicated). '
-             'Can be edited manually to override for this quotation.',
+             'Can be edited manually to override for this quotation — the '
+             'override is then kept and no longer re-fetched from the '
+             'products. Use "Reset to product warranty" to follow the '
+             'products again.',
+    )
+    # Set to True the moment the warranty is edited by hand on this order, so
+    # the per-order override is preserved and NOT clobbered when a product's
+    # Warranty Terms are later edited. copy=True keeps the override on
+    # duplicated quotations.
+    warranty_terms_is_custom = fields.Boolean(
+        string='Warranty Manually Set',
+        default=False,
+        copy=True,
+        help='Automatically set when the Warranty Terms are edited by hand. '
+             'While set, the warranty is not re-derived from the products.',
     )
 
     @api.depends('order_line.product_id', 'order_line.product_id.warranty_terms')
     def _compute_warranty_terms(self):
         for order in self:
+            # A manual per-order override wins: never overwrite it from the
+            # products. Re-assign the stored value so the stored compute is
+            # satisfied without changing it.
+            if order.warranty_terms_is_custom:
+                order.warranty_terms = order.warranty_terms
+                continue
             terms = []
             seen = set()
             for line in order.order_line:
@@ -192,12 +214,24 @@ class SaleOrder(models.Model):
                 if text and text not in seen:
                     seen.add(text)
                     terms.append(text)
-            if terms:
-                order.warranty_terms = '\n\n'.join(terms)
-            elif not order.warranty_terms:
-                # No default: warranty only prints when a product on the order
-                # has its own Warranty Terms (or it's typed on the quotation).
-                order.warranty_terms = False
+            # No default: warranty only prints when a product on the order has
+            # its own Warranty Terms (or it's typed on the quotation).
+            order.warranty_terms = '\n\n'.join(terms) if terms else False
+
+    def _inverse_warranty_terms(self):
+        # Fired only on an explicit write to warranty_terms (a manual edit in
+        # the form), never when the compute assigns it. Marks the order so the
+        # typed text is kept as an override.
+        for order in self:
+            order.warranty_terms_is_custom = True
+
+    def action_reset_warranty_to_products(self):
+        """Drop the manual override and re-fetch warranty from the products."""
+        self.write({'warranty_terms_is_custom': False})
+        # warranty_terms depends on the order lines, not on the flag, so force
+        # the recompute now that the override is cleared.
+        self._compute_warranty_terms()
+        return True
     delivery_terms = fields.Text(
         string='Delivery Terms',
         default='1-2 Weeks from the date of receipt of your technically and commercially clear purchase order.',

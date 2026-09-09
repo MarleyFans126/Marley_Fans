@@ -209,15 +209,10 @@
                     </div>
                 </t>
 
-                <t t-set="_seen_w" t-value="[]"/>
-                <t t-if="linked_so">
-                    <t t-foreach="linked_so.order_line.filtered(lambda l: l.product_id and (l.product_id.warranty_terms or '').strip())" t-as="_wline">
-                        <t t-set="_wt" t-value="_wline.product_id.warranty_terms.strip()"/>
-                        <t t-if="_wt not in _seen_w">
-                            <t t-set="_dummy" t-value="_seen_w.append(_wt)"/>
-                        </t>
-                    </t>
-                </t>
+                <!-- Warranty from the linked sale order's Warranty Terms field
+                     (auto-fetched from products, overridable per order), split
+                     back into bullets on the blank-line separator. -->
+                <t t-set="_seen_w" t-value="[p.strip() for p in (linked_so.warranty_terms or '').split('\n\n') if p.strip()] if linked_so else []"/>
                 <t t-if="_seen_w">
                     <div style="margin-bottom: 14px;">
                         <div class="section-heading">TERMS &amp; CONDITIONS:</div>
