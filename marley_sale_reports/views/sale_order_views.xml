@@ -148,7 +148,14 @@
                      wired in via a separate xpath further down. -->
                 <page string="Commercial Terms" name="marley_commercial_terms">
                     <group string="Warranty (auto-fetched from products)">
-                        <field name="warranty_terms" nolabel="1" colspan="2"/>
+                        <field name="warranty_terms_is_custom" invisible="1"/>
+                        <field name="warranty_terms" nolabel="1" colspan="2"
+                               placeholder="Auto-fetched from the products on this order. Type here to override for this quotation only."/>
+                        <button name="action_reset_warranty_to_products" type="object"
+                                string="Reset to product warranty" class="btn-link"
+                                colspan="2" icon="fa-refresh"
+                                invisible="not warranty_terms_is_custom"
+                                help="Discard the manual warranty text above and re-fetch it from the products on this order."/>
                     </group>
                 </page>
             </xpath>
