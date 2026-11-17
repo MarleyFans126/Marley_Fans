@@ -108,12 +108,14 @@ class CrmLead(models.Model):
              "lead's chatter. Useful to spot leads with no recent follow-up.",
     )
     last_lognote_by_id = fields.Many2one(
-        'res.partner', string='Last Log Note By',
+        'res.partner', string='Last Note Author',
         compute='_compute_last_lognote',
         store=True, readonly=True, index=True,
-        help="Who made the most recent chatter entry (the same entry as 'Last "
-             "Log Note') — the author the chatter shows for that note. This is "
-             "NOT 'Last Updated by', which is whoever last wrote any field on "
+        help="Author of the most recent chatter entry (the same entry as 'Last "
+             "Log Note') — exactly who the chatter shows for that note. This can "
+             "be a CUSTOMER when the last entry was an incoming email. For the "
+             "responsible team member only, use 'Last Note By (Team)'. Note this "
+             "is NOT 'Last Updated by', which is whoever last wrote any field on "
              "the lead (often OdooBot / an automation).",
     )
     last_lognote_by_user_id = fields.Many2one(
@@ -121,8 +123,9 @@ class CrmLead(models.Model):
         compute='_compute_last_lognote',
         store=True, readonly=True, index=True,
         help="The internal user (team member) who made the most recent chatter "
-             "entry. Empty when the last entry was a customer email. Drives the "
-             "'Last Note By' side panel so you can filter by a specific person.",
+             "entry. Empty when the last entry was a customer email (see 'Last "
+             "Note Author' for that case). Drives the 'Last Note By (Team)' side "
+             "panel so you can filter leads by a specific person.",
     )
 
     @api.depends('message_ids', 'message_ids.date', 'message_ids.message_type',
