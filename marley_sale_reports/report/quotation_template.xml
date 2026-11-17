@@ -86,23 +86,24 @@
                             </t>
                         </span>
                     </div>
-                    <!-- Kind Attention shows the COMPANY (commercial entity). -->
+                    <!-- Person, Company and Address are each shown ONCE.
+                         Kind Attention = the contact person (falls back to the
+                         company when there is no distinct contact person). The
+                         To block then shows the company (only when it differs
+                         from the person already shown) and the address. -->
+                    <t t-set="_company" t-value="doc.partner_id.commercial_partner_id.name or ''"/>
+                    <t t-set="_person" t-value="doc.kind_attn or (doc.partner_id.child_ids and doc.partner_id.child_ids[0].name) or ((not doc.partner_id.is_company) and doc.partner_id.name) or ''"/>
+                    <t t-set="_attn" t-value="_person or _company"/>
                     <div style="margin-bottom: 6px; font-size: 14px;">
-                        <t t-esc="doc.partner_id.commercial_partner_id.name"/>
+                        <t t-esc="_attn"/>
                     </div>
 
                     <!-- ===== TO ADDRESS ===== -->
-                    <!-- Contact person (if any) then the company, then address.
-                         commercial_partner_id resolves a selected contact up to
-                         its parent company. -->
                     <div style="margin-bottom: 14px; line-height: 1.7; font-size: 14px;">
                         <strong>To,</strong><br/>
-                        <t t-set="_contact" t-value="doc.kind_attn or (doc.partner_id.child_ids and doc.partner_id.child_ids[0].name) or ((not doc.partner_id.is_company) and doc.partner_id.name) or ''"/>
-                        <t t-if="_contact"><t t-esc="_contact"/><br/></t>
-                        <strong><t t-esc="doc.partner_id.commercial_partner_id.name"/></strong>
-                        <t t-if="doc.partner_id.street"><br/><t t-esc="doc.partner_id.street"/></t>
-                        <t t-if="doc.partner_id.street2"><br/><t t-esc="doc.partner_id.street2"/></t>
-                        <br/>
+                        <t t-if="_company and _company != _attn"><strong><t t-esc="_company"/></strong><br/></t>
+                        <t t-if="doc.partner_id.street"><t t-esc="doc.partner_id.street"/><br/></t>
+                        <t t-if="doc.partner_id.street2"><t t-esc="doc.partner_id.street2"/><br/></t>
                         <t t-if="doc.partner_id.city"><t t-esc="doc.partner_id.city"/>, </t>
                         <t t-if="doc.partner_id.state_id"><t t-esc="doc.partner_id.state_id.name"/> </t>
                         <t t-if="doc.partner_id.zip"><t t-esc="doc.partner_id.zip"/></t>
