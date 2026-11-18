@@ -1,6 +1,7 @@
 from markupsafe import Markup
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError
+from odoo.tools import html2plaintext
 import logging
 
 _logger = logging.getLogger(__name__)
@@ -101,56 +102,53 @@ class CrmLead(models.Model):
     # neglected lead look freshly touched.
     # ------------------------------------------------------------------
     last_lognote_date = fields.Datetime(
-        string='Last Log Note',
+        string='Last Note Date',
         compute='_compute_last_lognote',
         store=True, readonly=True, index=True,
         help="Date of the most recent note, message or email logged on this "
              "lead's chatter. Useful to spot leads with no recent follow-up.",
     )
-    last_lognote_by_id = fields.Many2one(
-        'res.partner', string='Last Note Author',
+    last_lognote_body = fields.Text(
+        string='Last Log Note',
         compute='_compute_last_lognote',
-        store=True, readonly=True, index=True,
-        help="Author of the most recent chatter entry (the same entry as 'Last "
-             "Log Note') — exactly who the chatter shows for that note. This can "
-             "be a CUSTOMER when the last entry was an incoming email. For the "
-             "responsible team member only, use 'Last Note By (Team)'. Note this "
-             "is NOT 'Last Updated by', which is whoever last wrote any field on "
-             "the lead (often OdooBot / an automation).",
+        store=True, readonly=True,
+        help="Plain-text preview of the most recent note / message / email on "
+             "this lead's chatter — the same entry as 'Last Note Date'.",
     )
     last_lognote_by_user_id = fields.Many2one(
         'res.users', string='Last Note By (Team)',
         compute='_compute_last_lognote',
         store=True, readonly=True, index=True,
         help="The internal user (team member) who made the most recent chatter "
-             "entry. Empty when the last entry was a customer email (see 'Last "
-             "Note Author' for that case). Drives the 'Last Note By (Team)' side "
-             "panel so you can filter leads by a specific person.",
+             "entry. Empty when the last entry was a customer email (no team "
+             "member authored it). Drives the 'Last Note By (Team)' side panel "
+             "so you can filter leads by a specific person.",
     )
 
     @api.depends('message_ids', 'message_ids.date', 'message_ids.message_type',
-                 'message_ids.author_id')
+                 'message_ids.author_id', 'message_ids.body')
     def _compute_last_lognote(self):
         # Resolve the newest qualifying message per lead in ONE query and take
-        # BOTH its date and its author, so the date and the "by" always refer to
-        # the same chatter entry.
+        # its date, author AND body, so all three always refer to the same
+        # chatter entry.
         self.last_lognote_date = False
-        self.last_lognote_by_id = False
         self.last_lognote_by_user_id = False
+        self.last_lognote_body = False
         if not self.ids:
             return
         # The raw read bypasses the ORM cache, so flush pending messages first.
         self.env['mail.message'].flush_model(
-            ['model', 'res_id', 'date', 'message_type', 'author_id'])
+            ['model', 'res_id', 'date', 'message_type', 'author_id', 'body'])
         self.env.cr.execute("""
-            SELECT DISTINCT ON (res_id) res_id, date, author_id
+            SELECT DISTINCT ON (res_id) res_id, date, author_id, body
             FROM mail_message
             WHERE model = 'crm.lead'
               AND res_id = ANY(%s)
               AND message_type IN ('comment', 'email')
             ORDER BY res_id, date DESC, id DESC
         """, (self.ids,))
-        latest = {res_id: (dt, author) for res_id, dt, author in self.env.cr.fetchall()}
+        latest = {res_id: (dt, author, body)
+                  for res_id, dt, author, body in self.env.cr.fetchall()}
 
         # Map each author partner -> its internal (non-share) user, in one query,
         # so we can also expose "who on the team made the last note".
@@ -172,8 +170,10 @@ class CrmLead(models.Model):
             vals = latest.get(lead.id)
             if vals:
                 lead.last_lognote_date = vals[0]
-                lead.last_lognote_by_id = vals[1]
                 lead.last_lognote_by_user_id = partner_to_user.get(vals[1], False)
+                if vals[2]:
+                    text = html2plaintext(vals[2]).strip()
+                    lead.last_lognote_body = text[:300] or False
 
     def _compute_project_count(self):
         has_task_model = 'project.task' in self.env
